@@ -13,9 +13,7 @@ import org.noear.solon.cloud.utils.IntervalUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * 云端配置服务实现
@@ -35,7 +33,7 @@ public class CloudConfigServiceConsulImpl extends TimerTask implements CloudConf
     private long refreshInterval;
 
     private Map<String, Config> configMap = new HashMap<>();
-    private Map<CloudConfigHandler, CloudConfigObserverEntity> observerMap = new HashMap<>();
+    private List<CloudConfigObserverEntity> observerList = new ArrayList<>();
 
     /**
      * 初始化客户端
@@ -128,10 +126,6 @@ public class CloudConfigServiceConsulImpl extends TimerTask implements CloudConf
 
     @Override
     public void attention(String group, String key, CloudConfigHandler observer) {
-        if (observerMap.containsKey(observer)) {
-            return;
-        }
-
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
 
@@ -140,7 +134,7 @@ public class CloudConfigServiceConsulImpl extends TimerTask implements CloudConf
             }
         }
 
-        observerMap.put(observer, new CloudConfigObserverEntity(group, key, observer));
+        observerList.add(new CloudConfigObserverEntity(group, key, observer));
     }
 
     @Override
@@ -154,9 +148,7 @@ public class CloudConfigServiceConsulImpl extends TimerTask implements CloudConf
 
     private void run0() {
         Map<String, Config> cfgTmp = new HashMap<>();
-        for (Map.Entry<CloudConfigHandler, CloudConfigObserverEntity> kv : observerMap.entrySet()) {
-            CloudConfigObserverEntity entity = kv.getValue();
-
+        for (CloudConfigObserverEntity entity : observerList) {
             String cfgKey = entity.group + "/" + entity.key;
 
             GetValue newV = client.getKVValue(cfgKey, token).getValue();
@@ -176,11 +168,11 @@ public class CloudConfigServiceConsulImpl extends TimerTask implements CloudConf
         }
 
         for (Config cfg2 : cfgTmp.values()) {
-            observerMap.forEach((k, v) -> {
-                if (cfg2.group().equals(v.group) && cfg2.key().equals(v.key)) {
-                    v.handle(cfg2);
+            for (CloudConfigObserverEntity entity : observerList) {
+                if (cfg2.group().equals(entity.group) && cfg2.key().equals(entity.key)) {
+                    entity.handler.handle(cfg2);
                 }
-            });
+            }
         }
     }
 }

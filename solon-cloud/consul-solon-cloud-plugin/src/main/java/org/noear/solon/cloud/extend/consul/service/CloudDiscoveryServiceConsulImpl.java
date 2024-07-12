@@ -35,8 +35,8 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
 
     private String healthCheckInterval;
 
-    Map<String,Discovery> discoveryMap = new HashMap<>();
-    private Map<CloudDiscoveryHandler, CloudDiscoveryObserverEntity> observerMap = new HashMap<>();
+    private Map<String, Discovery> discoveryMap = new HashMap<>();
+    private List<CloudDiscoveryObserverEntity> observerList = new ArrayList<>();
 
 
     public CloudDiscoveryServiceConsulImpl(CloudProps cloudProps) {
@@ -60,7 +60,7 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
 
     /**
      * 注册服务实例
-     * */
+     */
     @Override
     public void register(String group, Instance instance) {
         String[] ss = instance.address().split(":");
@@ -94,10 +94,10 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
 
     private void registerLocalCheck(Instance instance, NewService newService) {
         if (Utils.isNotEmpty(healthCheckInterval)) {
-            String protocol = Utils.annoAlias(instance.protocol(),"http");
+            String protocol = Utils.annoAlias(instance.protocol(), "http");
 
             if (protocol.startsWith("http")) {
-                String checkUrl = protocol+"://" + instance.address();
+                String checkUrl = protocol + "://" + instance.address();
                 if (HealthHandler.HANDLER_PATH.startsWith("/")) {
                     checkUrl = checkUrl + HealthHandler.HANDLER_PATH;
                 } else {
@@ -127,7 +127,7 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
 
     /**
      * 注销服务实例
-     * */
+     */
     @Override
     public void deregister(String group, Instance instance) {
         String serviceId = instance.service() + "-" + instance.address();
@@ -136,7 +136,7 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
 
     /**
      * 查询服务实例列表
-     * */
+     */
     @Override
     public Discovery find(String group, String service) {
         return discoveryMap.get(service);
@@ -144,15 +144,15 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
 
     /**
      * 关注服务实例列表
-     * */
+     */
     @Override
     public void attention(String group, String service, CloudDiscoveryHandler observer) {
-        observerMap.put(observer, new CloudDiscoveryObserverEntity(group, service, observer));
+        observerList.add(new CloudDiscoveryObserverEntity(group, service, observer));
     }
 
     /**
      * 定时任务，刷新服务列表
-     * */
+     */
     @Override
     public void run() {
         try {
@@ -163,7 +163,7 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
     }
 
     private void run0() {
-        Map<String,Discovery> discoveryTmp = new HashMap<>();
+        Map<String, Discovery> discoveryTmp = new HashMap<>();
         Response<Map<String, Service>> services = client.getAgentServices();
 
         for (Map.Entry<String, Service> kv : services.getValue().entrySet()) {
@@ -197,15 +197,13 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
 
     /**
      * 通知观察者
-     * */
+     */
     private void noticeObservers() {
-        for (Map.Entry<CloudDiscoveryHandler, CloudDiscoveryObserverEntity> kv : observerMap.entrySet()) {
-            CloudDiscoveryObserverEntity entity = kv.getValue();
+        for (CloudDiscoveryObserverEntity entity : observerList) {
             Discovery tmp = discoveryMap.get(entity.service);
             if (tmp != null) {
                 entity.handle(tmp);
             }
         }
     }
-
 }

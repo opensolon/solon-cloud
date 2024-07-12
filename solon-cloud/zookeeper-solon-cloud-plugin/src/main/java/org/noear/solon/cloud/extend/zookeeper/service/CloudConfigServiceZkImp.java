@@ -9,9 +9,6 @@ import org.noear.solon.cloud.model.Config;
 import org.noear.solon.cloud.service.CloudConfigObserverEntity;
 import org.noear.solon.cloud.service.CloudConfigService;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * @author noear
  * @since 1.3
@@ -70,20 +67,14 @@ public class CloudConfigServiceZkImp implements CloudConfigService {
         return true;
     }
 
-    private Map<CloudConfigHandler, CloudConfigObserverEntity> observerMap = new HashMap<>();
 
     @Override
     public void attention(String group, String key, CloudConfigHandler observer) {
-        if (observerMap.containsKey(observer)) {
-            return;
-        }
-
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
         }
 
         CloudConfigObserverEntity entity = new CloudConfigObserverEntity(group, key, observer);
-        observerMap.put(observer, entity);
 
         client.watchNodeData(String.format("%s/%s/%s", PATH_ROOT, group, key), event -> {
             entity.handle(pull(entity.group, entity.key));

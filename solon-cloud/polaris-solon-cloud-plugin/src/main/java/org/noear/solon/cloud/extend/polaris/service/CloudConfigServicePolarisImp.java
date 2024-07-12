@@ -25,7 +25,6 @@ import java.util.*;
  * */
 public class CloudConfigServicePolarisImp implements CloudConfigService , Closeable {
     private final CloudProps cloudProps;
-    private Map<CloudConfigHandler, CloudConfigObserverEntity> observerMap = new HashMap<>();
     private ConfigFileService real;
 
 
@@ -99,17 +98,11 @@ public class CloudConfigServicePolarisImp implements CloudConfigService , Closea
      */
     @Override
     public void attention(String group, String name, CloudConfigHandler observer) {
-        if (observerMap.containsKey(observer)) {
-            return;
-        }
-
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
         }
 
         CloudConfigObserverEntity entity = new CloudConfigObserverEntity(group, name, observer);
-        observerMap.put(observer, entity);
-
 
         ConfigFile configFile = real.getConfigFile(cloudProps.getNamespace(), group, name);
 

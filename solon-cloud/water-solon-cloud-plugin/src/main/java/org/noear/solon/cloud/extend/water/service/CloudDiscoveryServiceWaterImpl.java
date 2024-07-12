@@ -17,9 +17,7 @@ import org.noear.water.model.DiscoverM;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimerTask;
+import java.util.*;
 
 /**
  * 注册与发现服务
@@ -39,7 +37,7 @@ public class CloudDiscoveryServiceWaterImpl extends TimerTask implements CloudDi
         unstable = Solon.cfg().isFilesMode()
                 || Solon.cfg().isDriftMode();
         //checkPathDefault = WaterProps.instance.getDiscoveryHealthCheckPath();
-        alarmMobile =cloudProps.getAlarm();
+        alarmMobile = cloudProps.getAlarm();
         refreshInterval = IntervalUtils.getInterval(cloudProps.getDiscoveryRefreshInterval("5s"));
     }
 
@@ -66,7 +64,7 @@ public class CloudDiscoveryServiceWaterImpl extends TimerTask implements CloudDi
 
     /**
      * 文件模式运行时
-     * */
+     */
     private void runByFile() {
         if (Utils.isNotEmpty(Solon.cfg().appName())) {
             try {
@@ -79,9 +77,9 @@ public class CloudDiscoveryServiceWaterImpl extends TimerTask implements CloudDi
             }
 
             try {
-                observerMap.forEach((k, v) -> {
-                    onUpdate(v.group, v.service);
-                });
+                for (CloudDiscoveryObserverEntity entity : observerList) {
+                    onUpdate(entity.group, entity.service);
+                }
             } catch (Throwable ex) {
 
             }
@@ -138,12 +136,12 @@ public class CloudDiscoveryServiceWaterImpl extends TimerTask implements CloudDi
         return ConvertUtil.from(service, d1);
     }
 
-    Map<String, String> serviceMap = new HashMap<>();
-    Map<CloudDiscoveryHandler, CloudDiscoveryObserverEntity> observerMap = new HashMap<>();
+    private Map<String, String> serviceMap = new HashMap<>();
+    private List<CloudDiscoveryObserverEntity> observerList = new ArrayList<>();
 
     @Override
     public void attention(String group, String service, CloudDiscoveryHandler observer) {
-        observerMap.put(observer, new CloudDiscoveryObserverEntity(group, service, observer));
+        observerList.add(new CloudDiscoveryObserverEntity(group, service, observer));
         serviceMap.put(service, service);
     }
 
@@ -151,11 +149,11 @@ public class CloudDiscoveryServiceWaterImpl extends TimerTask implements CloudDi
         if (serviceMap.containsKey(service)) {
             Discovery discovery = find(group, service);
 
-            observerMap.forEach((k, v) -> {
-                if (service.equals(v.service)) {
-                    v.handle(discovery);
+            for (CloudDiscoveryObserverEntity entity : observerList) {
+                if (service.equals(entity.service)) {
+                    entity.handle(discovery);
                 }
-            });
+            }
         }
     }
 }

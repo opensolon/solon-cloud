@@ -13,8 +13,6 @@ import org.noear.solon.cloud.model.Config;
 import org.noear.solon.cloud.service.CloudConfigObserverEntity;
 import org.noear.solon.cloud.service.CloudConfigService;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
@@ -25,7 +23,6 @@ import java.util.concurrent.Executor;
  * @since 1.2
  */
 public class CloudConfigServiceNacosImp implements CloudConfigService {
-    private Map<CloudConfigHandler, CloudConfigObserverEntity> observerMap = new HashMap<>();
     private ConfigService real;
 
     public CloudConfigServiceNacosImp(CloudProps cloudProps) {
@@ -102,16 +99,11 @@ public class CloudConfigServiceNacosImp implements CloudConfigService {
      */
     @Override
     public void attention(String group, String name, CloudConfigHandler observer) {
-        if (observerMap.containsKey(observer)) {
-            return;
-        }
-
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
         }
 
         CloudConfigObserverEntity entity = new CloudConfigObserverEntity(group, name, observer);
-        observerMap.put(observer, entity);
 
         try {
             group = groupReview(group);

@@ -5,8 +5,6 @@ import static com.google.common.base.Charsets.UTF_8;
 import io.etcd.jetcd.KeyValue;
 import io.etcd.jetcd.Watch;
 import io.etcd.jetcd.watch.WatchEvent;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
@@ -87,23 +85,16 @@ public class CloudConfigServiceEtcdImpl implements CloudConfigService {
         return client.remove(key);
     }
 
-    private Map<CloudConfigHandler, CloudConfigObserverEntity> observerMap = new HashMap<>();
-
     /**
      * 关注配置
      */
     @Override
     public void attention(String group, String name, CloudConfigHandler observer) {
-        if (observerMap.containsKey(observer)) {
-            return;
-        }
-
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
         }
 
         CloudConfigObserverEntity entity = new CloudConfigObserverEntity(group, name, observer);
-        observerMap.put(observer, entity);
 
         String key = String.format("%s/%s/%s",PATH_ROOT,group,name);
 

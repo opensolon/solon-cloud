@@ -6,7 +6,9 @@ import org.noear.solon.cloud.model.Instance;
 import org.noear.solon.cloud.service.CloudDiscoveryObserverEntity;
 import org.noear.solon.cloud.service.CloudDiscoveryService;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,8 +18,8 @@ import java.util.Map;
  * @since 1.10
  */
 public class CloudDiscoveryServiceLocalImpl implements CloudDiscoveryService {
-    Map<String, Discovery> serviceMap = new HashMap<>();
-    Map<CloudDiscoveryHandler, CloudDiscoveryObserverEntity> observerMap = new HashMap<>();
+    private Map<String, Discovery> serviceMap = new HashMap<>();
+    private List<CloudDiscoveryObserverEntity> observerList = new ArrayList<>();
 
     @Override
     public void register(String group, Instance instance) {
@@ -55,7 +57,7 @@ public class CloudDiscoveryServiceLocalImpl implements CloudDiscoveryService {
 
     @Override
     public void attention(String group, String service, CloudDiscoveryHandler observer) {
-        observerMap.put(observer, new CloudDiscoveryObserverEntity(group, service, observer));
+        observerList.add(new CloudDiscoveryObserverEntity(group, service, observer));
     }
 
     /**
@@ -64,11 +66,11 @@ public class CloudDiscoveryServiceLocalImpl implements CloudDiscoveryService {
     private void onRegister(Discovery discovery) {
         if (serviceMap.containsKey(discovery.service())) {
 
-            observerMap.forEach((k, v) -> {
-                if (discovery.service().equals(v.service)) {
-                    v.handle(discovery);
+            for (CloudDiscoveryObserverEntity entity : observerList) {
+                if (discovery.service().equals(entity.service)) {
+                    entity.handle(discovery);
                 }
-            });
+            }
         }
     }
 }

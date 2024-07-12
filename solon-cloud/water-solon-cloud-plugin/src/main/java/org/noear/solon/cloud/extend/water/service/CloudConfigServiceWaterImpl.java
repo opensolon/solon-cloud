@@ -58,18 +58,18 @@ public class CloudConfigServiceWaterImpl extends TimerTask implements CloudConfi
             Set<String> loadGroups = new LinkedHashSet<>();
 
             try {
-                observerMap.forEach((k, v) -> {
-                    if (loadGroups.contains(v.group) == false) {
-                        loadGroups.add(v.group);
-                        WaterClient.Config.reload(v.group);
+                for(CloudConfigObserverEntity entity : observerList){
+                    if (loadGroups.contains(entity.group) == false) {
+                        loadGroups.add(entity.group);
+                        WaterClient.Config.reload(entity.group);
                     }
 
-                    ConfigM cfg = WaterClient.Config.get(v.group, v.key);
+                    ConfigM cfg = WaterClient.Config.get(entity.group, entity.key);
 
-                    onUpdateDo(v.group, v.key, cfg, cfg2 -> {
-                        v.handle(cfg2);
+                    onUpdateDo(entity.group, entity.key, cfg, cfg2 -> {
+                        entity.handle(cfg2);
                     });
-                });
+                }
             } catch (Throwable ex) {
 
             }
@@ -125,14 +125,10 @@ public class CloudConfigServiceWaterImpl extends TimerTask implements CloudConfi
         return false;
     }
 
-    private Map<CloudConfigHandler, CloudConfigObserverEntity> observerMap = new HashMap<>();
+    private List<CloudConfigObserverEntity> observerList = new ArrayList<>();
 
     @Override
     public void attention(String group, String key, CloudConfigHandler observer) {
-        if (observerMap.containsKey(observer)) {
-            return;
-        }
-
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
 
@@ -142,7 +138,7 @@ public class CloudConfigServiceWaterImpl extends TimerTask implements CloudConfi
         }
 
         CloudConfigObserverEntity entity = new CloudConfigObserverEntity(group, key, observer);
-        observerMap.put(observer, entity);
+        observerList.add(entity);
     }
 
     public void onUpdate(String group, String key) {
@@ -154,11 +150,11 @@ public class CloudConfigServiceWaterImpl extends TimerTask implements CloudConfi
         ConfigM cfg = WaterClient.Config.get(group, key);
 
         onUpdateDo(group, key, cfg, (cfg2) -> {
-            observerMap.forEach((k, v) -> {
-                if (group.equals(v.group) && key.equals(v.key)) {
-                    v.handle(cfg2);
+            for (CloudConfigObserverEntity entity : observerList) {
+                if (group.equals(entity.group) && key.equals(entity.key)) {
+                    entity.handle(cfg2);
                 }
-            });
+            }
         });
     }
 

@@ -32,8 +32,8 @@ import java.util.TimerTask;
  * @since 1.10
  */
 public class CloudConfigServiceK8sImpl extends TimerTask implements CloudConfigService {
-    final ApiClient client;
-    final CoreV1Api configApi;
+    private final ApiClient client;
+    private final CoreV1Api configApi;
 
     private long refreshInterval;
 

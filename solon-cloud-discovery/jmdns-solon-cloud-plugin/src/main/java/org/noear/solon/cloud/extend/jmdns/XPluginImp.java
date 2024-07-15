@@ -21,7 +21,6 @@ import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.extend.jmdns.service.CloudDiscoveryServiceJmdnsImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
-import org.noear.solon.core.util.LogUtil;
 
 import java.io.IOException;
 

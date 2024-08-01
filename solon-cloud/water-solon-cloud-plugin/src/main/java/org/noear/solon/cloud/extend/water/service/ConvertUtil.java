@@ -30,17 +30,17 @@ import java.util.Map;
  * @since 1.2
  */
 class ConvertUtil {
-    public static Discovery from(String service, DiscoverM d1) {
+    public static Discovery from(String group, String service, DiscoverM d1) {
         if (d1 == null) {
             return null;
         } else {
-            Discovery d2 = new Discovery(service);
+            Discovery d2 = new Discovery(group, service);
             d2.agent(d1.agent);
             d2.policy(d1.policy);
 
             d1.list.forEach((t1) -> {
-                Map<String,String> meta =null;
-                if(Utils.isNotEmpty(t1.meta)) {
+                Map<String, String> meta = null;
+                if (Utils.isNotEmpty(t1.meta)) {
                     meta = ONode.deserialize(t1.meta);
                 }
 

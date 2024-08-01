@@ -36,7 +36,7 @@ public class CloudLocalUtils {
             return ResourceUtil.getResourceAsString(resourceKey);
         } else if (ResourceUtil.hasClasspath(server)) {
             //资源目录
-            String resourceKey = ResourceUtil.remClasspath(server) + key;
+            String resourceKey = ResourceUtil.remSchema(server) + key;
             return ResourceUtil.getResourceAsString(resourceKey);
         } else {
             //本地目录

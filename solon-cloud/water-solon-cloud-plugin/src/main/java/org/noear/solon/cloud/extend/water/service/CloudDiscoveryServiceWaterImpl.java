@@ -148,7 +148,7 @@ public class CloudDiscoveryServiceWaterImpl extends TimerTask implements CloudDi
         Instance instance = Instance.local();
 
         DiscoverM d1 = WaterClient.Registry.discover(group, service, instance.service(), instance.address());
-        return ConvertUtil.from(service, d1);
+        return ConvertUtil.from(group, service, d1);
     }
 
     private Map<String, String> serviceMap = new HashMap<>();

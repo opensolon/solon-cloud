@@ -119,7 +119,7 @@ public class CloudDiscoveryServiceJmdnsImpl implements CloudDiscoveryService {
 
         ServiceInfo[] serviceInfos = getServiceInfos(group, service);
 
-        Discovery discovery = new Discovery(service);
+        Discovery discovery = new Discovery(group, service);
         for (ServiceInfo serviceInfo: serviceInfos) {
             // 单个服务器上可有多个 ip:port 提供服务，通常只有一个
             Enumeration<String> nodeKeyList = serviceInfo.getPropertyNames();

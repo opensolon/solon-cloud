@@ -83,7 +83,7 @@ public class CloudDiscoveryServiceEtcdImpl implements CloudDiscoveryService {
             group = Solon.cfg().appGroup();
         }
 
-        Discovery discovery = new Discovery(service);
+        Discovery discovery = new Discovery(group, service);
 
         String key = String.format("%s/%s/%s", PATH_ROOT, group, service);
 

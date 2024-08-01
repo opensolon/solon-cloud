@@ -134,7 +134,11 @@ public class CloudDiscoveryServicePolarisImp implements CloudDiscoveryService , 
      */
     @Override
     public Discovery find(String group, String service) {
-        Discovery discovery = new Discovery(service);
+        if (Utils.isEmpty(group)) {
+            group = Solon.cfg().appGroup();
+        }
+
+        Discovery discovery = new Discovery(group, service);
 
         GetHealthyInstancesRequest request = new GetHealthyInstancesRequest();
 
@@ -180,7 +184,7 @@ public class CloudDiscoveryServicePolarisImp implements CloudDiscoveryService , 
                 .namespace(cloudProps.getNamespace())
                 .service(service)
                 .listeners(Collections.singletonList(event -> {
-                    Discovery discovery = new Discovery(service);
+                    Discovery discovery = new Discovery(entity.group, service);
 
                     for (com.tencent.polaris.api.pojo.Instance instance : event.getAllInstances()) {
                         if (instance.isHealthy()) {

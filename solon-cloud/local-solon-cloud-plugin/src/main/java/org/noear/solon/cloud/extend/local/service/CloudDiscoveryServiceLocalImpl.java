@@ -15,6 +15,8 @@
  */
 package org.noear.solon.cloud.extend.local.service;
 
+import org.noear.solon.Solon;
+import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudDiscoveryHandler;
 import org.noear.solon.cloud.model.Discovery;
 import org.noear.solon.cloud.model.Instance;
@@ -38,9 +40,13 @@ public class CloudDiscoveryServiceLocalImpl implements CloudDiscoveryService {
 
     @Override
     public void register(String group, Instance instance) {
+        if (Utils.isEmpty(group)) {
+            group = Solon.cfg().appGroup();
+        }
+
         Discovery discovery = serviceMap.get(instance.service());
         if (discovery == null) {
-            discovery = new Discovery(instance.service());
+            discovery = new Discovery(group, instance.service());
             serviceMap.put(instance.service(), discovery);
         }
 
@@ -64,7 +70,7 @@ public class CloudDiscoveryServiceLocalImpl implements CloudDiscoveryService {
     public Discovery find(String group, String service) {
         Discovery tmp = serviceMap.get(service);
         if (tmp == null) {
-            tmp = new Discovery(service);
+            tmp = new Discovery(group, service);
         }
 
         return tmp;

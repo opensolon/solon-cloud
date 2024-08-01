@@ -149,7 +149,7 @@ public class CloudDiscoveryServiceNacosImp implements CloudDiscoveryService {
             group = Solon.cfg().appGroup();
         }
 
-        Discovery discovery = new Discovery(service);
+        Discovery discovery = new Discovery(group, service);
 
         try {
             List<com.alibaba.nacos.api.naming.pojo.Instance> list = null;

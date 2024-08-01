@@ -93,7 +93,7 @@ public class CloudDiscoveryServiceZkImp implements CloudDiscoveryService {
             group = Solon.cfg().appGroup();
         }
 
-        Discovery discovery = new Discovery(service);
+        Discovery discovery = new Discovery(group, service);
 
         List<String> nodeDataList = client.findChildrenNode(
                 String.format("%s/%s/%s", PATH_ROOT, group, service));

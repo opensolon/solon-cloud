@@ -19,6 +19,7 @@ import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.ecwid.consul.v1.agent.model.Service;
+import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudDiscoveryHandler;
 import org.noear.solon.cloud.CloudProps;
@@ -192,7 +193,7 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
             Discovery discovery = discoveryTmp.get(name);
 
             if (discovery == null) {
-                discovery = new Discovery(service.getService());
+                discovery = new Discovery(Solon.cfg().appGroup(), service.getService());
                 discoveryTmp.put(name, discovery);
             }
 

@@ -82,6 +82,8 @@ public class KafkaConfig {
             properties.put(ProducerConfig.RETRIES_CONFIG, 0);
         }
 
+        loadCommonProperties(properties);
+
         //绑定定制属性
         Properties props = cloudProps.getEventProducerProps();
         if (props.size() > 0) {
@@ -108,6 +110,8 @@ public class KafkaConfig {
         properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 100); //最大拉取条数 100条
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 
+        loadCommonProperties(properties);
+
         //绑定定制属性
         Properties props = cloudProps.getEventConsumerProps();
         if (props.size() > 0) {
@@ -117,5 +121,24 @@ public class KafkaConfig {
         }
 
         return properties;
+    }
+
+    private void loadCommonProperties(Properties properties){
+        String ussername = cloudProps.getEventUsername();
+        String password = cloudProps.getEventPassword();
+
+        if(Utils.isNotEmpty(ussername) && Utils.isNotEmpty(password)){
+            properties.put("security.protocol", "SASL_PLAINTEXT");
+            properties.put("sasl.mechanism", "PLAIN");
+            properties.put("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule required username='"+ussername+"' password='"+password+"'");
+        }
+
+        Properties props =  cloudProps.getProp("event.properties");
+
+        if (props.size() > 0) {
+            props.forEach((k, v) -> {
+                properties.put(k, v);
+            });
+        }
     }
 }

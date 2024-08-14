@@ -30,6 +30,7 @@ import org.noear.solon.cloud.model.Event;
 import org.noear.solon.cloud.model.EventTran;
 import org.noear.solon.cloud.service.CloudEventObserverManger;
 import org.noear.solon.cloud.service.CloudEventServicePlus;
+import org.noear.solon.core.bean.LifecycleSimpleBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * @author liuxuehua12
  * @since 2.0
  */
-public class CloudEventServiceActivemqImpl implements CloudEventServicePlus {
+public class CloudEventServiceActivemqImpl implements CloudEventServicePlus, LifecycleSimpleBean {
     static Logger log = LoggerFactory.getLogger(CloudEventServiceActivemqImpl.class);
     private CloudProps cloudProps;
     private ActivemqProducer producer;
@@ -133,7 +134,12 @@ public class CloudEventServiceActivemqImpl implements CloudEventServicePlus {
 
     }
 
-    public void subscribe() {
+    @Override
+    public void postStart() throws Throwable {
+        subscribe();
+    }
+
+    private void subscribe() {
         if (observerManger.topicSize() > 0) {
             try {
                 consumer.init(observerManger);

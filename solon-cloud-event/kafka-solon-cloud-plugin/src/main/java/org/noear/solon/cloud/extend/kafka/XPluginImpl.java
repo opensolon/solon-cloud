@@ -42,7 +42,7 @@ public class XPluginImpl implements Plugin {
             eventServiceImpl = new CloudEventServiceKafkaImpl(cloudProps);
             CloudManager.register(eventServiceImpl);
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, () -> eventServiceImpl.subscribe());
+            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImpl);
         }
     }
 

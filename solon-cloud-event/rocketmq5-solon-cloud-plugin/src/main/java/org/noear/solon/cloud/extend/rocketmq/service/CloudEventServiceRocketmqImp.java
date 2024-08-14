@@ -30,6 +30,7 @@ import org.noear.solon.cloud.model.Event;
 import org.noear.solon.cloud.model.EventTran;
 import org.noear.solon.cloud.service.CloudEventObserverManger;
 import org.noear.solon.cloud.service.CloudEventServicePlus;
+import org.noear.solon.core.bean.LifecycleSimpleBean;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -38,7 +39,7 @@ import java.io.IOException;
  * @author noear
  * @since 1.2
  */
-public class CloudEventServiceRocketmqImp implements CloudEventServicePlus, Closeable {
+public class CloudEventServiceRocketmqImp implements CloudEventServicePlus, Closeable, LifecycleSimpleBean {
     private CloudProps cloudProps;
     private RocketmqProducer producer;
     private RocketmqConsumer consumer;
@@ -121,7 +122,12 @@ public class CloudEventServiceRocketmqImp implements CloudEventServicePlus, Clos
         observerManger.add(topicNew, level, group, topic, tag, qos, observer);
     }
 
-    public void subscribe() {
+    @Override
+    public void postStart() throws Throwable {
+        subscribe();
+    }
+
+    private void subscribe() {
         if (observerManger.topicSize() > 0) {
             try {
                 consumer.init(observerManger);

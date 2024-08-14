@@ -193,7 +193,7 @@ public class XPluginImp implements Plugin, InitializingBean {
                        0, new HandlerConfigUpdate(configServiceImp));
             }
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, () -> eventServiceImp.subscribe());
+            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
         }
 
         if (cloudProps.getLockEnable()) {

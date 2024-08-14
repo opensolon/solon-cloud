@@ -15,6 +15,7 @@
  */
 package org.noear.solon.cloud.extend.activemq;
 
+import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
@@ -22,6 +23,7 @@ import org.noear.solon.cloud.extend.activemq.service.CloudEventServiceActivemqIm
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
+import org.noear.solon.core.event.AppLoadEndEvent;
 
 /**
  * @author liuxuehua12
@@ -40,7 +42,8 @@ public class XPluginImp implements Plugin {
         	CloudEventServiceActivemqImpl eventServiceImp = new CloudEventServiceActivemqImpl(cloudProps);
             CloudManager.register(eventServiceImp);
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, () -> eventServiceImp.subscribe());
+
+            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
         }
     }
 }

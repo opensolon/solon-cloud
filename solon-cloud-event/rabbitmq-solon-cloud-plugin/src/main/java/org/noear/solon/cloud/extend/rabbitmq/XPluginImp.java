@@ -40,7 +40,7 @@ public class XPluginImp implements Plugin {
             CloudEventServiceRabbitmqImpl eventServiceImp = new CloudEventServiceRabbitmqImpl(cloudProps);
             CloudManager.register(eventServiceImp);
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, () -> eventServiceImp.subscribe());
+            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
         }
     }
 }

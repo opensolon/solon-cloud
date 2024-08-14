@@ -32,6 +32,7 @@ import org.noear.solon.cloud.model.EventTran;
 import org.noear.solon.cloud.model.Instance;
 import org.noear.solon.cloud.service.CloudEventObserverManger;
 import org.noear.solon.cloud.service.CloudEventServicePlus;
+import org.noear.solon.core.bean.LifecycleSimpleBean;
 import org.noear.solon.core.event.EventBus;
 
 import java.io.IOException;
@@ -40,7 +41,7 @@ import java.io.IOException;
  * @author noear
  * @since 2.6
  */
-public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus {
+public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus, LifecycleSimpleBean {
     protected final MqClient client;
 
     private final CloudProps cloudProps;
@@ -150,7 +151,12 @@ public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus {
 
     }
 
-    public void subscribe() throws IOException {
+    @Override
+    public void postStart() throws Throwable {
+        subscribe();
+    }
+
+    private void subscribe() throws IOException {
         if (observerManger.topicSize() > 0) {
             Instance instance = Instance.local();
 

@@ -29,6 +29,7 @@ import org.noear.solon.cloud.model.EventTran;
 import org.noear.solon.cloud.service.CloudEventObserverManger;
 import org.noear.solon.cloud.service.CloudEventServicePlus;
 import org.noear.solon.core.Props;
+import org.noear.solon.core.bean.LifecycleSimpleBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author noear
  * @since 1.10
  */
-public class CloudEventServiceJedisImpl implements CloudEventServicePlus {
+public class CloudEventServiceJedisImpl implements CloudEventServicePlus, LifecycleSimpleBean {
     private static final Logger log = LoggerFactory.getLogger(CloudEventServiceJedisImpl.class);
 
     private final RedisClient client;
@@ -114,7 +115,12 @@ public class CloudEventServiceJedisImpl implements CloudEventServicePlus {
         observerManger.add(topicNew, level, group, topic, tag, qos, observer);
     }
 
-    public void subscribe() {
+    @Override
+    public void postStart() throws Throwable {
+        subscribe();
+    }
+
+    private void subscribe() {
         if (observerManger.topicSize() > 0) {
             try {
                 String[] topicAll = new String[observerManger.topicAll().size()];

@@ -51,7 +51,7 @@ public class ThriftClientBeanInjector implements BeanInjector<ThriftClient> {
             Constructor<?> declaredConstructor = clientType.getDeclaredConstructor(TProtocol.class);
 
             // 创建 Client 代理，在代理中将打开/关闭 Socket 连接
-            Object clientProxy = AsmProxy.newProxyInstance(Solon.context(), new ThriftClientProxy(anno, clientType), clientType, declaredConstructor, (Object) null);
+            Object clientProxy = AsmProxy.newProxyInstance(Solon.context(), new ThriftClientProxy(anno, clientType), clientType, declaredConstructor,  new Object[]{null});
             varH.setValue(clientProxy);
             clientMap.put(clientType, clientProxy);
         } catch (RuntimeException e) {

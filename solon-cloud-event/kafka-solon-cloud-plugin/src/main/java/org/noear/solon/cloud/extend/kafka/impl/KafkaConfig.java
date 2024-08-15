@@ -130,7 +130,7 @@ public class KafkaConfig {
         if(Utils.isNotEmpty(ussername) && Utils.isNotEmpty(password)){
             properties.put("security.protocol", "SASL_PLAINTEXT");
             properties.put("sasl.mechanism", "PLAIN");
-            properties.put("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule required username='"+ussername+"' password='"+password+"'");
+            properties.put("sasl.jaas.config", "org.apache.kafka.common.security.plain.PlainLoginModule required username='"+ussername+"' password='"+password+"';");
         }
 
         Properties props =  cloudProps.getProp("event.properties");

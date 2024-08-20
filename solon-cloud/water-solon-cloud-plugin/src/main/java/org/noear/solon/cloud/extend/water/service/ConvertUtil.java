@@ -44,7 +44,13 @@ class ConvertUtil {
                     meta = ONode.deserialize(t1.meta);
                 }
 
-                Instance instance = new Instance(service, t1.address)
+                String[] hostAndPort = t1.address.split(":");
+                int port = 0;
+                if (hostAndPort.length > 1) {
+                    port = Integer.parseInt(hostAndPort[1]);
+                }
+
+                Instance instance = new Instance(service, hostAndPort[0], port)
                         .weight(t1.weight)
                         .metaPutAll(meta); //会自动处理 protocol
 

@@ -23,10 +23,7 @@ import org.noear.solon.cloud.model.Instance;
 import org.noear.solon.cloud.service.CloudDiscoveryObserverEntity;
 import org.noear.solon.cloud.service.CloudDiscoveryService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 云端注册与发现（本地摸拟实现）
@@ -74,6 +71,11 @@ public class CloudDiscoveryServiceLocalImpl implements CloudDiscoveryService {
         }
 
         return tmp;
+    }
+
+    @Override
+    public Collection<String> findServices(String group) {
+        return serviceMap.keySet();
     }
 
     @Override

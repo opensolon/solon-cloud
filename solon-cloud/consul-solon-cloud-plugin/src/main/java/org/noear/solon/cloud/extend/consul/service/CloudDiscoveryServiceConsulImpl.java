@@ -155,7 +155,17 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
      */
     @Override
     public Discovery find(String group, String service) {
-        return discoveryMap.get(service);
+        Discovery tmp = discoveryMap.get(service);
+        if (tmp == null) {
+            tmp = new Discovery(group, service);
+        }
+
+        return tmp;
+    }
+
+    @Override
+    public Collection<String> findServices(String group) {
+        return discoveryMap.keySet();
     }
 
     /**
@@ -197,8 +207,7 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
                 discoveryTmp.put(name, discovery);
             }
 
-            Instance n1 = new Instance(service.getService(),
-                    service.getAddress() + ":" + service.getPort())
+            Instance n1 = new Instance(service.getService(), service.getAddress(), service.getPort())
                     .tagsAddAll(service.getTags())
                     .metaPutAll(service.getMeta());
 

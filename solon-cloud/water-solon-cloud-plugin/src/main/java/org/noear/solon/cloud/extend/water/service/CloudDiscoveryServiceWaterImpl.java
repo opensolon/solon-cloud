@@ -151,6 +151,11 @@ public class CloudDiscoveryServiceWaterImpl extends TimerTask implements CloudDi
         return ConvertUtil.from(group, service, d1);
     }
 
+    @Override
+    public Collection<String> findServices(String group) {
+        return Collections.emptyList();
+    }
+
     private Map<String, String> serviceMap = new HashMap<>();
     private List<CloudDiscoveryObserverEntity> observerList = new ArrayList<>();
 

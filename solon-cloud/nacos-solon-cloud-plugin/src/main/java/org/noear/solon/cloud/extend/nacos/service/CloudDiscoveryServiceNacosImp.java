@@ -30,6 +30,7 @@ import org.noear.solon.cloud.model.Instance;
 import org.noear.solon.cloud.service.CloudDiscoveryObserverEntity;
 import org.noear.solon.cloud.service.CloudDiscoveryService;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Properties;
 
@@ -54,7 +55,7 @@ public class CloudDiscoveryServiceNacosImp implements CloudDiscoveryService {
 
         clusterName = cloudProps.getDiscoveryClusterName();
 
-        if(Utils.isEmpty(clusterName)){
+        if (Utils.isEmpty(clusterName)) {
             clusterName = "DEFAULT";
         }
 
@@ -161,8 +162,7 @@ public class CloudDiscoveryServiceNacosImp implements CloudDiscoveryService {
             }
 
             for (com.alibaba.nacos.api.naming.pojo.Instance i1 : list) {
-                Instance n1 = new Instance(service,
-                        i1.getIp() + ":" + i1.getPort())
+                Instance n1 = new Instance(service, i1.getIp(), i1.getPort())
                         .weight(i1.getWeight())
                         .metaPutAll(i1.getMetadata()); //会自动处理 protocol
 
@@ -172,6 +172,20 @@ public class CloudDiscoveryServiceNacosImp implements CloudDiscoveryService {
             return discovery;
         } catch (NacosException ex) {
             throw new RuntimeException();
+        }
+    }
+
+    @Override
+    public Collection<String> findServices(String group) {
+        if (Utils.isEmpty(group)) {
+            group = Solon.cfg().appGroup();
+        }
+
+        try {
+            return real.getServicesOfServer(1, Integer.MAX_VALUE, group)
+                    .getData();
+        } catch (NacosException e) {
+            throw new RuntimeException(e);
         }
     }
 

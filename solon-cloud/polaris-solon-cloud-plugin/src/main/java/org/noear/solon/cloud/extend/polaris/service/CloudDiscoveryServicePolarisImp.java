@@ -17,6 +17,7 @@ package org.noear.solon.cloud.extend.polaris.service;
 
 import com.tencent.polaris.api.core.ConsumerAPI;
 import com.tencent.polaris.api.core.ProviderAPI;
+import com.tencent.polaris.api.pojo.ServiceInfo;
 import com.tencent.polaris.api.rpc.*;
 import com.tencent.polaris.factory.api.DiscoveryAPIFactory;
 import com.tencent.polaris.factory.config.ConfigurationImpl;
@@ -34,9 +35,7 @@ import org.noear.solon.cloud.service.CloudDiscoveryService;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * @author 何荣振
@@ -154,8 +153,7 @@ public class CloudDiscoveryServicePolarisImp implements CloudDiscoveryService , 
         for (com.tencent.polaris.api.pojo.Instance instance : instancesResponse.getInstances()) {
             //只关注健康的
             if (instance.isHealthy()) {
-                discovery.instanceAdd(new Instance(service,
-                        instance.getHost() + ":" + instance.getPort())
+                discovery.instanceAdd(new Instance(service, instance.getHost(), instance.getPort())
                         .weight(instance.getWeight())
                         .protocol(instance.getProtocol())
                         .metaPutAll(instance.getMetadata()));
@@ -163,6 +161,25 @@ public class CloudDiscoveryServicePolarisImp implements CloudDiscoveryService , 
         }
 
         return discovery;
+    }
+
+    @Override
+    public Collection<String> findServices(String group) {
+        if (Utils.isEmpty(group)) {
+            group = Solon.cfg().appGroup();
+        }
+
+        GetServicesRequest request = new GetServicesRequest();
+        request.setNamespace(cloudProps.getNamespace());
+
+        ServicesResponse response = consumerAPI.getServices(request);
+        Set<String> serviceNames = new HashSet<>();
+
+        for (ServiceInfo s1 : response.getServices()) {
+            serviceNames.add(s1.getService());
+        }
+
+        return serviceNames;
     }
 
     /**
@@ -188,8 +205,7 @@ public class CloudDiscoveryServicePolarisImp implements CloudDiscoveryService , 
 
                     for (com.tencent.polaris.api.pojo.Instance instance : event.getAllInstances()) {
                         if (instance.isHealthy()) {
-                            discovery.instanceAdd(new Instance(service,
-                                    instance.getHost() + ":" + instance.getPort())
+                            discovery.instanceAdd(new Instance(service, instance.getHost(), instance.getPort())
                                     .weight(instance.getWeight())
                                     .protocol(instance.getProtocol())
                                     .metaPutAll(instance.getMetadata()));

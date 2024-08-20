@@ -20,7 +20,8 @@ import static com.google.common.base.Charsets.UTF_8;
 import io.etcd.jetcd.KeyValue;
 import io.etcd.jetcd.Watch;
 import io.etcd.jetcd.watch.WatchEvent;
-import java.util.List;
+
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import org.noear.snack.ONode;
 import org.noear.solon.Solon;
@@ -104,6 +105,34 @@ public class CloudDiscoveryServiceEtcdImpl implements CloudDiscoveryService {
         }
 
         return discovery;
+    }
+
+    @Override
+    public Collection<String> findServices(String group) {
+        if (Utils.isEmpty(group)) {
+            group = Solon.cfg().appGroup();
+        }
+
+        String key = String.format("%s/%s", PATH_ROOT, group);
+
+        List<KeyValue> instances = null;
+
+        try {
+            instances = client.getByPrefix(key);
+        } catch (ExecutionException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        Set<String> serviceNames = new HashSet<>();
+
+        for (KeyValue kv : instances) {
+            String name = kv.getKey().toString(UTF_8);
+            serviceNames.add(name);
+        }
+
+        return serviceNames;
     }
 
     @Override

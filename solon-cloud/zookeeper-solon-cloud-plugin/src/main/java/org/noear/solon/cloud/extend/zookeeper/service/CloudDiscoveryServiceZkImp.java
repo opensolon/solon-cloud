@@ -26,7 +26,7 @@ import org.noear.solon.cloud.model.Instance;
 import org.noear.solon.cloud.service.CloudDiscoveryObserverEntity;
 import org.noear.solon.cloud.service.CloudDiscoveryService;
 
-import java.util.List;
+import java.util.*;
 
 /**
  * @author noear
@@ -104,6 +104,23 @@ public class CloudDiscoveryServiceZkImp implements CloudDiscoveryService {
         }
 
         return discovery;
+    }
+
+    @Override
+    public Collection<String> findServices(String group) {
+        if (Utils.isEmpty(group)) {
+            group = Solon.cfg().appGroup();
+        }
+
+        List<String> nodeDataList = client.findChildrenNode(
+                String.format("%s/%s", PATH_ROOT, group));
+        Set<String> serviceNames = new HashSet<>();
+
+        for (String v : nodeDataList) {
+            serviceNames.add(v);
+        }
+
+        return serviceNames;
     }
 
     @Override

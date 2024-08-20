@@ -29,9 +29,7 @@ import org.noear.solon.cloud.utils.IntervalUtils;
 import javax.jmdns.*;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -117,20 +115,31 @@ public class CloudDiscoveryServiceJmdnsImpl implements CloudDiscoveryService {
             group = Solon.cfg().appGroup();
         }
 
-        ServiceInfo[] serviceInfos = getServiceInfos(group, service);
-
         Discovery discovery = new Discovery(group, service);
-        for (ServiceInfo serviceInfo: serviceInfos) {
-            // 单个服务器上可有多个 ip:port 提供服务，通常只有一个
-            Enumeration<String> nodeKeyList = serviceInfo.getPropertyNames();
-            while (nodeKeyList.hasMoreElements()) {
-                Instance instance = ONode.deserialize(serviceInfo.getPropertyString(nodeKeyList.nextElement()),
-                        Instance.class);
-                discovery.instanceAdd(instance);
+
+        ServiceInfo[] serviceInfos = getServiceInfos(group).get(service);
+        if (serviceInfos != null) {
+            for (ServiceInfo serviceInfo : serviceInfos) {
+                // 单个服务器上可有多个 ip:port 提供服务，通常只有一个
+                Enumeration<String> nodeKeyList = serviceInfo.getPropertyNames();
+                while (nodeKeyList.hasMoreElements()) {
+                    Instance instance = ONode.deserialize(serviceInfo.getPropertyString(nodeKeyList.nextElement()),
+                            Instance.class);
+                    discovery.instanceAdd(instance);
+                }
             }
         }
 
         return discovery;
+    }
+
+    @Override
+    public Collection<String> findServices(String group) {
+        if (Utils.isEmpty(group)) {
+            group = Solon.cfg().appGroup();
+        }
+
+        return getServiceInfos(group).keySet();
     }
 
     @Override
@@ -175,16 +184,17 @@ public class CloudDiscoveryServiceJmdnsImpl implements CloudDiscoveryService {
     /**
      * 限时重试
      */
-    private ServiceInfo[] getServiceInfos(String group, String service) {
+    private Map<String, ServiceInfo[]> getServiceInfos(String group) {
+        Map<String, ServiceInfo[]> serviceMap = Collections.emptyMap();
+
         String type = getType(group);
-        ServiceInfo[] serviceInfos = null;
         long begin = System.currentTimeMillis();
 
-        while (Utils.isEmpty(serviceInfos) && System.currentTimeMillis()-begin < RETRY_LIMIT_TIME) {
-            serviceInfos = jmDNS.listBySubtype(type).get(service);
+        while (Utils.isEmpty(serviceMap) && System.currentTimeMillis() - begin < RETRY_LIMIT_TIME) {
+            serviceMap = jmDNS.listBySubtype(type);
         }
 
-        return serviceInfos;
+        return serviceMap;
     }
 
     /**

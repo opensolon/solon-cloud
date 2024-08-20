@@ -94,6 +94,7 @@ public class CloudDiscoveryServiceNacosImp implements CloudDiscoveryService {
         iw.setHealthy(health);
         iw.setEphemeral(unstable);
         iw.setWeight(1.0D);
+        iw.setEnabled(Solon.cfg().appEnabled());
 
         try {
             if (Utils.isEmpty(group)) {

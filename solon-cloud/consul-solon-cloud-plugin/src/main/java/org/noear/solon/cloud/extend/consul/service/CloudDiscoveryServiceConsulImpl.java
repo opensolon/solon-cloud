@@ -79,6 +79,10 @@ public class CloudDiscoveryServiceConsulImpl extends TimerTask implements CloudD
      */
     @Override
     public void register(String group, Instance instance) {
+        if(Solon.cfg().appEnabled() == false) {
+            return;
+        }
+
         String[] ss = instance.address().split(":");
         String serviceId = instance.service() + "-" + instance.address();
 

@@ -37,6 +37,10 @@ public class CloudDiscoveryServiceLocalImpl implements CloudDiscoveryService {
 
     @Override
     public void register(String group, Instance instance) {
+        if(Solon.cfg().appEnabled() == false) {
+            return;
+        }
+
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
         }

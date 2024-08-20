@@ -104,6 +104,10 @@ public class CloudDiscoveryServiceWaterImpl extends TimerTask implements CloudDi
 
     @Override
     public void register(String group, Instance instance) {
+        if(Solon.cfg().appEnabled() == false) {
+            return;
+        }
+
         String meta = null;
         if (instance.meta() != null && instance.meta().size() > 0) {
             meta = ONode.stringify(instance.meta());

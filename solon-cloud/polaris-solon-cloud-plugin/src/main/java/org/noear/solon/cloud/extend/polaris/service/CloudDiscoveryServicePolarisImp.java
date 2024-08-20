@@ -74,6 +74,10 @@ public class CloudDiscoveryServicePolarisImp implements CloudDiscoveryService , 
      */
     @Override
     public void register(String group, Instance instance) {
+        if(Solon.cfg().appEnabled() == false) {
+            return;
+        }
+
         registerState(group, instance, true);
     }
 

@@ -1,8 +1,12 @@
 <h1 align="center" style="text-align:center;">
-Solon Java Framework
+<img src="solon_icon.png" width="128" />
+<br />
+Solon v2.9.0
 </h1>
 <p align="center">
-	<strong>Java 新的生态，更小、更快、更简单！</strong>
+	<strong>Java “新的”应用开发框架，克制、简洁、高效、开放、生态！</strong>
+    <br/>
+    <strong>【开放原子开源基金会，孵化项目】</strong>
 </p>
 <p align="center">
 	<a href="https://solon.noear.org/">https://solon.noear.org</a>
@@ -12,7 +16,7 @@ Solon Java Framework
     <a target="_blank" href="https://central.sonatype.com/search?q=org.noear%3Asolon-parent">
         <img src="https://img.shields.io/maven-central/v/org.noear/solon.svg?label=Maven%20Central" alt="Maven" />
     </a>
-    <a target="_blank" href="https://www.apache.org/licenses/LICENSE-2.0.txt">
+    <a target="_blank" href="LICENSE">
 		<img src="https://img.shields.io/:License-Apache2-blue.svg" alt="Apache 2" />
 	</a>
     <a target="_blank" href="https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html">
@@ -47,7 +51,11 @@ Solon Java Framework
 
 <hr />
 
-并发高 2～ 3 倍；内存省 50%；启动快 5 ～ 10 倍；打包缩小 50% ~ 90%；同时兼容 java8 ~ java22
+<p align="center">
+并发高 300%；内存省 50%；启动快 10 倍；打包小 90%；同时支持 java8 ~ java22, native 运行时。
+<br/>
+从零开始构建，有更灵活的接口规范与开放生态
+</p>
 
 <hr />
 

@@ -207,9 +207,7 @@ public class XPluginImp implements Plugin, InitializingBean {
         if (cloudProps.getJobEnable()) {
             CloudManager.register(CloudJobServiceWaterImpl.instance);
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, () -> {
-                CloudJobServiceWaterImpl.instance.push();
-            });
+            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, CloudJobServiceWaterImpl.instance);
         }
 
 

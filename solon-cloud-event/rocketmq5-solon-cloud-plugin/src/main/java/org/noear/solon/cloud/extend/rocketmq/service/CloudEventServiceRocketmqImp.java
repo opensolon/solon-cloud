@@ -30,7 +30,7 @@ import org.noear.solon.cloud.model.Event;
 import org.noear.solon.cloud.model.EventTran;
 import org.noear.solon.cloud.service.CloudEventObserverManger;
 import org.noear.solon.cloud.service.CloudEventServicePlus;
-import org.noear.solon.core.bean.LifecycleSimpleBean;
+import org.noear.solon.core.bean.LifecycleBean;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -39,7 +39,7 @@ import java.io.IOException;
  * @author noear
  * @since 1.2
  */
-public class CloudEventServiceRocketmqImp implements CloudEventServicePlus, Closeable, LifecycleSimpleBean {
+public class CloudEventServiceRocketmqImp implements CloudEventServicePlus, Closeable, LifecycleBean {
     private CloudProps cloudProps;
     private RocketmqProducer producer;
     private RocketmqConsumer consumer;

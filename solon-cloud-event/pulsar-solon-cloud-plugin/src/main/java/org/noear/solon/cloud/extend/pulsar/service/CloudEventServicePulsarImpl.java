@@ -29,7 +29,7 @@ import org.noear.solon.cloud.model.Event;
 import org.noear.solon.cloud.model.EventTran;
 import org.noear.solon.cloud.service.CloudEventObserverManger;
 import org.noear.solon.cloud.service.CloudEventServicePlus;
-import org.noear.solon.core.bean.LifecycleSimpleBean;
+import org.noear.solon.core.bean.LifecycleBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +40,7 @@ import java.util.ArrayList;
  * @author noear
  * @since 1.5
  */
-public class CloudEventServicePulsarImpl implements CloudEventServicePlus, LifecycleSimpleBean {
+public class CloudEventServicePulsarImpl implements CloudEventServicePlus, LifecycleBean {
     private static final Logger log = LoggerFactory.getLogger(CloudEventServicePulsarImpl.class);
 
     private static final String PROP_EVENT_consumerGroup = "event.consumerGroup";

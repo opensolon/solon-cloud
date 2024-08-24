@@ -19,6 +19,7 @@ import org.noear.solon.Solon;
 import org.noear.solon.cloud.CloudJobHandler;
 import org.noear.solon.cloud.model.JobHolder;
 import org.noear.solon.cloud.service.CloudJobService;
+import org.noear.solon.core.bean.LifecycleBean;
 import org.noear.solon.logging.utils.TagsMDC;
 import org.noear.water.WaterClient;
 import org.noear.water.model.JobM;
@@ -37,7 +38,7 @@ import java.util.Map;
  * @author noear
  * @since 1.2
  */
-public class CloudJobServiceWaterImpl implements CloudJobService {
+public class CloudJobServiceWaterImpl implements CloudJobService , LifecycleBean {
     static final Logger log = LoggerFactory.getLogger(CloudJobServiceWaterImpl.class);
 
     public static final CloudJobServiceWaterImpl instance = new CloudJobServiceWaterImpl();
@@ -48,7 +49,7 @@ public class CloudJobServiceWaterImpl implements CloudJobService {
         return jobMap.get(name);
     }
 
-    public void push() {
+    private void push() {
         if (jobMap.size() == 0) {
             return;
         }
@@ -63,6 +64,11 @@ public class CloudJobServiceWaterImpl implements CloudJobService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void postStart() throws Throwable {
+        push();
     }
 
     @Override

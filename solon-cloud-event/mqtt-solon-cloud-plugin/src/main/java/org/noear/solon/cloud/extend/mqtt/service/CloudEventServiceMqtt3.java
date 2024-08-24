@@ -24,7 +24,7 @@ import org.noear.solon.cloud.model.Event;
 import org.noear.solon.cloud.model.EventTran;
 import org.noear.solon.cloud.service.CloudEventObserverManger;
 import org.noear.solon.cloud.service.CloudEventServicePlus;
-import org.noear.solon.core.bean.LifecycleSimpleBean;
+import org.noear.solon.core.bean.LifecycleBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @since 1.3
  * @since 2.5
  */
-public class CloudEventServiceMqtt3 implements CloudEventServicePlus, LifecycleSimpleBean {
+public class CloudEventServiceMqtt3 implements CloudEventServicePlus, LifecycleBean {
     private static final Logger log = LoggerFactory.getLogger(CloudEventServiceMqtt3.class);
 
     private final CloudProps cloudProps;

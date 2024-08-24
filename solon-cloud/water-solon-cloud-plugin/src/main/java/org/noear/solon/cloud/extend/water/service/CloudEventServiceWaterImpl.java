@@ -26,7 +26,7 @@ import org.noear.solon.cloud.model.Event;
 import org.noear.solon.cloud.model.Instance;
 import org.noear.solon.cloud.service.CloudEventObserverManger;
 import org.noear.solon.cloud.service.CloudEventServicePlus;
-import org.noear.solon.core.bean.LifecycleSimpleBean;
+import org.noear.solon.core.bean.LifecycleBean;
 import org.noear.water.WW;
 import org.noear.water.WaterClient;
 import org.noear.water.utils.EncryptUtils;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author noear
  * @since 1.2
  */
-public class CloudEventServiceWaterImpl implements CloudEventServicePlus, LifecycleSimpleBean {
+public class CloudEventServiceWaterImpl implements CloudEventServicePlus, LifecycleBean {
     static Logger log = LoggerFactory.getLogger(CloudEventServiceWaterImpl.class);
 
     private final CloudProps cloudProps;

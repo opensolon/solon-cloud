@@ -7,7 +7,7 @@
     <parent>
         <groupId>org.noear</groupId>
         <artifactId>solon-parent</artifactId>
-        <version>2.9.1</version>
+        <version>2.9.2-SNAPSHOT</version>
         <relativePath />
     </parent>
 
@@ -18,4 +18,24 @@
     <modules>
         <module>__release</module>
     </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jasig.maven</groupId>
+                <artifactId>notice-maven-plugin</artifactId>
+                <version>2.0.0</version>
+                <configuration>
+                    <generateChildNotices>false</generateChildNotices>
+                    <noticeTemplate>${project.basedir}/NOTICE.template</noticeTemplate>
+                    <licenseMapping>
+                        <param>https://source.jasig.org/licenses/license-mappings.xml</param>
+                    </licenseMapping>
+                    <excludedModules>
+                        <excludedModule>pulsar-solon-cloud-plugin</excludedModule>
+                    </excludedModules>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

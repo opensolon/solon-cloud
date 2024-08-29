@@ -21,8 +21,9 @@ import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.exception.CloudFileException;
 import org.noear.solon.cloud.model.Media;
 import org.noear.solon.cloud.service.CloudFileService;
-import org.noear.solon.cloud.utils.http.HttpUtils;
 import org.noear.solon.core.handle.Result;
+import org.noear.solon.net.http.HttpResponse;
+import org.noear.solon.net.http.HttpUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -133,12 +134,12 @@ public class CloudFileServiceOfS3HttpImpl implements CloudFileService {
 
             String url = buildUrl(bucket, key);
 
-            ResponseBody obj = HttpUtils.http(url)
+            HttpResponse resp = HttpUtils.http(url)
                     .header("Date", date)
                     .header("Authorization", authorization)
-                    .exec("GET").body();
+                    .exec("GET");
 
-            return new Media(obj.byteStream(), obj.contentType().toString(), obj.contentLength());
+            return new Media(resp.body(), resp.contentType(), resp.contentLength());
         } catch (Exception ex) {
             throw new CloudFileException(ex);
         }

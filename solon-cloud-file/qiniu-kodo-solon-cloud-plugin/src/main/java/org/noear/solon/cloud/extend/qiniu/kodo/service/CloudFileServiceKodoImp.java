@@ -29,8 +29,9 @@ import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.exception.CloudFileException;
 import org.noear.solon.cloud.model.Media;
 import org.noear.solon.cloud.service.CloudFileService;
-import org.noear.solon.cloud.utils.http.HttpUtils;
 import org.noear.solon.core.handle.Result;
+import org.noear.solon.net.http.HttpResponse;
+import org.noear.solon.net.http.HttpUtils;
 
 import java.io.IOException;
 import java.util.Date;
@@ -158,9 +159,9 @@ public class CloudFileServiceKodoImp implements CloudFileService {
         String downUrl = auth.privateDownloadUrl(baseUrl);
 
         try {
-            ResponseBody obj = HttpUtils.http(downUrl).exec("GET").body();
+            HttpResponse resp = HttpUtils.http(downUrl).exec("GET");
 
-            return new Media(obj.byteStream(), obj.contentType().toString());
+            return new Media(resp.body(), resp.contentType(), resp.contentLength());
         } catch (IOException e) {
             throw new CloudFileException(e);
         }

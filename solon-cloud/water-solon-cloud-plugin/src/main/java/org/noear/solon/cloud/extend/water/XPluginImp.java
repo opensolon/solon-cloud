@@ -30,7 +30,6 @@ import org.noear.solon.cloud.model.Instance;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
-import org.noear.solon.core.bean.InitializingBean;
 import org.noear.water.WW;
 import org.noear.water.WaterAddress;
 import org.noear.water.WaterClient;
@@ -42,12 +41,31 @@ import java.util.Timer;
  * @author noear
  * @since 1.2
  */
-public class XPluginImp implements Plugin, InitializingBean {
+public class XPluginImp implements Plugin {
     private Timer clientTimer = new Timer();
     private CloudProps cloudProps;
     private boolean inited = false;
 
-    private boolean initDo(AppContext context) throws Throwable {
+    public XPluginImp() {
+        if (initDo(Solon.context()) == false) {
+            return;
+        }
+
+        CloudTraceServiceWaterImpl traceServiceImp = new CloudTraceServiceWaterImpl();
+        WaterClient.localHostSet(Instance.local().address());
+        WaterClient.localServiceSet(Instance.local().service());
+        WaterSetting.water_trace_id_supplier(traceServiceImp::getTraceId);
+
+        if (cloudProps.getLogEnable()) {
+            CloudManager.register(new CloudLogServiceWaterImpl(cloudProps));
+        }
+
+        if (cloudProps.getTraceEnable()) {
+            CloudManager.register(traceServiceImp);
+        }
+    }
+
+    private boolean initDo(AppContext context) {
         if (cloudProps == null) {
             cloudProps = new CloudProps(context, "water");
         }
@@ -95,26 +113,6 @@ public class XPluginImp implements Plugin, InitializingBean {
 
         inited = true;
         return true;
-    }
-
-    @Override
-    public void afterInjection() throws Throwable {
-        if (initDo(Solon.context()) == false) {
-            return;
-        }
-
-        CloudTraceServiceWaterImpl traceServiceImp = new CloudTraceServiceWaterImpl();
-        WaterClient.localHostSet(Instance.local().address());
-        WaterClient.localServiceSet(Instance.local().service());
-        WaterSetting.water_trace_id_supplier(traceServiceImp::getTraceId);
-
-        if (cloudProps.getLogEnable()) {
-            CloudManager.register(new CloudLogServiceWaterImpl(cloudProps));
-        }
-
-        if (cloudProps.getTraceEnable()) {
-            CloudManager.register(traceServiceImp);
-        }
     }
 
     @Override
@@ -190,7 +188,7 @@ public class XPluginImp implements Plugin, InitializingBean {
             if (configServiceImp != null) {
                 //关注配置更新事件
                 eventServiceImp.attention(EventLevel.instance, "", "", WW.msg_uconfig_topic, "",
-                       0, new HandlerConfigUpdate(configServiceImp));
+                        0, new HandlerConfigUpdate(configServiceImp));
             }
 
             context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);

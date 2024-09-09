@@ -19,11 +19,11 @@ import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
+import org.noear.solon.cloud.annotation.CloudJob;
 import org.noear.solon.cloud.extend.powerjob.impl.PowerJobBeanBuilder;
 import org.noear.solon.cloud.extend.powerjob.impl.PowerJobProperties;
 import org.noear.solon.cloud.extend.powerjob.impl.PowerJobWorkerOfSolon;
 import org.noear.solon.cloud.extend.powerjob.service.CloudJobServiceImpl;
-import org.noear.solon.cloud.impl.CloudJobBeanBuilder;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
 import org.slf4j.Logger;
@@ -83,6 +83,6 @@ public class XPluginImp implements Plugin {
         CloudManager.register(new CloudJobServiceImpl());
 
         //添加 @CloudJob 支持 BasicProcessor 原生类型
-        CloudJobBeanBuilder.getInstance().addBuilder(BasicProcessor.class, new PowerJobBeanBuilder());
+        context.beanBuilderAdd(CloudJob.class, BasicProcessor.class, new PowerJobBeanBuilder());
     }
 }

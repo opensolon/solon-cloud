@@ -115,6 +115,7 @@ public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus, Lifec
         try {
             MqMessage message = new MqMessage(event.content(), event.key())
                     .scheduled(event.scheduled())
+                    .broadcast(event.broadcast())
                     .tag(event.tags())
                     .qos(event.qos());
 

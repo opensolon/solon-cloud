@@ -210,12 +210,15 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
 
 
                 //接收并处理事件
+                TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
                 if (onReceive(event)) {
                     //接收需要提交的偏移量
-                    topicOffsets.put(new TopicPartition(record.topic(), record.partition()),
-                            new OffsetAndMetadata(record.offset() + 1));
+                    topicOffsets.put(topicPartition, new OffsetAndMetadata(record.offset() + 1));
                 } else {
-                    //如果失败了，中止重来
+                    //如果失败了，从失败的地方重试，避免丢失进度
+                    log.warn("Event processing failed, retrying from the failed location. topic:{}; partition:{}; offset:{}",
+                            record.topic(), record.partition(), record.offset());
+                    consumer.seek(topicPartition, record.offset());
                     break;
                 }
             }

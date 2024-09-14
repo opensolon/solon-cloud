@@ -189,9 +189,12 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
         }
     }
 
+    //接口超时
+    private final long poll_timeout_ms = 1_000; //1s
+
     private void subscribePullDo() throws Throwable {
         //拉取
-        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(100));
+        ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(poll_timeout_ms));
 
         //如果没有小休息下
         if (records.isEmpty()) {
@@ -201,40 +204,49 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
 
         Map<TopicPartition, OffsetAndMetadata> topicOffsets = new LinkedHashMap<>();
 
-        try {
-            //如果异常，就中止 for；把已收集的 topicOffsets 提交掉；然后重新拉取
-            for (ConsumerRecord<String, String> record : records) {
-                Event event = new Event(record.topic(), record.value())
-                        .key(record.key())
-                        .channel(config.getEventChannel());
+        //如果异常，就中止 for；把已收集的 topicOffsets 提交掉；然后重新拉取
+        for (ConsumerRecord<String, String> record : records) {
+            Event event = new Event(record.topic(), record.value())
+                    .key(record.key())
+                    .channel(config.getEventChannel());
 
 
-                //接收并处理事件
-                TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
-                if (onReceive(event)) {
-                    //接收需要提交的偏移量
-                    topicOffsets.put(topicPartition, new OffsetAndMetadata(record.offset() + 1));
-                } else {
-                    //如果失败了，从失败的地方重试，避免丢失进度
-                    log.warn("Event processing failed, retrying from the failed location. topic:{}; partition:{}; offset:{}",
-                            record.topic(), record.partition(), record.offset());
-                    consumer.seek(topicPartition, record.offset());
-                    break;
-                }
+            //接收并处理事件
+            TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
+            if (onReceive(event)) {
+                //接收需要提交的偏移量
+                topicOffsets.put(topicPartition, new OffsetAndMetadata(record.offset() + 1));
+            } else {
+                //如果失败了，从失败的地方重试，避免丢失进度
+                log.warn("Event processing failed, retrying from the failed location. topic:{}; partition:{}; offset:{}",
+                        record.topic(), record.partition(), record.offset());
+                consumer.seek(topicPartition, record.offset());
+                break;
             }
-        } catch (Throwable e) {
-            log.warn(e.getMessage(), e);
         }
 
+
         if (topicOffsets.size() > 0) {
-            consumer.commitAsync(topicOffsets, null);
+            consumer.commitSync(topicOffsets);
         }
     }
 
     /**
      * 处理接收事件
      */
-    public boolean onReceive(Event event) throws Throwable {
+    protected boolean onReceive(Event event) {
+        try {
+            return onReceiveDo(event);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return false;
+        }
+    }
+
+    /**
+     * 处理接收事件
+     */
+    protected boolean onReceiveDo(Event event) throws Throwable {
         boolean isOk = true;
         CloudEventHandler handler = null;
 

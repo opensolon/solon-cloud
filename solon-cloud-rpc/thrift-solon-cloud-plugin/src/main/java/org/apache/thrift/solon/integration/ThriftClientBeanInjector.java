@@ -39,23 +39,23 @@ public class ThriftClientBeanInjector implements BeanInjector<ThriftClient> {
     }
 
     @Override
-    public void doInject(VarHolder varH, ThriftClient anno) {
-        varH.required(true);
+    public void doInject(VarHolder vh, ThriftClient anno) {
+        vh.required(true);
 
-        Object thriftClient = clientMap.get(varH.getType());
+        Object thriftClient = clientMap.get(vh.getType());
         if (thriftClient != null) {
-            varH.setValue(thriftClient);
+            vh.setValue(thriftClient);
             return;
         }
 
         try {
             // 找到 Client 中，带 TProtocol.class 的构造器，将其初始化
-            Class<?> clientType = varH.getType();
+            Class<?> clientType = vh.getType();
             Constructor<?> declaredConstructor = clientType.getDeclaredConstructor(TProtocol.class);
 
             // 创建 Client 代理，在代理中将打开/关闭 Socket 连接
             Object clientProxy = AsmProxy.newProxyInstance(Solon.context(), new ThriftClientProxy(anno, clientType), clientType, declaredConstructor,  new Object[]{null});
-            varH.setValue(clientProxy);
+            vh.setValue(clientProxy);
             clientMap.put(clientType, clientProxy);
         } catch (RuntimeException e) {
             throw e;

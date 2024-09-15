@@ -38,34 +38,34 @@ public class GrpcClientBeanInjector implements BeanInjector<GrpcClient> {
     }
 
     @Override
-    public void doInject(VarHolder varH, GrpcClient anno) {
-        varH.required(true);
+    public void doInject(VarHolder vh, GrpcClient anno) {
+        vh.required(true);
 
         Method method;
-        Object grpcCli = clientMap.get(varH.getType());
+        Object grpcCli = clientMap.get(vh.getType());
 
         if (grpcCli != null) {
-            varH.setValue(grpcCli);
+            vh.setValue(grpcCli);
         } else {
             Channel grpcChannel = new GrpcChannelProxy(anno);
-            Class<?> grpcClz = ClassUtil.loadClass(varH.getType().getName().split("\\$")[0]);
+            Class<?> grpcClz = ClassUtil.loadClass(vh.getType().getName().split("\\$")[0]);
 
             try {
                 //同步
-                if (AbstractBlockingStub.class.isAssignableFrom(varH.getType())) {
+                if (AbstractBlockingStub.class.isAssignableFrom(vh.getType())) {
                     method = grpcClz.getDeclaredMethod("newBlockingStub", Channel.class);
                     grpcCli = method.invoke(null, new Object[]{grpcChannel});
                 }
 
                 //异步
-                if (AbstractFutureStub.class.isAssignableFrom(varH.getType())) {
+                if (AbstractFutureStub.class.isAssignableFrom(vh.getType())) {
                     method = grpcClz.getDeclaredMethod("newFutureStub", Channel.class);
                     grpcCli = method.invoke(null, new Object[]{grpcChannel});
                 }
 
                 if (grpcCli != null) {
-                    clientMap.put(varH.getType(), grpcCli);
-                    varH.setValue(grpcCli);
+                    clientMap.put(vh.getType(), grpcCli);
+                    vh.setValue(grpcCli);
                 }
             } catch (RuntimeException e) {
                 throw e;

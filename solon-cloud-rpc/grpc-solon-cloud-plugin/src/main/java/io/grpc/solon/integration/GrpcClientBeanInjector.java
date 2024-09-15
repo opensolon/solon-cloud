@@ -39,6 +39,8 @@ public class GrpcClientBeanInjector implements BeanInjector<GrpcClient> {
 
     @Override
     public void doInject(VarHolder varH, GrpcClient anno) {
+        varH.required(true);
+
         Method method;
         Object grpcCli = clientMap.get(varH.getType());
 

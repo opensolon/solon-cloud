@@ -40,11 +40,14 @@ public class ThriftClientBeanInjector implements BeanInjector<ThriftClient> {
 
     @Override
     public void doInject(VarHolder varH, ThriftClient anno) {
+        varH.required(true);
+
         Object thriftClient = clientMap.get(varH.getType());
         if (thriftClient != null) {
             varH.setValue(thriftClient);
             return;
         }
+
         try {
             // 找到 Client 中，带 TProtocol.class 的构造器，将其初始化
             Class<?> clientType = varH.getType();

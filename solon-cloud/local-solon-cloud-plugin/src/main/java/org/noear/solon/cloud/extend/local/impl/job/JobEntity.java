@@ -17,11 +17,13 @@ package org.noear.solon.cloud.extend.local.impl.job;
 
 import org.noear.java_cron.CronExpressionPlus;
 import org.noear.solon.Utils;
+import org.noear.solon.core.Lifecycle;
 import org.noear.solon.core.util.RunUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Date;
+import java.util.concurrent.Future;
 
 /**
  * 任务实体（内部使用）
@@ -29,9 +31,13 @@ import java.util.Date;
  * @author noear
  * @since 1.6
  */
-class JobEntity extends Thread {
+class JobEntity implements Lifecycle {
     static final Logger log = LoggerFactory.getLogger(JobEntity.class);
 
+    /**
+     * 名字
+     */
+    private String name;
     /**
      * 描述信息
      */
@@ -51,9 +57,9 @@ class JobEntity extends Thread {
 
 
     /**
-     * 是否取消任务
+     * 是否停止
      */
-    private boolean isCanceled;
+    private boolean isStopped;
 
     /**
      * 休息时间
@@ -69,31 +75,39 @@ class JobEntity extends Thread {
      */
     private Date nextTime;
 
+    /**
+     * 任务前景
+     * */
+    private Future<?> jobFuture;
+
 
     public JobEntity(String name, String description, long fixedRate, Runnable runnable) {
-        this(name, description,null, fixedRate, runnable);
+        this(name, description, null, fixedRate, runnable);
     }
 
     public JobEntity(String name, String description, CronExpressionPlus cron, Runnable runnable) {
-        this(name,description, cron, 0,  runnable);
+        this(name, description, cron, 0, runnable);
     }
 
-    private JobEntity(String name,String description, CronExpressionPlus cron, long fixedRate, Runnable runnable) {
+    private JobEntity(String name, String description, CronExpressionPlus cron, long fixedRate, Runnable runnable) {
         this.cron = cron;
+        this.name = name;
         this.description = description;
         this.fixedRate = fixedRate;
         this.runnable = runnable;
 
         this.baseTime = new Date();
-
-        if (Utils.isNotEmpty(name)) {
-            setName("Job:" + name);
-        }
     }
 
     /**
-     * 获取描述信息
-     * @return
+     * 名字
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * 描述信息
      */
     public String getDescription() {
         return description;
@@ -111,27 +125,47 @@ class JobEntity extends Thread {
     /**
      * 取消
      */
-    public void cancel() {
-        isCanceled = true;
+    @Override
+    public void stop() {
+        isStopped = true;
+
+        if (jobFuture != null) {
+            jobFuture.cancel(true);
+        }
+    }
+
+    /**
+     * 开始
+     */
+    @Override
+    public void start() {
+        isStopped = false;
+        RunUtil.parallel(this::run);
     }
 
     /**
      * 运行
      */
-    @Override
-    public void run() {
-        while (true) {
-            if (isCanceled == false) {
-                try {
-                    scheduling();
-                } catch (Throwable e) {
-                    e = Utils.throwableUnwrap(e);
-                    log.warn(e.getMessage(), e);
-                }
-            } else {
-                break;
+    private void run() {
+        if (isStopped) {
+            return;
+        }
+
+        try {
+            scheduling();
+        } catch (Throwable e) {
+            //过滤中断异常
+            if (e instanceof InterruptedException == false) {
+                e = Utils.throwableUnwrap(e);
+                log.warn(e.getMessage(), e);
             }
         }
+
+        if (sleepMillis < 0) {
+            sleepMillis = 100;
+        }
+
+        RunUtil.delay(this::run, sleepMillis);
     }
 
     /**
@@ -152,8 +186,6 @@ class JobEntity extends Thread {
                 //时间还未到（一般，第一次才会到这里来）
                 sleepMillis = 100;
             }
-
-            sleep0(sleepMillis);
         } else {
             //按表达式调度
             nextTime = cron.getNextValidTimeAfter(baseTime);
@@ -170,32 +202,18 @@ class JobEntity extends Thread {
                     sleepMillis = System.currentTimeMillis() - nextTime.getTime();
                 }
             }
-
-            sleep0(sleepMillis);
         }
     }
 
 
     private void execAsParallel() {
-        RunUtil.parallel(this::exec0);
+        jobFuture = RunUtil.parallel(this::exec0);
     }
 
     private void exec0() {
         try {
             runnable.run();
         } catch (Throwable e) {
-            log.warn(e.getMessage(), e);
-        }
-    }
-
-    private void sleep0(long sleep) {
-        if (sleep < 0) {
-            sleep = 100;
-        }
-
-        try {
-            Thread.sleep(sleep);
-        } catch (Exception e) {
             log.warn(e.getMessage(), e);
         }
     }

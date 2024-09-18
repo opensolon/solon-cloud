@@ -128,7 +128,7 @@ public class JobManager {
     public static void remove(String name) {
         JobEntity jobEntity = jobEntityMap.get(name);
         if (jobEntity != null) {
-            jobEntity.cancel();
+            jobEntity.stop();
             jobEntityMap.remove(name);
         }
     }
@@ -165,7 +165,7 @@ public class JobManager {
     /**
      * 开启
      */
-    public static void start() {
+    public static void start() throws Throwable{
         for (JobEntity job : jobEntityMap.values()) {
             job.start();
         }
@@ -175,9 +175,9 @@ public class JobManager {
     /**
      * 停止
      */
-    public static void stop() {
+    public static void stop() throws Throwable{
         for (JobEntity job : jobEntityMap.values()) {
-            job.cancel();
+            job.stop();
         }
         isStarted = false;
     }

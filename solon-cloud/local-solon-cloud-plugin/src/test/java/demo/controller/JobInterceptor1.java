@@ -15,16 +15,18 @@
  */
 package demo.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.noear.solon.annotation.Component;
 import org.noear.solon.cloud.CloudJobHandler;
 import org.noear.solon.cloud.CloudJobInterceptor;
 import org.noear.solon.cloud.model.Job;
 
+@Slf4j
 @Component(index = 1)
 public class JobInterceptor1 implements CloudJobInterceptor {
     @Override
     public void doIntercept(Job job, CloudJobHandler handler) throws Throwable {
-        System.out.println("111");
+        log.info("111");
         handler.handle(job.getContext());
     }
 }

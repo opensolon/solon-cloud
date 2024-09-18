@@ -175,14 +175,14 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
 
     //接口超时
     private final long poll_timeout_ms = 1_000; //1s
-    //重复派发
-    private final AtomicInteger distribute_failture_times = new AtomicInteger(0);
+    //消费失败次数
+    private final AtomicInteger consume_failure_times = new AtomicInteger(0);
 
     private void subscribePull() {
         try {
             if (subscribePull0() == 0) {
                 //如果没有数据，隔几秒
-                distribute_failture_times.set(1);
+                consume_failure_times.set(1);
             }
         } catch (EOFException e) {
             return;
@@ -191,15 +191,15 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
                 return;
             }
 
-            distribute_failture_times.incrementAndGet();
+            consume_failure_times.incrementAndGet();
             log.warn(e.getMessage(), e);
         }
 
-        int times = distribute_failture_times.get();
+        int times = consume_failure_times.get();
 
         if (times > 0) {
             if(times > 99){
-                distribute_failture_times.set(99);
+                consume_failure_times.set(99);
             }
 
             consumerFuture = RunUtil.delay(this::subscribePull, ExpirationUtils.getExpiration(times));
@@ -225,14 +225,14 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
             TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
             if (onReceive(event)) {
                 //接收需要提交的偏移量（如果成果，重置失败次数）
-                distribute_failture_times.set(0);
+                consume_failure_times.set(0);
                 topicOffsets.put(topicPartition, new OffsetAndMetadata(record.offset() + 1));
             } else {
                 //如果失败了，从失败的地方重试，避免丢失进度
                 log.warn("Event processing failed, retrying from the failed location. topic:{}; partition:{}; offset:{}",
                         record.topic(), record.partition(), record.offset());
 
-                distribute_failture_times.incrementAndGet();
+                consume_failure_times.incrementAndGet();
                 consumer.seek(topicPartition, record.offset());
                 break;
             }

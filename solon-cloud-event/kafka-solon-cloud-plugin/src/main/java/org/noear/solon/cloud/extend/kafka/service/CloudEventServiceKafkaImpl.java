@@ -32,7 +32,9 @@ import org.noear.solon.cloud.model.Event;
 import org.noear.solon.cloud.model.EventTran;
 import org.noear.solon.cloud.service.CloudEventObserverManger;
 import org.noear.solon.cloud.service.CloudEventServicePlus;
+import org.noear.solon.cloud.utils.ExpirationUtils;
 import org.noear.solon.core.bean.LifecycleBean;
+import org.noear.solon.core.util.RunUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +47,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author noear
@@ -57,7 +60,7 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
     private KafkaProducer<String, String> producer;
     private KafkaProducer<String, String> producerTran;
     private KafkaConsumer<String, String> consumer;
-    private Thread consumerThread;
+    private Future<?> consumerFuture;
 
     public CloudEventServiceKafkaImpl(CloudProps cloudProps) {
         this.config = new KafkaConfig(cloudProps);
@@ -149,7 +152,7 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
         return true;
     }
 
-    CloudEventObserverManger observerManger = new CloudEventObserverManger();
+    private CloudEventObserverManger observerManger = new CloudEventObserverManger();
 
     @Override
     public void attention(EventLevel level, String channel, String group, String topic, String tag, int qos, CloudEventHandler observer) {
@@ -158,49 +161,56 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
 
     @Override
     public void postStart() throws Throwable {
-        subscribe();
-    }
+        //订阅开始
+        if (observerManger.topicSize() > 0) {
 
-    private void subscribe() {
-        //订阅
-        if (consumerThread == null && observerManger.topicSize() > 0) {
-            try {
-                initConsumer();
-                consumer.subscribe(observerManger.topicAll());
+            initConsumer();
+            consumer.subscribe(observerManger.topicAll());
 
-                //开始拉取
-                consumerThread = new Thread(this::subscribePull);
-                consumerThread.start();
-            } catch (Throwable ex) {
-                throw new RuntimeException(ex);
-            }
+            //开始拉取
+            consumerFuture = RunUtil.parallel(this::subscribePull);
         }
     }
 
-    private void subscribePull() {
-        while (!consumerThread.isInterrupted()) {
-            try {
-                subscribePullDo();
-            } catch (EOFException e) {
-                break;
-            } catch (Throwable e) {
-                log.warn(e.getMessage(), e);
-            }
-        }
-    }
 
     //接口超时
     private final long poll_timeout_ms = 1_000; //1s
+    //重复派发
+    private final AtomicInteger distribute_failture_times = new AtomicInteger(0);
 
-    private void subscribePullDo() throws Throwable {
+    private void subscribePull() {
+        try {
+            if (subscribePull0() == 0) {
+                //如果没有数据，隔几秒
+                distribute_failture_times.set(1);
+            }
+        } catch (EOFException e) {
+            return;
+        } catch (Throwable e) {
+            if (e instanceof InterruptedException) {
+                return;
+            }
+
+            distribute_failture_times.incrementAndGet();
+            log.warn(e.getMessage(), e);
+        }
+
+        int times = distribute_failture_times.get();
+
+        if (times > 0) {
+            if(times > 99){
+                distribute_failture_times.set(99);
+            }
+
+            consumerFuture = RunUtil.delay(this::subscribePull, ExpirationUtils.getExpiration(times));
+        } else {
+            consumerFuture = RunUtil.parallel(this::subscribePull);
+        }
+    }
+
+    private int subscribePull0() throws Throwable {
         //拉取
         ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(poll_timeout_ms));
-
-        //如果没有小休息下
-        if (records.isEmpty()) {
-            Thread.sleep(100);
-            return;
-        }
 
         Map<TopicPartition, OffsetAndMetadata> topicOffsets = new LinkedHashMap<>();
 
@@ -214,12 +224,15 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
             //接收并处理事件
             TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());
             if (onReceive(event)) {
-                //接收需要提交的偏移量
+                //接收需要提交的偏移量（如果成果，重置失败次数）
+                distribute_failture_times.set(0);
                 topicOffsets.put(topicPartition, new OffsetAndMetadata(record.offset() + 1));
             } else {
                 //如果失败了，从失败的地方重试，避免丢失进度
                 log.warn("Event processing failed, retrying from the failed location. topic:{}; partition:{}; offset:{}",
                         record.topic(), record.partition(), record.offset());
+
+                distribute_failture_times.incrementAndGet();
                 consumer.seek(topicPartition, record.offset());
                 break;
             }
@@ -229,6 +242,8 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
         if (topicOffsets.size() > 0) {
             consumer.commitSync(topicOffsets);
         }
+
+        return records.count();
     }
 
     /**
@@ -285,8 +300,8 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
             consumer.close();
         }
 
-        if (consumerThread != null) {
-            consumerThread.interrupt();
+        if (consumerFuture != null) {
+            consumerFuture.cancel(true);
         }
     }
 }

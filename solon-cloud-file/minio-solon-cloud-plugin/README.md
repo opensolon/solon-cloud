@@ -51,5 +51,5 @@ public class DemoApp {
 }
 
 //这样，可以获取其原始接口
-MinioClient client = ((CloudFileServiceMinioImp)CloudClient.file()).getMinio();
+MinioClient client = ((CloudFileServiceMinioImpl)CloudClient.file()).getClient();
 ```

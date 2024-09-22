@@ -51,5 +51,24 @@ public class DemoApp {
 }
 
 //这样，可以获取其原始接口
-MinioClient client = ((CloudFileServiceMinioImp)CloudClient.file()).getMinio();
+MinioClient client = ((CloudFileServiceMinioImpl)CloudClient.file()).getClient();
+```
+
+```java
+    // 文件上传接口
+    @Post
+    @Mapping("/file/upload")
+    public Object upload(UploadedFile file) throws Exception {
+        try{
+            InputStream inputStream = file.getContent();
+            String contentType = file.getContentType();
+            long fileSize = file.getContentSize();
+            String fileName = file.getName();
+            //上传文件
+            return CloudClient.file().put(fileName, new Media(inputStream, contentType, fileSize));
+        } finally {
+            file.delete();
+        }
+   }
+
 ```

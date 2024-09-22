@@ -13,3 +13,8 @@
 * folkmq
 * rabbitmq
 * rocketmq5
+
+
+消息广播支持：
+
+* folkmq

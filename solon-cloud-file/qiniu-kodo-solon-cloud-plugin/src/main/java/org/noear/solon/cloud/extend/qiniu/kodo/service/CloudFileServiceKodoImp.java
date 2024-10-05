@@ -23,7 +23,6 @@ import com.qiniu.storage.Region;
 import com.qiniu.storage.UploadManager;
 import com.qiniu.util.Auth;
 import com.qiniu.util.StringMap;
-import okhttp3.ResponseBody;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.exception.CloudFileException;

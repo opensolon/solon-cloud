@@ -15,7 +15,6 @@
  */
 package org.noear.solon.cloud.extend.aws.s3.service;
 
-import okhttp3.ResponseBody;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.exception.CloudFileException;

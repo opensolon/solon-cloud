@@ -44,8 +44,7 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
                     .key(key)
                     .build();
 
-            client.headObject(headObjectRequest);
-            return true;
+            return client.headObject(headObjectRequest).sdkHttpResponse().isSuccessful();
         } catch (NoSuchKeyException e) {
             return false;
         } catch (Exception e) {
@@ -122,9 +121,9 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
             RequestBody requestBody = RequestBody.fromInputStream(media.body(), media.contentSize());
 
             // 上传对象
-            client.putObject(putObjectRequest, requestBody);
+            PutObjectResponse resp = client.putObject(putObjectRequest, requestBody);
 
-            return Result.succeed();
+            return Result.succeed(resp);
         } catch (Exception ex) {
             throw new CloudFileException(ex);
         }
@@ -143,8 +142,8 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
                     .key(key)
                     .build();
 
-            client.deleteObject(deleteObjectRequest);
-            return Result.succeed();
+            DeleteObjectResponse resp = client.deleteObject(deleteObjectRequest);
+            return Result.succeed(resp);
         } catch (Exception e) {
             throw new CloudFileException(e);
         }

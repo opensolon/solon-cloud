@@ -3,7 +3,6 @@ package org.noear.solon.cloud.extend.file.s3.utils;
 import org.noear.solon.Utils;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
-import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.S3Configuration;
@@ -39,25 +38,28 @@ public class BucketUtils {
 
         if (Utils.isNotBlank(accessKey) && Utils.isNotBlank(secretKey)) {
             return createClient(endpoint, regionId, accessKey, secretKey);
+        } else {
+            // Use the default provider chain if no credentials are explicitly provided
+            return S3Client.builder().build();
         }
-
-        // Use the default provider chain if no credentials are explicitly provided
-        return S3Client.builder().build();
     }
 
     public static S3Client createClient(String endpoint, String regionId, String accessKey, String secretKey) {
         AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
         StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(credentials);
+
         S3ClientBuilder builder = S3Client.builder()
                 .credentialsProvider(credentialsProvider)
                 .serviceConfiguration(S3Configuration.builder()
                         .pathStyleAccessEnabled(true)
                         .build())
-                .region(Region.of(regionId));
+                .region(software.amazon.awssdk.regions.Region.of(regionId));
+
         if (Utils.isNotEmpty(endpoint)) {
             URI endpointUri = URI.create(endpoint);
             builder.endpointOverride(endpointUri);
         }
+
         return builder.build();
     }
 

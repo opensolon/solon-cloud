@@ -38,11 +38,15 @@ class JobEntity implements Lifecycle {
     /**
      * 名字
      */
-    private String name;
+    private final String name;
     /**
      * 描述信息
      */
-    private String description;
+    private final String description;
+    /**
+     * 执行函数
+     */
+    protected final Runnable runnable;
     /**
      * 调度表达式
      */
@@ -51,10 +55,6 @@ class JobEntity implements Lifecycle {
      * 固定频率
      */
     private long fixedRate;
-    /**
-     * 执行函数
-     */
-    final Runnable runnable;
 
     /**
      * 延后时间
@@ -80,11 +80,12 @@ class JobEntity implements Lifecycle {
     }
 
     private JobEntity(String name, String description, CronExpressionPlus cron, long fixedRate, Runnable runnable) {
-        this.cron = cron;
         this.name = name;
         this.description = description;
-        this.fixedRate = fixedRate;
         this.runnable = runnable;
+
+        this.cron = cron;
+        this.fixedRate = fixedRate;
     }
 
     /**
@@ -148,7 +149,7 @@ class JobEntity implements Lifecycle {
      */
     @Override
     public void stop() {
-        if (isStarted = false) {
+        if (isStarted == false) {
             return;
         } else {
             isStarted = false;

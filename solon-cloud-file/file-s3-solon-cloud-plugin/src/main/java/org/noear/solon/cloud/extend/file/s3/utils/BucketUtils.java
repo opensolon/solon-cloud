@@ -1,12 +1,16 @@
 package org.noear.solon.cloud.extend.file.s3.utils;
 
 import org.noear.solon.Utils;
+import org.noear.solon.core.Props;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+
 import java.net.URI;
 import java.util.Properties;
 
@@ -37,30 +41,65 @@ public class BucketUtils {
         }
 
         if (Utils.isNotBlank(accessKey) && Utils.isNotBlank(secretKey)) {
-            return createClient(endpoint, regionId, accessKey, secretKey);
-        } else {
-            // Use the default provider chain if no credentials are explicitly provided
-            return S3Client.builder().build();
+            AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+            StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(credentials);
+
+            S3ClientBuilder builder = S3Client.builder()
+                    .credentialsProvider(credentialsProvider)
+                    .serviceConfiguration(S3Configuration.builder()
+                            .pathStyleAccessEnabled(true)
+                            .build())
+                    .region(Region.of(regionId));
+
+            if (Utils.isNotEmpty(endpoint)) {
+                URI endpointUri = URI.create(endpoint);
+                builder.endpointOverride(endpointUri);
+            }
+
+            return builder.build();
         }
+
+        // Use the default provider chain if no credentials are explicitly provided
+        return S3Client.builder().build();
     }
 
-    public static S3Client createClient(String endpoint, String regionId, String accessKey, String secretKey) {
-        AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
-        StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(credentials);
 
-        S3ClientBuilder builder = S3Client.builder()
-                .credentialsProvider(credentialsProvider)
-                .serviceConfiguration(S3Configuration.builder()
-                        .pathStyleAccessEnabled(true)
-                        .build())
-                .region(software.amazon.awssdk.regions.Region.of(regionId));
+    public static S3Presigner createClientPresigner(Props props) {
+        String endpoint = props.getProperty("endpoint", "");
+        String regionId = props.getProperty("regionId", "");
 
-        if (Utils.isNotEmpty(endpoint)) {
-            URI endpointUri = URI.create(endpoint);
-            builder.endpointOverride(endpointUri);
+        String accessKey = props.getProperty("accessKey");
+        String secretKey = props.getProperty("secretKey");
+
+        if (accessKey == null) {
+            accessKey = props.getProperty("username");
         }
 
-        return builder.build();
+        if (secretKey == null) {
+            secretKey = props.getProperty("password");
+        }
+
+        if (Utils.isNotBlank(accessKey) && Utils.isNotBlank(secretKey)) {
+            AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+            StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(credentials);
+
+            S3Presigner.Builder builder = S3Presigner.builder()
+                    .credentialsProvider(credentialsProvider)
+                    .serviceConfiguration(S3Configuration.builder()
+                            .pathStyleAccessEnabled(true)
+                            .build())
+                    .region(Region.of(regionId));
+
+            if (Utils.isNotEmpty(endpoint)) {
+                URI endpointUri = URI.create(endpoint);
+                builder.endpointOverride(endpointUri);
+            }
+
+            return builder.build();
+
+        }
+
+        return S3Presigner.builder().build();
     }
 
     /**
@@ -106,6 +145,7 @@ public class BucketUtils {
             return false;
         }
     }
+
 
     /**
      * 构建存储桶策略

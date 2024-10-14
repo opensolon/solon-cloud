@@ -26,8 +26,11 @@ import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.net.URL;
+import java.time.Duration;
 import java.util.Date;
 
 /**
@@ -39,19 +42,26 @@ import java.util.Date;
 public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
     private final String bucketDef;
     private final S3Client client;
+    private final S3Presigner presigner;
 
     public S3Client getClient() {
         return client;
     }
 
+    public S3Presigner getPresigner() {
+        return presigner;
+    }
+
     public CloudFileServiceOfS3SdkImpl(CloudProps cloudProps) {
         this.bucketDef = cloudProps.getFileBucket();
         this.client = BucketUtils.createClient(cloudProps);
+        this.presigner = BucketUtils.createClientPresigner(cloudProps);
     }
 
-    public CloudFileServiceOfS3SdkImpl(String bucketDef, S3Client client) {
+    public CloudFileServiceOfS3SdkImpl(String bucketDef, S3Client client, S3Presigner presigner) {
         this.bucketDef = bucketDef;
         this.client = client;
+        this.presigner = presigner;
     }
 
     @Override
@@ -67,6 +77,8 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
                     .build();
 
             return client.headObject(headObjectRequest).sdkHttpResponse().isSuccessful();
+        } catch (NoSuchKeyException e) {
+            return false;
         } catch (Exception e) {
             throw new CloudFileException(e);
         }
@@ -79,12 +91,17 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
         }
 
         try {
-            GetUrlRequest getObjectRequest = GetUrlRequest.builder()
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucket)
                     .key(key)
                     .build();
 
-            URL url = client.utilities().getUrl(getObjectRequest);
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                    .getObjectRequest(getObjectRequest)
+                    .signatureDuration(Duration.between(new Date().toInstant(), expiration.toInstant()))
+                    .build();
+
+            URL url = presigner.presignGetObject(presignRequest).url();
             return url != null ? url.toString() : null;
         } catch (Exception e) {
             throw new CloudFileException(e);
@@ -144,10 +161,11 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
             PutObjectResponse resp = client.putObject(putObjectRequest, requestBody);
 
             return Result.succeed(resp);
-        } catch (Exception e) {
-            throw new CloudFileException(e);
+        } catch (Exception ex) {
+            throw new CloudFileException(ex);
         }
     }
+
 
     @Override
     public Result delete(String bucket, String key) throws CloudFileException {
@@ -155,12 +173,16 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
             bucket = bucketDef;
         }
 
-        DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                .bucket(bucket)
-                .key(key)
-                .build();
+        try {
+            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+                    .bucket(bucket)
+                    .key(key)
+                    .build();
 
-        DeleteObjectResponse resp = client.deleteObject(deleteObjectRequest);
-        return Result.succeed(resp);
+            DeleteObjectResponse resp = client.deleteObject(deleteObjectRequest);
+            return Result.succeed(resp);
+        } catch (Exception e) {
+            throw new CloudFileException(e);
+        }
     }
 }

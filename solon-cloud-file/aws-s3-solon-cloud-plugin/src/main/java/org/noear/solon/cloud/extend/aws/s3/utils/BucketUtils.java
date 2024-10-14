@@ -20,10 +20,12 @@ import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.core.Props;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3ClientBuilder;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 
 import java.net.URI;
 
@@ -54,35 +56,76 @@ public class BucketUtils {
         }
 
         if (Utils.isNotBlank(accessKey) && Utils.isNotBlank(secretKey)) {
-            return createClient(endpoint, regionId, accessKey, secretKey, cloudProps.getProp("file"));
-        } else {
-            // Use the default provider chain if no credentials are explicitly provided
-            return S3Client.builder().build();
+            AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+            StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(credentials);
+
+            S3ClientBuilder builder = S3Client.builder()
+                    .credentialsProvider(credentialsProvider)
+                    .serviceConfiguration(S3Configuration.builder()
+                            .pathStyleAccessEnabled(true)
+                            .build())
+                    .region(Region.of(regionId));
+
+            if (Utils.isNotEmpty(endpoint)) {
+                URI endpointUri = URI.create(endpoint);
+                builder.endpointOverride(endpointUri);
+            }
+
+            //注入配置
+            Props props = cloudProps.getProp("file");
+            if (props != null && props.size() > 0) {
+                Utils.injectProperties(builder, props);
+            }
+
+            return builder.build();
         }
+
+        // Use the default provider chain if no credentials are explicitly provided
+        return S3Client.builder().build();
     }
 
-    public static S3Client createClient(String endpoint, String regionId, String accessKey, String secretKey, Props props) {
-        AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
-        StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(credentials);
+    public static S3Presigner createClientPresigner(CloudProps cloudProps) {
+        String endpoint = cloudProps.getFileEndpoint();
+        String regionId = cloudProps.getFileRegionId();
 
-        S3ClientBuilder builder = S3Client.builder()
-                .credentialsProvider(credentialsProvider)
-                .serviceConfiguration(S3Configuration.builder()
-                        .pathStyleAccessEnabled(true)
-                        .build())
-                .region(software.amazon.awssdk.regions.Region.of(regionId));
+        String accessKey = cloudProps.getFileAccessKey();
+        String secretKey = cloudProps.getFileSecretKey();
 
-        if (Utils.isNotEmpty(endpoint)) {
-            URI endpointUri = URI.create(endpoint);
-            builder.endpointOverride(endpointUri);
+        if (accessKey == null) {
+            accessKey = cloudProps.getFileUsername();
         }
 
-        //注入配置
-        if (props != null && props.size() > 0) {
-            Utils.injectProperties(builder, props);
+        if (secretKey == null) {
+            secretKey = cloudProps.getFilePassword();
         }
 
-        return builder.build();
+        if (Utils.isNotBlank(accessKey) && Utils.isNotBlank(secretKey)) {
+            AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
+            StaticCredentialsProvider credentialsProvider = StaticCredentialsProvider.create(credentials);
+
+            S3Presigner.Builder builder = S3Presigner.builder()
+                    .credentialsProvider(credentialsProvider)
+                    .serviceConfiguration(S3Configuration.builder()
+                            .pathStyleAccessEnabled(true)
+                            .build())
+                    .region(Region.of(regionId));
+
+            if (Utils.isNotEmpty(endpoint)) {
+                URI endpointUri = URI.create(endpoint);
+                builder.endpointOverride(endpointUri);
+            }
+
+            //注入配置
+            Props props = cloudProps.getProp("file");
+            if (props != null && props.size() > 0) {
+                Utils.injectProperties(builder, props);
+            }
+
+            return builder.build();
+
+        }
+
+        return S3Presigner.builder().build();
     }
 
     /**

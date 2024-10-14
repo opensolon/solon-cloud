@@ -39,14 +39,11 @@ public class CloudFileServiceImpl implements CloudFileService {
 
     public CloudFileServiceImpl(CloudProps cloudProps) {
         this.cloudProps = cloudProps;
-
         Map<String, Props> propsMap = cloudProps.getProp("file.buckets")
                 .getGroupedProp("");
-
         for (Map.Entry<String, Props> kv : propsMap.entrySet()) {
             String bucketName = kv.getKey();
             Props props = kv.getValue();
-
             addBucket(bucketName, props);
         }
     }

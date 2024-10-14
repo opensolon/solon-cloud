@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Date;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
 
 /**
  * 任务实体（内部使用）
@@ -55,30 +56,19 @@ class JobEntity implements Lifecycle {
      */
     final Runnable runnable;
 
-
     /**
-     * 是否停止
+     * 延后时间
      */
-    private boolean isStopped;
-
-    /**
-     * 休息时间
-     */
-    private long sleepMillis;
-
-    /**
-     * 基准时间（对于比对）
-     */
-    private Date baseTime;
+    private long delayMillis;
     /**
      * 下次执行时间
      */
     private Date nextTime;
-
     /**
-     * 任务前景
-     * */
-    private Future<?> jobFuture;
+     * 执行任务
+     */
+    private ScheduledFuture<?> jobFutureOfFixed;
+    private Future<?> jobFutureOfCron;
 
 
     public JobEntity(String name, String description, long fixedRate, Runnable runnable) {
@@ -95,8 +85,6 @@ class JobEntity implements Lifecycle {
         this.description = description;
         this.fixedRate = fixedRate;
         this.runnable = runnable;
-
-        this.baseTime = new Date();
     }
 
     /**
@@ -119,19 +107,19 @@ class JobEntity implements Lifecycle {
     protected void reset(CronExpressionPlus cron, long fixedRate) {
         this.cron = cron;
         this.fixedRate = fixedRate;
-        this.baseTime = new Date(System.currentTimeMillis() + sleepMillis);
     }
 
-    /**
-     * 取消
-     */
-    @Override
-    public void stop() {
-        isStopped = true;
 
-        if (jobFuture != null) {
-            jobFuture.cancel(true);
-        }
+    /**
+     * 是否开始
+     */
+    private boolean isStarted = false;
+
+    /**
+     * 是否已开始
+     */
+    public boolean isStarted() {
+        return isStarted;
     }
 
     /**
@@ -139,75 +127,95 @@ class JobEntity implements Lifecycle {
      */
     @Override
     public void start() {
-        isStopped = false;
-        RunUtil.parallel(this::run);
+        if (isStarted) {
+            return;
+        } else {
+            isStarted = true;
+        }
+
+        //重置（可能会二次启动）
+        nextTime = null;
+
+        if (fixedRate > 0) {
+            jobFutureOfFixed = RunUtil.scheduleAtFixedRate(this::exec0, 0L, fixedRate);
+        } else {
+            RunUtil.parallel(this::run);
+        }
     }
 
     /**
-     * 运行
+     * 取消
      */
+    @Override
+    public void stop() {
+        if (isStarted = false) {
+            return;
+        } else {
+            isStarted = false;
+        }
+
+        if (jobFutureOfFixed != null) {
+            jobFutureOfFixed.cancel(false);
+        }
+
+        if (jobFutureOfCron != null) {
+            jobFutureOfCron.cancel(false);
+        }
+    }
+
     private void run() {
-        if (isStopped) {
+        if (isStarted == false) {
             return;
         }
 
         try {
-            scheduling();
+            runAsCron();
         } catch (Throwable e) {
-            //过滤中断异常
-            if (e instanceof InterruptedException == false) {
-                e = Utils.throwableUnwrap(e);
-                log.warn(e.getMessage(), e);
+            e = Utils.throwableUnwrap(e);
+            if (e instanceof InterruptedException) {
+                //任务中止
+                isStarted = false;
+                return;
             }
+
+            log.warn(e.getMessage(), e);
         }
 
-        if (sleepMillis < 0) {
-            sleepMillis = 100;
+        if (delayMillis < 0L) {
+            delayMillis = 100L;
         }
 
-        RunUtil.delay(this::run, sleepMillis);
+        RunUtil.delay(this::run, delayMillis);
     }
 
     /**
      * 调度
      */
-    private void scheduling() throws Throwable {
-        if (fixedRate > 0) {
-            //按固定频率调度
-            sleepMillis = System.currentTimeMillis() - baseTime.getTime();
+    private void runAsCron() throws Throwable {
+        if (nextTime == null) {
+            //说明是第一次
+            nextTime = cron.getNextValidTimeAfter(new Date());
+        }
 
-            if (sleepMillis >= fixedRate) {
-                baseTime = new Date();
-                execAsParallel();
+        if (nextTime != null) {
+            delayMillis = nextTime.getTime() - System.currentTimeMillis();
 
-                //重新设定休息时间
-                sleepMillis = fixedRate;
-            } else {
-                //时间还未到（一般，第一次才会到这里来）
-                sleepMillis = 100;
-            }
-        } else {
-            //按表达式调度
-            nextTime = cron.getNextValidTimeAfter(baseTime);
-            sleepMillis = System.currentTimeMillis() - nextTime.getTime();
+            if (delayMillis <= 0L) {
+                //到时（=0）或超时（<0）了
+                jobFutureOfCron = RunUtil.parallel(this::exec0);
 
-            if (sleepMillis >= 0) {
-                baseTime = nextTime;
-                nextTime = cron.getNextValidTimeAfter(baseTime);
-
-                if (sleepMillis <= 1000) {
-                    execAsParallel();
-
+                nextTime = cron.getNextValidTimeAfter(nextTime);
+                if (nextTime != null) {
                     //重新设定休息时间
-                    sleepMillis = System.currentTimeMillis() - nextTime.getTime();
+                    delayMillis = nextTime.getTime() - System.currentTimeMillis();
                 }
             }
         }
-    }
 
-
-    private void execAsParallel() {
-        jobFuture = RunUtil.parallel(this::exec0);
+        if (nextTime == null) {
+            isStarted = false;
+            log.warn("The cron expression has expired, and the job is complete!");
+        }
     }
 
     private void exec0() {

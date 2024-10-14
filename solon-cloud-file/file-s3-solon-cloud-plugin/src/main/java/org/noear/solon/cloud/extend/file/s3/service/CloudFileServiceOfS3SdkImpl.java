@@ -7,16 +7,25 @@ import org.noear.solon.cloud.model.Media;
 import org.noear.solon.cloud.service.CloudFileService;
 import org.noear.solon.core.Props;
 import org.noear.solon.core.handle.Result;
+import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+
+import java.net.URI;
 import java.net.URL;
+import java.time.Duration;
 import java.util.Date;
 
 public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
     private final String bucketDef;
     private final S3Client client;
+    private final S3Presigner s3Presigner;
 
     public S3Client getClient() {
         return client;
@@ -25,11 +34,7 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
     public CloudFileServiceOfS3SdkImpl(String bucketDef, Props props) {
         this.bucketDef = bucketDef;
         this.client = BucketUtils.createClient(props);
-    }
-
-    public CloudFileServiceOfS3SdkImpl(String bucketDef, S3Client client) {
-        this.bucketDef = bucketDef;
-        this.client = client;
+        this.s3Presigner = BucketUtils.createClientPresigner(props);
     }
 
     @Override
@@ -60,12 +65,17 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
         }
 
         try {
-            GetUrlRequest getObjectRequest = GetUrlRequest.builder()
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucket)
                     .key(key)
                     .build();
 
-            URL url = client.utilities().getUrl(getObjectRequest);
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                    .getObjectRequest(getObjectRequest)
+                    .signatureDuration(Duration.ofMillis(30))
+                    .build();
+
+            URL url = s3Presigner.presignGetObject(presignRequest).url();
             return url != null ? url.toString() : null;
         } catch (Exception e) {
             throw new CloudFileException(e);

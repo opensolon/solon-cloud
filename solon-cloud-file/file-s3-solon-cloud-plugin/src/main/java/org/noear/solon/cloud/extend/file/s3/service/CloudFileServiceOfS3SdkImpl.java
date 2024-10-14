@@ -72,7 +72,7 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
 
             GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
                     .getObjectRequest(getObjectRequest)
-                    .signatureDuration(Duration.ofMillis(30))
+                    .signatureDuration(Duration.between(new Date().toInstant(), expiration.toInstant()))
                     .build();
 
             URL url = s3Presigner.presignGetObject(presignRequest).url();

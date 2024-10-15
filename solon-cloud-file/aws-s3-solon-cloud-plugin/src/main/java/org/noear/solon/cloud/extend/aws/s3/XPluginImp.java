@@ -22,14 +22,13 @@ import org.noear.solon.cloud.extend.aws.s3.service.CloudFileServiceOfS3SdkImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
 import org.noear.solon.core.util.ClassUtil;
+import software.amazon.awssdk.services.s3.S3Client;
 
 /**
  * @author noear
  * @since 1.3
  */
 public class XPluginImp implements Plugin {
-    final String AWS_SDK_TAG = "com.amazonaws.services.s3.AmazonS3ClientBuilder";
-
     @Override
     public void start(AppContext context) {
         CloudProps cloudProps = new CloudProps(context, "aws.s3");
@@ -41,10 +40,10 @@ public class XPluginImp implements Plugin {
                 return;
             }
 
-            if (ClassUtil.loadClass(AWS_SDK_TAG) == null) {
-                CloudManager.register(new CloudFileServiceOfS3HttpImpl(cloudProps));
-            } else {
+            if (ClassUtil.hasClass(() -> S3Client.class)) {
                 CloudManager.register(new CloudFileServiceOfS3SdkImpl(cloudProps));
+            } else {
+                CloudManager.register(new CloudFileServiceOfS3HttpImpl(cloudProps));
             }
         }
     }

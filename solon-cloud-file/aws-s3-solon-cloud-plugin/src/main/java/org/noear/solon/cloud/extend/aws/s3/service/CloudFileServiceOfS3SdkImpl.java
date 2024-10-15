@@ -85,7 +85,7 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
     }
 
     @Override
-    public String getTempUrl(String bucket, String key, Date expiration) throws CloudFileException {
+    public String getTempUrl(String bucket, String key, Duration duration) throws CloudFileException {
         if (Utils.isEmpty(bucket)) {
             bucket = bucketDef;
         }
@@ -98,7 +98,7 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
 
             GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
                     .getObjectRequest(getObjectRequest)
-                    .signatureDuration(Duration.between(new Date().toInstant(), expiration.toInstant()))
+                    .signatureDuration(duration)
                     .build();
 
             URL url = presigner.presignGetObject(presignRequest).url();

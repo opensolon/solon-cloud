@@ -27,6 +27,7 @@ import org.noear.solon.net.http.HttpUtils;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -105,7 +106,7 @@ public class CloudFileServiceOssImpl implements CloudFileService {
     }
 
     @Override
-    public String getTempUrl(String bucket, String key, Date expiration) throws CloudFileException, UnsupportedOperationException {
+    public String getTempUrl(String bucket, String key, Duration duration) throws CloudFileException, UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

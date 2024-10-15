@@ -33,7 +33,7 @@ import org.noear.solon.net.http.HttpResponse;
 import org.noear.solon.net.http.HttpUtils;
 
 import java.io.IOException;
-import java.util.Date;
+import java.time.Duration;
 
 /**
  * @author noear
@@ -135,12 +135,12 @@ public class CloudFileServiceKodoImp implements CloudFileService {
     }
 
     @Override
-    public String getTempUrl(String bucket, String key, Date expiration) throws CloudFileException, UnsupportedOperationException {
+    public String getTempUrl(String bucket, String key, Duration duration) throws CloudFileException, UnsupportedOperationException {
         if (Utils.isEmpty(bucket)) {
             bucket = bucketDef;
         }
 
-        long seconds = (expiration.getTime() - System.currentTimeMillis()) / 1000L;
+        long seconds = duration.getSeconds();
 
         String baseUrl = buildUrl(key);
         String downUrl = auth.privateDownloadUrl(baseUrl, seconds);

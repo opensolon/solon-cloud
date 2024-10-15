@@ -23,6 +23,7 @@ import org.noear.solon.core.handle.Result;
 import org.noear.solon.core.util.IoUtil;
 
 import java.io.*;
+import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -52,7 +53,7 @@ public class CloudFileServiceLocalImpl implements CloudFileService {
     }
 
     @Override
-    public String getTempUrl(String bucket, String key, Date expiration) throws CloudFileException, UnsupportedOperationException {
+    public String getTempUrl(String bucket, String key, Duration duration) throws CloudFileException, UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

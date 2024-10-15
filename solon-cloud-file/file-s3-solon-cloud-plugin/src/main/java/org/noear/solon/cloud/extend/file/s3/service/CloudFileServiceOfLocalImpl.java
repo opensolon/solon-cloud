@@ -27,6 +27,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -66,7 +67,7 @@ public class CloudFileServiceOfLocalImpl implements CloudFileService {
     }
 
     @Override
-    public String getTempUrl(String bucket, String key, Date expiration) throws CloudFileException {
+    public String getTempUrl(String bucket, String key, Duration duration) throws CloudFileException {
         throw new UnsupportedOperationException();
     }
 

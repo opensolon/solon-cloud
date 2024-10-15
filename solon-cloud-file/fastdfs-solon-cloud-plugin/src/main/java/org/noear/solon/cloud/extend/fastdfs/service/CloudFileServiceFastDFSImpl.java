@@ -24,6 +24,7 @@ import org.noear.solon.cloud.service.CloudFileService;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.handle.Result;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Properties;
 
@@ -99,7 +100,7 @@ public class CloudFileServiceFastDFSImpl implements CloudFileService {
     }
 
     @Override
-    public String getTempUrl(String bucket, String key, Date expiration) throws CloudFileException {
+    public String getTempUrl(String bucket, String key, Duration duration) throws CloudFileException {
         throw new UnsupportedOperationException();
     }
 

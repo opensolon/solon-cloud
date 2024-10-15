@@ -25,6 +25,7 @@ import org.noear.solon.cloud.service.CloudFileService;
 import org.noear.solon.core.handle.Result;
 
 import java.io.InputStream;
+import java.time.Duration;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
@@ -93,9 +94,9 @@ public class CloudFileServiceMinioImpl implements CloudFileService {
     }
 
     @Override
-    public String getTempUrl(String bucket, String key, Date expiration) throws CloudFileException, UnsupportedOperationException {
+    public String getTempUrl(String bucket, String key, Duration duration) throws CloudFileException, UnsupportedOperationException {
 
-        long seconds = (expiration.getTime() - System.currentTimeMillis()) / 1000L;
+        long seconds = duration.getSeconds();
 
         try {
             String url = client.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()

@@ -49,6 +49,10 @@ public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus, Lifec
     private final CloudEventObserverManger observerManger;
     private final long publishTimeout;
 
+    public MqClient getClient() {
+        return client;
+    }
+
     public CloudEventServiceFolkMqImpl(CloudProps cloudProps) {
         this.cloudProps = cloudProps;
         this.observerManger = new CloudEventObserverManger();
@@ -66,19 +70,6 @@ public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus, Lifec
 
         //总线扩展
         EventBus.publish(client);
-
-        //加入容器
-        Solon.context().wrapAndPut(MqClient.class, client);
-
-        //异步获取 MqTransactionCheckback
-        Solon.context().getBeanAsync(MqTransactionCheckback.class, bean -> {
-            client.transactionCheckback(bean);
-        });
-
-        Solon.context().getBeanAsync(MqConsumeListener.class, bean -> {
-            client.listen(bean);
-        });
-
 
         try {
             client.connect();

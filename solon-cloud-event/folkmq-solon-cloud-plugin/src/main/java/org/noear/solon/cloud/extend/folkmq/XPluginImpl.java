@@ -15,6 +15,9 @@
  */
 package org.noear.solon.cloud.extend.folkmq;
 
+import org.noear.folkmq.client.MqClient;
+import org.noear.folkmq.client.MqConsumeListener;
+import org.noear.folkmq.client.MqTransactionCheckback;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
@@ -30,7 +33,7 @@ import org.noear.solon.core.Plugin;
 public class XPluginImpl implements Plugin {
     @Override
     public void start(AppContext context) throws Throwable {
-        CloudProps cloudProps = new CloudProps(context,"folkmq");
+        CloudProps cloudProps = new CloudProps(context, "folkmq");
 
         if (Utils.isEmpty(cloudProps.getEventServer())) {
             return;
@@ -41,6 +44,20 @@ public class XPluginImpl implements Plugin {
             CloudManager.register(eventServiceImp);
 
             context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
+
+
+            //加入容器
+            context.wrapAndPut(MqClient.class, eventServiceImp.getClient());
+
+            //异步获取 MqTransactionCheckback
+            context.getBeanAsync(MqTransactionCheckback.class, bean -> {
+                eventServiceImp.getClient().transactionCheckback(bean);
+            });
+
+            //异步获取 MqConsumeListener
+            context.getBeanAsync(MqConsumeListener.class, bean -> {
+                eventServiceImp.getClient().listen(bean);
+            });
         }
     }
 }

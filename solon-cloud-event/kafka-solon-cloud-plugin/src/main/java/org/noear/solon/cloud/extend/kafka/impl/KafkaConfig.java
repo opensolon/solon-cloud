@@ -92,6 +92,12 @@ public class KafkaConfig {
             });
         }
 
+        //避免被重写了
+        if (forTran) {
+            //事务时必须为 all
+            properties.put(ProducerConfig.ACKS_CONFIG, "all");
+        }
+
         return properties;
     }
 

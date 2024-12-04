@@ -68,19 +68,10 @@ public class KafkaConfig {
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
         //发送ack级别（最高了）
         properties.put(ProducerConfig.ACKS_CONFIG, "all");
+        //重试次数
+        properties.put(ProducerConfig.RETRIES_CONFIG, 0);
 
         properties.put(ProducerConfig.BATCH_SIZE_CONFIG, 16384); //默认是16384Bytes，即16kB
-
-        if (forTran) {
-            //重试次数  //幂等时要大于0
-            properties.put(ProducerConfig.RETRIES_CONFIG, 1);
-            //开启幂等和事务
-            properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
-            properties.put(ProducerConfig.TRANSACTIONAL_ID_CONFIG, Utils.guid());
-        } else {
-            //重试次数
-            properties.put(ProducerConfig.RETRIES_CONFIG, 0);
-        }
 
         loadCommonProperties(properties);
 
@@ -94,8 +85,17 @@ public class KafkaConfig {
 
         //避免被重写了
         if (forTran) {
+            //开启幂等和事务
+            properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, true);
+            //事务id配置 //如果没有？
+            properties.putIfAbsent(ProducerConfig.TRANSACTIONAL_ID_CONFIG, Utils.guid());
             //事务时必须为 all
             properties.put(ProducerConfig.ACKS_CONFIG, "all");
+            //重试次数  //幂等时要大于0
+            int retries = Integer.parseInt(properties.get(ProducerConfig.RETRIES_CONFIG).toString());
+            if (retries < 1) {
+                properties.put(ProducerConfig.RETRIES_CONFIG, 1);
+            }
         }
 
         return properties;

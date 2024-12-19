@@ -32,12 +32,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.activemq</groupId>
-            <artifactId>activemq-broker</artifactId>
-            <version>${activemq.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.noear</groupId>
             <artifactId>solon-test</artifactId>
             <scope>test</scope>

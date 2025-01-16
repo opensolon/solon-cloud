@@ -94,16 +94,16 @@ public class ActivemqProducer {
         MessageProducer producer = session.createProducer(destination);
 
         //创建消息
-        TextMessage message = session.createTextMessage(ONode.stringify(event));
+        TextMessage textMessage = session.createTextMessage(ONode.stringify(event));
 
         //支持延时消息
         if (delay > 0) {
-            message.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
+            textMessage.setLongProperty(ScheduledMessage.AMQ_SCHEDULED_DELAY, delay);
         }
 
         //发布消息
         try {
-            producer.send(destination, message);
+            producer.send(destination, textMessage);
             return true;
         } catch (JMSException e) {
             log.error(e.getMessage(), e);

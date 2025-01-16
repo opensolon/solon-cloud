@@ -47,16 +47,16 @@ public class ActivemqConsumeHandler implements MessageListener {
 
     @Override
     public void onMessage(Message message) {
-        ActiveMQTextMessage textmsg = (ActiveMQTextMessage) message;
+        ActiveMQTextMessage textMessage = (ActiveMQTextMessage) message;
         try {
-            Event event = ONode.deserialize(textmsg.getText(), Event.class);
-            event.times(textmsg.getRedeliveryCounter());
+            Event event = ONode.deserialize(textMessage.getText(), Event.class);
+            event.times(textMessage.getRedeliveryCounter());
 
             //已设置自动延时策略
             boolean isOk = onReceive(event);
 
             if(isOk){
-                textmsg.acknowledge();
+                textMessage.acknowledge();
             }else{
                 session.recover();
             }

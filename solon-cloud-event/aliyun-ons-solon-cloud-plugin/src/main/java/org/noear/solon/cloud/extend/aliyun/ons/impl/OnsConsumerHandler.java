@@ -27,6 +27,8 @@ import org.noear.solon.cloud.service.CloudEventObserverManger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 
 /**
  * @author cgy
@@ -68,6 +70,15 @@ public class OnsConsumerHandler implements MessageListener {
             if (Utils.isNotEmpty(group)) {
                 event.group(group);
             }
+
+            if (Utils.isNotEmpty(message.getUserProperties())) {
+                for (Map.Entry kv : message.getUserProperties().entrySet()) {
+                    if (kv.getKey() instanceof String && kv.getValue() instanceof String) {
+                        event.meta().put((String) kv.getKey(), (String) kv.getValue());
+                    }
+                }
+            }
+
             isOk = isOk && onReceive(event, topicNew);
         } catch (Throwable e) {
             isOk = false;

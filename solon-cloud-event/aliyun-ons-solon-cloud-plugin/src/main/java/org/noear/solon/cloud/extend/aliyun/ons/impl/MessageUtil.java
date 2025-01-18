@@ -20,6 +20,7 @@ import org.noear.solon.Utils;
 import org.noear.solon.cloud.model.Event;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * @author cgy
@@ -39,11 +40,14 @@ class MessageUtil {
                 event.key(),
                 event.content().getBytes(StandardCharsets.UTF_8));
 
+        for (Map.Entry<String, String> kv : event.meta().entrySet()) {
+            message.putUserProperties(kv.getKey(), kv.getValue());
+        }
+
         if (event.scheduled() != null) {
             long delayTimestamp = event.scheduled().getTime() - System.currentTimeMillis();
             message.setStartDeliverTime(delayTimestamp);
         }
         return message;
-
     }
 }

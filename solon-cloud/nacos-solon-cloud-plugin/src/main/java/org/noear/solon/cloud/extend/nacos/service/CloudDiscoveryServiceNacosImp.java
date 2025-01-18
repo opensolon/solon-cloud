@@ -15,6 +15,7 @@
  */
 package org.noear.solon.cloud.extend.nacos.service;
 
+import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
@@ -166,6 +167,9 @@ public class CloudDiscoveryServiceNacosImp implements CloudDiscoveryService {
                 Instance n1 = new Instance(service, i1.getIp(), i1.getPort())
                         .weight(i1.getWeight())
                         .metaPutAll(i1.getMetadata()); //会自动处理 protocol
+
+                //添加集群名
+                n1.metaPut(PropertyKeyConst.CLUSTER_NAME, i1.getClusterName());
 
                 discovery.instanceAdd(n1);
             }

@@ -38,11 +38,11 @@ public class RocketmqConsumerHandler implements MessageListenerConcurrently {
     static final Logger log = LoggerFactory.getLogger(RocketmqConsumerHandler.class);
 
     private final CloudEventObserverManger observerManger;
-    private final RocketmqConfig  config;
+    private final RocketmqConfig config;
 
     public RocketmqConsumerHandler(RocketmqConfig config, CloudEventObserverManger observerManger) {
         this.observerManger = observerManger;
-        this.config =config;
+        this.config = config;
     }
 
 
@@ -55,10 +55,10 @@ public class RocketmqConsumerHandler implements MessageListenerConcurrently {
                 String topicNew = message.getTopic();
                 String group = null;
                 String topic = null;
-                if(topicNew.contains(RocketmqProps.GROUP_SPLIT_MARK)){
+                if (topicNew.contains(RocketmqProps.GROUP_SPLIT_MARK)) {
                     group = topicNew.split(RocketmqProps.GROUP_SPLIT_MARK)[0];
                     topic = topicNew.split(RocketmqProps.GROUP_SPLIT_MARK)[1];
-                }else{
+                } else {
                     topic = topicNew;
                 }
 
@@ -67,8 +67,12 @@ public class RocketmqConsumerHandler implements MessageListenerConcurrently {
                 event.key(message.getKeys());
                 event.times(message.getReconsumeTimes());
                 event.channel(config.getChannelName());
-                if(Utils.isNotEmpty(group)){
+                if (Utils.isNotEmpty(group)) {
                     event.group(group);
+                }
+
+                if (Utils.isNotEmpty(message.getProperties())) {
+                    event.meta().putAll(message.getProperties());
                 }
 
                 isOk = isOk && onReceive(event, topicNew); //可以不吃异常
@@ -104,7 +108,7 @@ public class RocketmqConsumerHandler implements MessageListenerConcurrently {
 
         if (handler != null) {
             isOk = handler.handle(event);
-        }else{
+        } else {
             //只需要记录一下
             log.warn("There is no observer for this event topic[{}]", topicNew);
         }

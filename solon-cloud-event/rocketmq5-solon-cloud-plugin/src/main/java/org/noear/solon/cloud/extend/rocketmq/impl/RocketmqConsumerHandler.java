@@ -72,6 +72,10 @@ public class RocketmqConsumerHandler implements MessageListener {
                 event.group(group);
             }
 
+            if (Utils.isNotEmpty(message.getProperties())) {
+                event.meta().putAll(message.getProperties());
+            }
+
             isOk = isOk && onReceive(event, topicNew); //可以不吃异常
 
         } catch (Throwable e) {

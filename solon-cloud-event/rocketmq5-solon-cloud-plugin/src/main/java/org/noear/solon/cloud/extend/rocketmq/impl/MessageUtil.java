@@ -22,6 +22,7 @@ import org.noear.solon.Utils;
 import org.noear.solon.cloud.model.Event;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 /**
  * @author noear
@@ -43,6 +44,10 @@ class MessageUtil {
                 //消息体。
                 .setBody(event.content().getBytes(StandardCharsets.UTF_8));
 
+
+        for(Map.Entry<String,String> kv: event.meta().entrySet()) {
+            messageBuilder.addProperty(kv.getKey(), kv.getValue());
+        }
 
         //设置消息Tag，用于消费端根据指定Tag过滤消息。
         if (Utils.isNotEmpty(event.tags())) {

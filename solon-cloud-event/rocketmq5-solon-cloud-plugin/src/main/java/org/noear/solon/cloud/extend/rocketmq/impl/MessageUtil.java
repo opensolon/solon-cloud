@@ -44,7 +44,7 @@ class MessageUtil {
                 //消息体。
                 .setBody(event.content().getBytes(StandardCharsets.UTF_8));
 
-
+        //@since 3.0
         for(Map.Entry<String,String> kv: event.meta().entrySet()) {
             messageBuilder.addProperty(kv.getKey(), kv.getValue());
         }

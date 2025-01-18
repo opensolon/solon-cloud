@@ -138,6 +138,7 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
 
         ProducerRecord<String, String> record = new ProducerRecord<>(event.topic(), event.key(), event.content());
 
+        //@since 3.0
         for (Map.Entry<String, String> kv : event.meta().entrySet()) {
             record.headers().add(kv.getKey(), kv.getValue().getBytes(StandardCharsets.UTF_8));
         }
@@ -227,6 +228,7 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
                     .key(record.key())
                     .channel(config.getEventChannel());
 
+            //@since 3.0
             for (Header h1 : record.headers()) {
                 event.meta().put(h1.key(), new String(h1.value(), StandardCharsets.UTF_8));
             }

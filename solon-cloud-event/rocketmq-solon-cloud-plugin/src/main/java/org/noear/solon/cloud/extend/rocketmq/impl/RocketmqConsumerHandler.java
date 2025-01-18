@@ -67,10 +67,12 @@ public class RocketmqConsumerHandler implements MessageListenerConcurrently {
                 event.key(message.getKeys());
                 event.times(message.getReconsumeTimes());
                 event.channel(config.getChannelName());
+
                 if (Utils.isNotEmpty(group)) {
                     event.group(group);
                 }
 
+                //@since 3.0
                 if (Utils.isNotEmpty(message.getProperties())) {
                     event.meta().putAll(message.getProperties());
                 }

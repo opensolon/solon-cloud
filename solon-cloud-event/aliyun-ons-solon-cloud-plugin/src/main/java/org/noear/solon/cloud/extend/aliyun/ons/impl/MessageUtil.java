@@ -40,6 +40,7 @@ class MessageUtil {
                 event.key(),
                 event.content().getBytes(StandardCharsets.UTF_8));
 
+        //@since 3.0
         for (Map.Entry<String, String> kv : event.meta().entrySet()) {
             message.putUserProperties(kv.getKey(), kv.getValue());
         }

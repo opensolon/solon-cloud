@@ -112,9 +112,9 @@ public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus, Lifec
                     .tag(event.tags())
                     .qos(event.qos());
 
-
+            //@since 3.0
             if (Utils.isNotEmpty(event.meta())) {
-                message.attr("event_meta", ONode.stringify(event.meta()));
+                message.attr("user_meta", ONode.stringify(event.meta()));
             }
 
             if (event.tran() != null) {

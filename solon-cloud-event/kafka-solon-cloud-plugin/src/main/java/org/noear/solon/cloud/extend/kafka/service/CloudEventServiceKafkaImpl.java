@@ -21,6 +21,7 @@ import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.*;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.header.Header;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.CloudProps;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -135,6 +137,11 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
         Future<RecordMetadata> future = null;
 
         ProducerRecord<String, String> record = new ProducerRecord<>(event.topic(), event.key(), event.content());
+
+        for (Map.Entry<String, String> kv : event.meta().entrySet()) {
+            record.headers().add(kv.getKey(), kv.getValue().getBytes(StandardCharsets.UTF_8));
+        }
+
         if (event.tran() == null) {
             future = producer.send(record);
         } else {
@@ -198,7 +205,7 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
         int times = consume_failure_times.get();
 
         if (times > 0) {
-            if(times > 99){
+            if (times > 99) {
                 consume_failure_times.set(99);
             }
 
@@ -220,6 +227,9 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
                     .key(record.key())
                     .channel(config.getEventChannel());
 
+            for (Header h1 : record.headers()) {
+                event.meta().put(h1.key(), new String(h1.value(), StandardCharsets.UTF_8));
+            }
 
             //接收并处理事件
             TopicPartition topicPartition = new TopicPartition(record.topic(), record.partition());

@@ -17,6 +17,9 @@ package org.noear.solon.cloud.extend.mqtt5.service;
 
 import org.eclipse.paho.mqttv5.client.IMqttToken;
 import org.eclipse.paho.mqttv5.common.MqttMessage;
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
+import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.annotation.EventLevel;
@@ -28,6 +31,8 @@ import org.noear.solon.cloud.service.CloudEventServicePlus;
 import org.noear.solon.core.bean.LifecycleBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
 
 /**
  * @author noear
@@ -78,6 +83,15 @@ public class CloudEventServiceMqtt5 implements CloudEventServicePlus, LifecycleB
         message.setQos(event.qos());
         message.setRetained(event.retained());
         message.setPayload(event.content().getBytes());
+
+        //@since 3.0
+        if(Utils.isNotEmpty(event.meta())) {
+            MqttProperties mqttProperties = new MqttProperties();
+            for (Map.Entry<String, String> kv : event.meta().entrySet()) {
+                mqttProperties.getUserProperties().add(new UserProperty(kv.getKey(), kv.getValue()));
+            }
+            message.setProperties(mqttProperties);
+        }
 
         try {
             IMqttToken token = clientManager.getClient().publish(event.topic(), message);

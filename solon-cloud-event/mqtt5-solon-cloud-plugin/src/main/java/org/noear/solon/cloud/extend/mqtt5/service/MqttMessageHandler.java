@@ -17,11 +17,15 @@ package org.noear.solon.cloud.extend.mqtt5.service;
 
 import org.eclipse.paho.mqttv5.common.MqttMessage;
 
+import org.eclipse.paho.mqttv5.common.packet.MqttProperties;
+import org.eclipse.paho.mqttv5.common.packet.UserProperty;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.model.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * 消息处理
@@ -29,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author noear
  * @since 2.5
  */
-public class MqttMessageHandler implements Runnable{
+public class MqttMessageHandler implements Runnable {
     private static Logger log = LoggerFactory.getLogger(MqttMessageListenerImpl.class);
     private MqttClientManager clientManager;
     private String eventChannelName;
@@ -37,7 +41,7 @@ public class MqttMessageHandler implements Runnable{
     private String topic;
     private MqttMessage message;
 
-    public MqttMessageHandler(MqttClientManager clientManager,  String eventChannelName, CloudEventHandler eventHandler, String topic, MqttMessage message){
+    public MqttMessageHandler(MqttClientManager clientManager, String eventChannelName, CloudEventHandler eventHandler, String topic, MqttMessage message) {
         this.clientManager = clientManager;
         this.eventChannelName = eventChannelName;
         this.eventHandler = eventHandler;
@@ -52,6 +56,17 @@ public class MqttMessageHandler implements Runnable{
                     .qos(message.getQos())
                     .retained(message.isRetained())
                     .channel(eventChannelName);
+
+            //@since 3.0
+            MqttProperties mqttProperties = message.getProperties();
+            if (mqttProperties != null) {
+                List<UserProperty> userProperties = mqttProperties.getUserProperties();
+                if (Utils.isNotEmpty(userProperties)) {
+                    for (UserProperty p1 : userProperties) {
+                        event.meta().put(p1.getKey(), p1.getValue());
+                    }
+                }
+            }
 
             if (eventHandler != null) {
                 if (eventHandler.handle(event)) {

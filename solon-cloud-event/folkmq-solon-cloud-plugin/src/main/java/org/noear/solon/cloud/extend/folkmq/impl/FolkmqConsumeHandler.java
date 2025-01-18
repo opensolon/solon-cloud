@@ -17,6 +17,7 @@ package org.noear.solon.cloud.extend.folkmq.impl;
 
 import org.noear.folkmq.client.MqMessageReceived;
 import org.noear.folkmq.client.MqConsumeHandler;
+import org.noear.snack.ONode;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.extend.folkmq.FolkmqProps;
@@ -26,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author noear
@@ -57,6 +59,11 @@ public class FolkmqConsumeHandler implements MqConsumeHandler {
             event.key(message.getTid());
             event.times(message.getTimes());
             event.tags(message.getTag());
+
+            String event_meta = message.getAttr("event_meta");
+            if(Utils.isNotEmpty(event_meta)) {
+                event.meta().putAll(ONode.deserialize(event_meta, Map.class));
+            }
 
             if (Utils.isNotEmpty(group)) {
                 event.group(group);

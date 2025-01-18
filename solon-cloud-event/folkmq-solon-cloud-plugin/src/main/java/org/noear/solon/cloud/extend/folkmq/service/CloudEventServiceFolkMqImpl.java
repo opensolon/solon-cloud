@@ -17,6 +17,7 @@ package org.noear.solon.cloud.extend.folkmq.service;
 
 import org.noear.folkmq.FolkMQ;
 import org.noear.folkmq.client.*;
+import org.noear.snack.ONode;
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
@@ -36,6 +37,7 @@ import org.noear.solon.core.bean.LifecycleBean;
 import org.noear.solon.core.event.EventBus;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * @author noear
@@ -110,6 +112,11 @@ public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus, Lifec
                     .tag(event.tags())
                     .qos(event.qos());
 
+
+            if (Utils.isNotEmpty(event.meta())) {
+                message.attr("event_meta", ONode.stringify(event.meta()));
+            }
+
             if (event.tran() != null) {
                 MqTransaction transaction = event.tran().getListener(FolkmqTransactionListener.class).getTransaction();
                 message.transaction(transaction);
@@ -157,9 +164,9 @@ public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus, Lifec
 
                 if (observer.getLevel() == EventLevel.instance) {
                     String instanceName = Instance.local().serviceAndAddress()
-                            .replace("@","-")
-                            .replace(".","_")
-                            .replace(":","_");
+                            .replace("@", "-")
+                            .replace(".", "_")
+                            .replace(":", "_");
                     //实例订阅
                     client.subscribe(topicNew, instanceName, folkmqConsumeHandler);
                 } else {

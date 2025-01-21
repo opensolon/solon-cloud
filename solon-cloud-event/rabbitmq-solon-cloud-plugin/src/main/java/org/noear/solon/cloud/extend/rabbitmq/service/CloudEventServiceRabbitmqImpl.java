@@ -107,7 +107,7 @@ public class CloudEventServiceRabbitmqImpl implements CloudEventServicePlus, Lif
         }
     }
 
-    CloudEventObserverManger observerManger = new CloudEventObserverManger();
+    private CloudEventObserverManger observerManger = new CloudEventObserverManger();
 
     @Override
     public void attention(EventLevel level, String channel, String group, String topic, String tag, int qos, CloudEventHandler observer) {

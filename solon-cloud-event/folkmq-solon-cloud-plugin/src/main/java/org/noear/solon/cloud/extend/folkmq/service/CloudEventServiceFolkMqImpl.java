@@ -113,9 +113,11 @@ public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus, Lifec
                     .qos(event.qos());
 
             //@since 3.0
-            if (Utils.isNotEmpty(event.meta())) {
-                message.attr("user_meta", ONode.stringify(event.meta()));
-            }
+//            if (Utils.isNotEmpty(event.meta())) {
+//                for (Map.Entry<String, String> kv : event.meta().entrySet()) {
+//                    message.attr(kv.getKey(), kv.getValue());
+//                }
+//            }
 
             if (event.tran() != null) {
                 MqTransaction transaction = event.tran().getListener(FolkmqTransactionListener.class).getTransaction();

@@ -61,10 +61,10 @@ public class FolkmqConsumeHandler implements MqConsumeHandler {
             event.tags(message.getTag());
 
             //@since 3.0
-            String event_meta = message.getAttr("user_meta");
-            if(Utils.isNotEmpty(event_meta)) {
-                event.meta().putAll(ONode.deserialize(event_meta, Map.class));
-            }
+//            String event_meta = message.getAttr("user_meta");
+//            if(Utils.isNotEmpty(event_meta)) {
+//                event.meta().putAll(ONode.deserialize(event_meta, Map.class));
+//            }
 
             if (Utils.isNotEmpty(group)) {
                 event.group(group);

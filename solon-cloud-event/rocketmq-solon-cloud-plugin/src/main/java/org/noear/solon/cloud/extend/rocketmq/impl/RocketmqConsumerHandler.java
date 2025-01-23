@@ -28,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author noear
@@ -74,7 +75,11 @@ public class RocketmqConsumerHandler implements MessageListenerConcurrently {
 
                 //@since 3.0
                 if (Utils.isNotEmpty(message.getProperties())) {
-                    event.meta().putAll(message.getProperties());
+                    for (Map.Entry<String, String> kv : message.getProperties().entrySet()) {
+                        if (kv.getKey().startsWith("!")) {
+                            event.meta().put(kv.getKey().substring(1), kv.getValue());
+                        }
+                    }
                 }
 
                 isOk = isOk && onReceive(event, topicNew); //可以不吃异常

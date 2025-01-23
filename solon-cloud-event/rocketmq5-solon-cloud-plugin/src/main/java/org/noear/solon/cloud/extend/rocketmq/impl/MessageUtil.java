@@ -46,7 +46,7 @@ class MessageUtil {
 
         //@since 3.0
         for(Map.Entry<String,String> kv: event.meta().entrySet()) {
-            messageBuilder.addProperty(kv.getKey(), kv.getValue());
+            messageBuilder.addProperty("!" + kv.getKey(), kv.getValue());
         }
 
         //设置消息Tag，用于消费端根据指定Tag过滤消息。

@@ -75,7 +75,10 @@ public class OnsConsumerHandler implements MessageListener {
             if (Utils.isNotEmpty(message.getUserProperties())) {
                 for (Map.Entry kv : message.getUserProperties().entrySet()) {
                     if (kv.getKey() instanceof String && kv.getValue() instanceof String) {
-                        event.meta().put((String) kv.getKey(), (String) kv.getValue());
+                        String k = (String) kv.getKey();
+                        if (k.startsWith("!")) {
+                            event.meta().put(k.substring(1), (String) kv.getValue());
+                        }
                     }
                 }
             }

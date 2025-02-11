@@ -21,11 +21,12 @@ import io.grpc.ServerBuilder;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.solon.annotation.EnableGrpc;
 import io.grpc.solon.annotation.GrpcService;
+import io.grpc.solon.annotation.GrpcClient;
+
 import org.noear.solon.Solon;
 import org.noear.solon.SolonApp;
 import org.noear.solon.core.*;
 import org.noear.solon.core.util.LogUtil;
-import io.grpc.solon.annotation.GrpcClient;
 
 import java.util.HashMap;
 import java.util.Map;

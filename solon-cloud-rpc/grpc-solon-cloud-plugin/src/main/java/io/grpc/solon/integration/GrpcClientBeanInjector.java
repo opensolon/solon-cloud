@@ -18,9 +18,10 @@ package io.grpc.solon.integration;
 import io.grpc.Channel;
 import io.grpc.stub.AbstractBlockingStub;
 import io.grpc.stub.AbstractFutureStub;
+import io.grpc.solon.annotation.GrpcClient;
+
 import org.noear.solon.core.BeanInjector;
 import org.noear.solon.core.VarHolder;
-import io.grpc.solon.annotation.GrpcClient;
 import org.noear.solon.core.util.ClassUtil;
 
 import java.lang.reflect.Method;

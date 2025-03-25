@@ -23,6 +23,7 @@ import org.noear.solon.cloud.model.Event;
  * @since 2.0
  */
 public class FolkmqProps {
+    public static final String CREATED_TIMESTAMP ="__CREATED_TIMESTAMP";
 
     public static final String GROUP_SPLIT_MARK = "--";
 

@@ -99,6 +99,10 @@ public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus, Lifec
             throw new IllegalArgumentException("Event missing content");
         }
 
+        if (event.created() == 0L) {
+            event.created(System.currentTimeMillis());
+        }
+
         if (event.tran() != null) {
             beginTransaction(event.tran());
         }
@@ -113,11 +117,14 @@ public class CloudEventServiceFolkMqImpl implements CloudEventServicePlus, Lifec
                     .qos(event.qos());
 
             //@since 3.0
-//            if (Utils.isNotEmpty(event.meta())) {
-//                for (Map.Entry<String, String> kv : event.meta().entrySet()) {
-//                    message.attr(kv.getKey(), kv.getValue());
-//                }
-//            }
+            if (Utils.isNotEmpty(event.meta())) {
+                for (Map.Entry<String, String> kv : event.meta().entrySet()) {
+                    message.attr(kv.getKey(), kv.getValue());
+                }
+            }
+
+            //@since 3.1
+            message.attr(FolkmqProps.CREATED_TIMESTAMP, String.valueOf(event.created()));
 
             if (event.tran() != null) {
                 MqTransaction transaction = event.tran().getListener(FolkmqTransactionListener.class).getTransaction();

@@ -61,10 +61,15 @@ public class FolkmqConsumeHandler implements MqConsumeHandler {
             event.tags(message.getTag());
 
             //@since 3.0
-//            String event_meta = message.getAttr("user_meta");
-//            if(Utils.isNotEmpty(event_meta)) {
-//                event.meta().putAll(ONode.deserialize(event_meta, Map.class));
-//            }
+            for(Map.Entry<String,String> kv: message.getAttrMap().entrySet()) {
+                event.metaPut(kv.getKey(), kv.getValue());
+            }
+
+            //@since 3.1
+            String createdStr = message.getAttr(FolkmqProps.CREATED_TIMESTAMP);
+            if(Utils.isNotEmpty(createdStr)){
+                event.created(Long.parseLong(createdStr));
+            }
 
             if (Utils.isNotEmpty(group)) {
                 event.group(group);

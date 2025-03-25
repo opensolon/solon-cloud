@@ -22,7 +22,7 @@
         <dependency>
             <groupId>org.noear</groupId>
             <artifactId>folkmq-solon</artifactId>
-            <version>1.8.0-M1</version>
+            <version>${folkmq.version}</version>
         </dependency>
 
         <dependency>

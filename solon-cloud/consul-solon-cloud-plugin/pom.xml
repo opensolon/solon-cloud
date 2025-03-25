@@ -44,7 +44,7 @@
 
         <dependency>
             <groupId>org.noear</groupId>
-            <artifactId>nami-channel-http-okhttp</artifactId>
+            <artifactId>nami-channel-http</artifactId>
             <scope>test</scope>
         </dependency>
 

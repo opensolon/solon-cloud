@@ -33,8 +33,8 @@ import redis.clients.jedis.JedisPubSub;
 public class JedisEventConsumer extends JedisPubSub {
     static final Logger log = LoggerFactory.getLogger(JedisEventConsumer.class);
 
-    CloudEventObserverManger observerManger;
-    String eventChannelName;
+    private CloudEventObserverManger observerManger;
+    private String eventChannelName;
 
     public JedisEventConsumer(CloudProps cloudProps, CloudEventObserverManger observerManger) {
         this.observerManger = observerManger;

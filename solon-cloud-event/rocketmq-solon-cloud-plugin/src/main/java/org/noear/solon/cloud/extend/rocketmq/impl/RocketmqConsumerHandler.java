@@ -80,6 +80,12 @@ public class RocketmqConsumerHandler implements MessageListenerConcurrently {
                             event.meta().put(kv.getKey().substring(1), kv.getValue());
                         }
                     }
+
+                    //@since 3.1
+                    String createdStr = message.getProperty(RocketmqProps.CREATED_TIMESTAMP);
+                    if (Utils.isNotEmpty(createdStr)) {
+                        event.created(Long.parseLong(createdStr));
+                    }
                 }
 
                 isOk = isOk && onReceive(event, topicNew); //可以不吃异常

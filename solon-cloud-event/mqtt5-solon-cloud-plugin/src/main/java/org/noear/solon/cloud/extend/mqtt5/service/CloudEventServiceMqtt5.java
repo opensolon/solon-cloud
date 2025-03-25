@@ -73,9 +73,15 @@ public class CloudEventServiceMqtt5 implements CloudEventServicePlus, LifecycleB
         log.warn("Event transactions are not supported!");
     }
 
+    public static final String CREATED_TIMESTAMP ="__CREATED_TIMESTAMP";
+
     @Override
     public boolean publish(Event event) throws CloudEventException {
-        if(event.tran() != null){
+        if (event.created() == 0L) {
+            event.created(System.currentTimeMillis());
+        }
+
+        if (event.tran() != null) {
             beginTransaction(event.tran());
         }
 
@@ -84,14 +90,19 @@ public class CloudEventServiceMqtt5 implements CloudEventServicePlus, LifecycleB
         message.setRetained(event.retained());
         message.setPayload(event.content().getBytes());
 
+        MqttProperties mqttProperties = new MqttProperties();
+
+        //@since 3.1
+        mqttProperties.getUserProperties().add(new UserProperty(CREATED_TIMESTAMP, String.valueOf(event.created())));
+
         //@since 3.0
-        if(Utils.isNotEmpty(event.meta())) {
-            MqttProperties mqttProperties = new MqttProperties();
+        if (Utils.isNotEmpty(event.meta())) {
             for (Map.Entry<String, String> kv : event.meta().entrySet()) {
                 mqttProperties.getUserProperties().add(new UserProperty(kv.getKey(), kv.getValue()));
             }
-            message.setProperties(mqttProperties);
         }
+
+        message.setProperties(mqttProperties);
 
         try {
             IMqttToken token = clientManager.getClient().publish(event.topic(), message);

@@ -19,6 +19,7 @@ import org.apache.rocketmq.client.apis.ClientServiceProvider;
 import org.apache.rocketmq.client.apis.message.Message;
 import org.apache.rocketmq.client.apis.message.MessageBuilder;
 import org.noear.solon.Utils;
+import org.noear.solon.cloud.extend.rocketmq.RocketmqProps;
 import org.noear.solon.cloud.model.Event;
 
 import java.nio.charset.StandardCharsets;
@@ -44,8 +45,9 @@ class MessageUtil {
                 //消息体。
                 .setBody(event.content().getBytes(StandardCharsets.UTF_8));
 
+
         //@since 3.0
-        for(Map.Entry<String,String> kv: event.meta().entrySet()) {
+        for (Map.Entry<String, String> kv : event.meta().entrySet()) {
             messageBuilder.addProperty("!" + kv.getKey(), kv.getValue());
         }
 
@@ -53,6 +55,9 @@ class MessageUtil {
         if (Utils.isNotEmpty(event.tags())) {
             messageBuilder.setTag(event.tags());
         }
+
+        //@since 3.1
+        messageBuilder.addProperty(RocketmqProps.CREATED_TIMESTAMP, String.valueOf(event.created()));
 
         //设置超时
         if (event.scheduled() != null) {

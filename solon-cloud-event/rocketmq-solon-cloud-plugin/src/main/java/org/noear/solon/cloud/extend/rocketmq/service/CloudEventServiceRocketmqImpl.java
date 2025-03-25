@@ -75,6 +75,10 @@ public class CloudEventServiceRocketmqImpl implements CloudEventServicePlus , Cl
             event.key(Utils.guid());
         }
 
+        if (event.created() == 0L) {
+            event.created(System.currentTimeMillis());
+        }
+
         if (event.tran() != null) {
             beginTransaction(event.tran());
         }

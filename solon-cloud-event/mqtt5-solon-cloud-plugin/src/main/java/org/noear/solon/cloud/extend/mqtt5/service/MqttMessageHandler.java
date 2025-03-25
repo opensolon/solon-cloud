@@ -64,6 +64,11 @@ public class MqttMessageHandler implements Runnable {
                 if (Utils.isNotEmpty(userProperties)) {
                     for (UserProperty p1 : userProperties) {
                         event.meta().put(p1.getKey(), p1.getValue());
+
+                        //@since 3.1
+                        if (CloudEventServiceMqtt5.CREATED_TIMESTAMP.equals(p1.getKey())) {
+                            event.created(Long.parseLong(p1.getValue()));
+                        }
                     }
                 }
             }

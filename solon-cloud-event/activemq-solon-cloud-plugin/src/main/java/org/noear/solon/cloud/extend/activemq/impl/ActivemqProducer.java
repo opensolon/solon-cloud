@@ -63,6 +63,10 @@ public class ActivemqProducer {
             delay = event.scheduled().getTime() - System.currentTimeMillis();
         }
 
+        if (event.created() == 0L) {
+            event.created(System.currentTimeMillis());
+        }
+
         if (delay > 0) {
             return publish(event, topic, delay);
         } else {

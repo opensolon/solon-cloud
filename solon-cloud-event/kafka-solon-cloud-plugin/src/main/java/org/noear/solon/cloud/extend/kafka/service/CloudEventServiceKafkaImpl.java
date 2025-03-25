@@ -130,13 +130,17 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
             event.key(Utils.guid());
         }
 
+        if (event.created() == 0L) {
+            event.created(System.currentTimeMillis());
+        }
+
         if (event.tran() != null) {
             beginTransaction(event.tran());
         }
 
         Future<RecordMetadata> future = null;
 
-        ProducerRecord<String, String> record = new ProducerRecord<>(event.topic(), event.key(), event.content());
+        ProducerRecord<String, String> record = new ProducerRecord<>(event.topic(), null, event.created(), event.key(), event.content());
 
         //@since 3.0
         for (Map.Entry<String, String> kv : event.meta().entrySet()) {
@@ -227,6 +231,9 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
             Event event = new Event(record.topic(), record.value())
                     .key(record.key())
                     .channel(config.getEventChannel());
+
+            //@since 3.1
+            event.created(record.timestamp());
 
             //@since 3.0
             for (Header h1 : record.headers()) {

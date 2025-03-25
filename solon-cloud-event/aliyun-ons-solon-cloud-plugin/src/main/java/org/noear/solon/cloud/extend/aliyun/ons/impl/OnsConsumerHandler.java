@@ -71,6 +71,9 @@ public class OnsConsumerHandler implements MessageListener {
                 event.group(group);
             }
 
+            //@since 3.1
+            event.created(message.getBornTimestamp());
+
             //@since 3.0
             if (Utils.isNotEmpty(message.getUserProperties())) {
                 for (Map.Entry kv : message.getUserProperties().entrySet()) {

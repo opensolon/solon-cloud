@@ -34,11 +34,18 @@ class MessageUtil {
             event.key(Utils.guid());
         }
 
+        if (event.created() == 0L) {
+            event.created(System.currentTimeMillis());
+        }
+
         Message message = new Message(
                 topicNew,
                 event.tags(),
                 event.key(),
                 event.content().getBytes(StandardCharsets.UTF_8));
+
+        //@since 3.1
+        message.setBornTimestamp(event.created());
 
         //@since 3.0
         for (Map.Entry<String, String> kv : event.meta().entrySet()) {

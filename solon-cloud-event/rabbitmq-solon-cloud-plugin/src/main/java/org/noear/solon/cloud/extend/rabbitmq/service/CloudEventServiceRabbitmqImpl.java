@@ -88,6 +88,10 @@ public class CloudEventServiceRabbitmqImpl implements CloudEventServicePlus, Lif
             event.key(Utils.guid());
         }
 
+        if (event.created() == 0L) {
+            event.created(System.currentTimeMillis());
+        }
+
         if(event.tran()!=null){
             beginTransaction(event.tran());
         }

@@ -17,6 +17,7 @@ package org.noear.solon.cloud.extend.rocketmq.impl;
 
 import org.apache.rocketmq.common.message.Message;
 import org.noear.solon.Utils;
+import org.noear.solon.cloud.extend.rocketmq.RocketmqProps;
 import org.noear.solon.cloud.model.Event;
 
 import java.nio.charset.StandardCharsets;
@@ -39,6 +40,9 @@ class MessageUtil {
                 event.tags(),
                 event.key(),
                 event.content().getBytes(StandardCharsets.UTF_8));
+
+        //@since 3.1
+        message.putUserProperty(RocketmqProps.CREATED_TIMESTAMP, String.valueOf(event.created()));
 
         //@since 3.0
         for(Map.Entry<String,String> kv: event.meta().entrySet()) {

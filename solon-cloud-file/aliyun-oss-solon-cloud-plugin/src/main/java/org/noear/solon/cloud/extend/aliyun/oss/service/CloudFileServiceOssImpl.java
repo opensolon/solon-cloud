@@ -100,7 +100,7 @@ public class CloudFileServiceOssImpl implements CloudFileService {
                     .execAsCode("HEAD");
 
             return code == 200;
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new CloudFileException(ex);
         }
     }
@@ -136,7 +136,7 @@ public class CloudFileServiceOssImpl implements CloudFileService {
                     .exec("GET");
 
             return new Media(resp.body(), resp.contentType(), resp.contentLength());
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new CloudFileException(ex);
         }
     }
@@ -196,7 +196,7 @@ public class CloudFileServiceOssImpl implements CloudFileService {
                     .delete();
 
             return Result.succeed(tmp);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new CloudFileException(ex);
         }
     }

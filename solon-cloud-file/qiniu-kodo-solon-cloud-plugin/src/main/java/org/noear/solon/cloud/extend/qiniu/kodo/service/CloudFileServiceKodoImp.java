@@ -129,7 +129,7 @@ public class CloudFileServiceKodoImp implements CloudFileService {
             int code = HttpUtils.http(downUrl).execAsCode("HEAD");
 
             return code == 200;
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new CloudFileException(e);
         }
     }
@@ -161,7 +161,7 @@ public class CloudFileServiceKodoImp implements CloudFileService {
             HttpResponse resp = HttpUtils.http(downUrl).exec("GET");
 
             return new Media(resp.body(), resp.contentType(), resp.contentLength());
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new CloudFileException(e);
         }
     }

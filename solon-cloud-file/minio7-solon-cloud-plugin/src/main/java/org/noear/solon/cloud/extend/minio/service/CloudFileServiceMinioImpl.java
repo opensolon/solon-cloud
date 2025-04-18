@@ -17,6 +17,7 @@ package org.noear.solon.cloud.extend.minio.service;
 
 import io.minio.*;
 import io.minio.http.Method;
+import io.minio.messages.DeleteObject;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.exception.CloudFileException;
@@ -26,13 +27,15 @@ import org.noear.solon.core.handle.Result;
 
 import java.io.InputStream;
 import java.time.Duration;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 云端文件服务（minio）
  *
  * @author iYarnFog
+ * @author noear
  * @since 1.5
  */
 public class CloudFileServiceMinioImpl implements CloudFileService {
@@ -172,4 +175,24 @@ public class CloudFileServiceMinioImpl implements CloudFileService {
         }
     }
 
+    @Override
+    public Result deleteBatch(String bucket, Collection<String> keys) throws CloudFileException {
+        if (Utils.isEmpty(bucket)) {
+            bucket = bucketDef;
+        }
+
+        List<DeleteObject> objects = keys.stream()
+                .map(k -> new DeleteObject(k))
+                .collect(Collectors.toList());
+
+        try {
+            this.client.removeObjects(RemoveObjectsArgs.builder()
+                    .bucket(bucket)
+                    .objects(objects)
+                    .build());
+            return Result.succeed();
+        } catch (Exception exception) {
+            throw new CloudFileException(exception);
+        }
+    }
 }

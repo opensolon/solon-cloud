@@ -32,8 +32,8 @@ import org.noear.solon.core.handle.Result;
 import org.noear.solon.net.http.HttpResponse;
 import org.noear.solon.net.http.HttpUtils;
 
-import java.io.IOException;
 import java.time.Duration;
+import java.util.Collection;
 
 /**
  * @author noear
@@ -199,6 +199,23 @@ public class CloudFileServiceKodoImp implements CloudFileService {
         } catch (QiniuException e) {
             return Result.failure(e.error());
         }
+    }
+
+    @Override
+    public Result deleteBatch(String bucket, Collection<String> keys) throws CloudFileException {
+        if (Utils.isEmpty(bucket)) {
+            bucket = bucketDef;
+        }
+
+        for (String key : keys) {
+            try {
+                bucketManager.delete(bucket, key);
+            } catch (QiniuException e) {
+                return Result.failure(e.error());
+            }
+        }
+
+        return Result.succeed();
     }
 
     private String buildUrl(String key) {

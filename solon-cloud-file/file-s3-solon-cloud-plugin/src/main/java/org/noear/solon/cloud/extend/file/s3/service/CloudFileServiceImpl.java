@@ -24,14 +24,15 @@ import org.noear.solon.core.Props;
 import org.noear.solon.core.handle.Result;
 
 import java.time.Duration;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * CloudFileService 综合实现
  *
  * @author 等風來再離開
+ * @author noear
  * @since 1.11
  */
 public class CloudFileServiceImpl implements CloudFileService {
@@ -51,15 +52,15 @@ public class CloudFileServiceImpl implements CloudFileService {
 
     /**
      * 获取默认 bucket
-     * */
-    public String getBucketDef(){
+     */
+    public String getBucketDef() {
         return cloudProps.getValue("file.default");
     }
 
     /**
      * 添加 bucket
-     * */
-    public void addBucket(String bucketName, Props props){
+     */
+    public void addBucket(String bucketName, Props props) {
         String endpoint = props.getProperty("endpoint");
 
         // TODO!!!
@@ -74,7 +75,7 @@ public class CloudFileServiceImpl implements CloudFileService {
 
     /**
      * 获取 bucket service
-     * */
+     */
     public CloudFileService getBucketService(String bucket) throws CloudFileException {
         CloudFileService tmp = bucketServiceMap.get(bucket);
 
@@ -117,7 +118,7 @@ public class CloudFileServiceImpl implements CloudFileService {
 
     /**
      * @return Result 主要表达是否成功；尽量不用它途
-     * */
+     */
     @Override
     public Result put(String bucket, String key, Media media) throws CloudFileException {
         if (Utils.isEmpty(bucket)) {
@@ -130,7 +131,7 @@ public class CloudFileServiceImpl implements CloudFileService {
 
     /**
      * @return Result 主要表达是否成功；尽量不用它途
-     * */
+     */
     @Override
     public Result delete(String bucket, String key) throws CloudFileException {
         if (Utils.isEmpty(bucket)) {
@@ -142,12 +143,12 @@ public class CloudFileServiceImpl implements CloudFileService {
     }
 
     @Override
-    public Result deleteList(String bucket, List<String> keyList) {
+    public Result deleteBatch(String bucket, Collection<String> keys) throws CloudFileException {
         if (Utils.isEmpty(bucket)) {
             bucket = getBucketDef();
         }
 
         CloudFileService tmp = getBucketService(bucket);
-        return tmp.deleteList(bucket, keyList);
+        return tmp.deleteBatch(bucket, keys);
     }
 }

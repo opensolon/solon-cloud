@@ -28,14 +28,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.time.Duration;
-import java.util.Date;
-import java.util.List;
+import java.util.Collection;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * CloudFileService 的本地实现
  *
  * @author 等風來再離開
+ * @author noear
  * @since 1.11
  */
 public class CloudFileServiceOfLocalImpl implements CloudFileService {
@@ -135,13 +135,13 @@ public class CloudFileServiceOfLocalImpl implements CloudFileService {
     }
 
     @Override
-    public Result deleteList(String bucket, List<String> keyList) throws CloudFileException {
+    public Result deleteBatch(String bucket, Collection<String> keys) throws CloudFileException {
         if (Utils.isEmpty(bucket)) {
             bucket = bucketDef;
         }
 
         try {
-            for (String key : keyList) {
+            for (String key : keys) {
                 File file = getFile(bucket, key);
                 if (file.exists()) {
                     if (file.delete() == false) {

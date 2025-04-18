@@ -29,6 +29,7 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.time.Duration;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -128,6 +129,28 @@ public class CloudFileServiceOfLocalImpl implements CloudFileService {
             }
 
             return Result.succeed(file.getAbsolutePath());
+        } catch (Throwable e) {
+            throw new CloudFileException(e);
+        }
+    }
+
+    @Override
+    public Result deleteList(String bucket, List<String> keyList) throws CloudFileException {
+        if (Utils.isEmpty(bucket)) {
+            bucket = bucketDef;
+        }
+
+        try {
+            for (String key : keyList) {
+                File file = getFile(bucket, key);
+                if (file.exists()) {
+                    if (file.delete() == false) {
+                        return Result.failure();
+                    }
+                }
+            }
+
+            return Result.succeed();
         } catch (Throwable e) {
             throw new CloudFileException(e);
         }

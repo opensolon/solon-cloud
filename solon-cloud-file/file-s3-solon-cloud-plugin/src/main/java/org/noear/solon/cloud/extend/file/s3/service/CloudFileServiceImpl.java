@@ -25,6 +25,7 @@ import org.noear.solon.core.handle.Result;
 
 import java.time.Duration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -138,5 +139,15 @@ public class CloudFileServiceImpl implements CloudFileService {
 
         CloudFileService tmp = getBucketService(bucket);
         return tmp.delete(bucket, key);
+    }
+
+    @Override
+    public Result deleteList(String bucket, List<String> keyList) {
+        if (Utils.isEmpty(bucket)) {
+            bucket = getBucketDef();
+        }
+
+        CloudFileService tmp = getBucketService(bucket);
+        return tmp.deleteList(bucket, keyList);
     }
 }

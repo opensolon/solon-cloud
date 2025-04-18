@@ -16,7 +16,9 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 
 import java.net.URL;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
     private final String bucketDef;
@@ -154,4 +156,29 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
             throw new CloudFileException(e);
         }
     }
+
+    @Override
+    public Result deleteList(String bucket, List<String> listKey) throws CloudFileException {
+        if (Utils.isEmpty(bucket)) {
+            bucket = bucketDef;
+        }
+
+        try {
+            List<ObjectIdentifier> objectIdentifiers = new ArrayList<>();
+            for (String key : listKey) {
+                objectIdentifiers.add(ObjectIdentifier.builder().key(key).build());
+            }
+            Delete delete = Delete.builder().objects(objectIdentifiers).build();
+            DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
+                    .bucket(bucket)
+                    .delete(delete)
+                    .build();
+            DeleteObjectsResponse resp = client.deleteObjects(deleteObjectsRequest);
+            return Result.succeed(resp);
+        } catch (Exception e) {
+            throw new CloudFileException(e);
+        }
+    }
+
+
 }

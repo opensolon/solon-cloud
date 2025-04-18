@@ -26,12 +26,8 @@ import org.noear.solon.net.http.HttpUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.IOException;
 import java.time.Duration;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 云端文件服务（aliyun oss）
@@ -199,6 +195,15 @@ public class CloudFileServiceOssImpl implements CloudFileService {
         } catch (Exception ex) {
             throw new CloudFileException(ex);
         }
+    }
+
+    @Override
+    public Result deleteBatch(String bucket, Collection<String> keys) throws CloudFileException {
+        for (String key : keys) {
+            delete(bucket, key);
+        }
+
+        return Result.succeed();
     }
 
     private String buildUrl(String bucket, String key) {

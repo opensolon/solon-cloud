@@ -29,7 +29,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.net.URI;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.Date;
+import java.util.Collection;
 
 /**
  * @author noear
@@ -207,6 +207,15 @@ public class CloudFileServiceOfS3HttpImpl implements CloudFileService {
         } catch (Exception ex) {
             throw new CloudFileException(ex);
         }
+    }
+
+    @Override
+    public Result deleteBatch(String bucket, Collection<String> keys) throws CloudFileException {
+        for (String key : keys) {
+            delete(bucket, key);
+        }
+
+        return Result.succeed();
     }
 
     private String buildUrl(String bucket, String key) {

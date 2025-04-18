@@ -25,7 +25,7 @@ import org.noear.solon.core.AppContext;
 import org.noear.solon.core.handle.Result;
 
 import java.time.Duration;
-import java.util.Date;
+import java.util.Collection;
 import java.util.Properties;
 
 /**
@@ -163,5 +163,22 @@ public class CloudFileServiceFastDFSImpl implements CloudFileService {
         } catch (Exception e) {
             throw new CloudFileException("Cloud file delete failure: " + key, e);
         }
+    }
+
+    @Override
+    public Result deleteBatch(String bucket, Collection<String> keys) throws CloudFileException {
+        if (Utils.isEmpty(bucket)) {
+            bucket = bucketDef;
+        }
+
+        for (String key : keys) {
+            try {
+                client.delete_file(bucket, key);
+            } catch (Exception e) {
+                throw new CloudFileException("Cloud file delete failure: " + key, e);
+            }
+        }
+
+        return Result.succeed();
     }
 }

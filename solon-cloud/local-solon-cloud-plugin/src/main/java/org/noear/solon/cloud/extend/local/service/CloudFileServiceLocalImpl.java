@@ -24,7 +24,7 @@ import org.noear.solon.core.util.IoUtil;
 
 import java.io.*;
 import java.time.Duration;
-import java.util.Date;
+import java.util.Collection;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -105,6 +105,24 @@ public class CloudFileServiceLocalImpl implements CloudFileService {
         } catch (Throwable e) {
             throw new CloudFileException(e);
         }
+    }
+
+    @Override
+    public Result deleteBatch(String bucket, Collection<String> keys) throws CloudFileException {
+        for (String key : keys) {
+            try {
+                File file = getFile(bucket, key);
+                if (file.exists()) {
+                    if (file.delete() == false) {
+                        return Result.failure();
+                    }
+                }
+            } catch (Throwable e) {
+                throw new CloudFileException(e);
+            }
+        }
+
+        return Result.succeed();
     }
 
     private File getFile(String bucket, String key) {

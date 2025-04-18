@@ -1,3 +1,18 @@
+/*
+ * Copyright 2017-2025 noear.org and authors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.noear.solon.cloud.extend.file.s3.service;
 
 import org.noear.solon.Utils;
@@ -17,9 +32,16 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collection;
 import java.util.List;
 
+/**
+ * CloudFileService 的S3实现
+ *
+ * @author 等風來再離開
+ * @author noear
+ * @since 1.11
+ */
 public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
     private final String bucketDef;
     private final S3Client client;
@@ -158,27 +180,28 @@ public class CloudFileServiceOfS3SdkImpl implements CloudFileService {
     }
 
     @Override
-    public Result deleteList(String bucket, List<String> listKey) throws CloudFileException {
+    public Result deleteBatch(String bucket, Collection<String> keys) throws CloudFileException {
         if (Utils.isEmpty(bucket)) {
             bucket = bucketDef;
         }
 
         try {
             List<ObjectIdentifier> objectIdentifiers = new ArrayList<>();
-            for (String key : listKey) {
+            for (String key : keys) {
                 objectIdentifiers.add(ObjectIdentifier.builder().key(key).build());
             }
+
             Delete delete = Delete.builder().objects(objectIdentifiers).build();
+
             DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
                     .bucket(bucket)
                     .delete(delete)
                     .build();
+
             DeleteObjectsResponse resp = client.deleteObjects(deleteObjectsRequest);
             return Result.succeed(resp);
         } catch (Exception e) {
             throw new CloudFileException(e);
         }
     }
-
-
 }

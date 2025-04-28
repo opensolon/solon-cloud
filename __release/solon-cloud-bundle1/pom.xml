@@ -25,9 +25,15 @@
         <module>../../solon-cloud-config-and-discovery/etcd-solon-cloud-plugin</module>
         <module>../../solon-cloud-config-and-discovery/polaris-solon-cloud-plugin</module>
 
-
         <module>../../solon-cloud-config-only/kubernetes-solon-cloud-plugin</module>
 
         <module>../../solon-cloud-discovery-only/jmdns-solon-cloud-plugin</module>
+
+        <module>../../solon-cloud/solon-cloud</module>
+        <module>../../solon-cloud/solon-cloud-eventplus</module>
+        <module>../../solon-cloud/solon-cloud-gateway</module>
+        <module>../../solon-cloud/solon-cloud-metrics</module>
+        <module>../../solon-cloud/solon-cloud-telemetry</module>
+        <module>../../solon-cloud/solon-cloud-tracing</module>
     </modules>
 </project>

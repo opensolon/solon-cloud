@@ -30,8 +30,11 @@
         <module>../../solon-cloud-breaker/sentinel-solon-cloud-plugin</module>
         <module>../../solon-cloud-breaker/semaphore-solon-cloud-plugin</module>
 
-        <module>../../solon-cloud-trace/opentracing-solon-cloud-plugin</module>
-        <module>../../solon-cloud-trace/jaeger-solon-cloud-plugin</module>
-        <module>../../solon-cloud-trace/zipkin-solon-cloud-plugin</module>
+
+        <module>../../solon-cloud_old/solon.cloud</module>
+        <module>../../solon-cloud_old/solon.cloud.eventplus</module>
+        <module>../../solon-cloud_old/solon.cloud.gateway</module>
+        <module>../../solon-cloud_old/solon.cloud.metrics</module>
+        <module>../../solon-cloud_old/solon.cloud.tracing</module>
     </modules>
 </project>

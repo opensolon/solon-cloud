@@ -26,7 +26,7 @@
 
         <module>../../solon-cloud-id/snowflake-id-solon-cloud-plugin</module>
 
-        <module>../../solon-cloud-config/kubernetes-solon-cloud-plugin</module>
+        <module>../../solon-cloud-config-only/kubernetes-solon-cloud-plugin</module>
 
         <module>../../solon-cloud-breaker/guava-solon-cloud-plugin</module>
         <module>../../solon-cloud-breaker/sentinel-solon-cloud-plugin</module>

@@ -25,7 +25,7 @@
         <module>../../solon-cloud-config-and-discovery/etcd-solon-cloud-plugin</module>
         <module>../../solon-cloud-config-and-discovery/polaris-solon-cloud-plugin</module>
 
-        <module>../../solon-cloud-discovery/jmdns-solon-cloud-plugin</module>
+        <module>../../solon-cloud-discovery-only/jmdns-solon-cloud-plugin</module>
         <module>../../solon-cloud-rpc/grpc-solon-cloud-plugin</module>
         <module>../../solon-cloud-rpc/thrift-solon-cloud-plugin</module>
         <module>../../solon-cloud-trace/opentracing-solon-cloud-plugin</module>

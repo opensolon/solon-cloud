@@ -31,5 +31,8 @@
         <module>../../solon-cloud-job/xxl-job-solon-cloud-plugin</module>
         <module>../../solon-cloud-job/quartz-solon-cloud-plugin</module>
         <module>../../solon-cloud-job/powerjob-solon-cloud-plugin</module>
+
+        <module>../../solon-cloud-rpc/grpc-solon-cloud-plugin</module>
+        <module>../../solon-cloud-rpc/thrift-solon-cloud-plugin</module>
     </modules>
 </project>

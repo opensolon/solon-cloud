@@ -1,6 +1,6 @@
 package demo;
 
-import features.gateway.sys.AppLogFilter;
+import features.gateway.sys.CloudGatewayLogFilter;
 import org.noear.solon.cloud.gateway.CloudGatewayFilter;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
 import org.noear.solon.cloud.gateway.exchange.ExFilterChain;
@@ -17,7 +17,7 @@ import java.io.IOException;
  * @author noear 2025/4/19 created
  */
 public class DemoFilter implements CloudGatewayFilter {
-    static final Logger log = LoggerFactory.getLogger(AppLogFilter.class);
+    static final Logger log = LoggerFactory.getLogger(DemoFilter.class);
 
     @Override
     public Completable doFilter(ExContext ctx, ExFilterChain chain) {

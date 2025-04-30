@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
  * @author noear 2025/3/29 created
  */
 @Component
-public class AppLogFilter implements CloudGatewayFilter {
-    static final Logger log = LoggerFactory.getLogger(AppLogFilter.class);
+public class CloudGatewayLogFilter implements CloudGatewayFilter {
+    static final Logger log = LoggerFactory.getLogger(CloudGatewayLogFilter.class);
 
     @Override
     public Completable doFilter(ExContext ctx, ExFilterChain chain) {

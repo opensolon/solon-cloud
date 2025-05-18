@@ -16,6 +16,7 @@
 package io.grpc.solon.integration;
 
 import io.grpc.*;
+import io.grpc.netty.NegotiationType;
 import io.grpc.solon.annotation.GrpcClient;
 import org.noear.solon.Utils;
 import org.noear.solon.core.LoadBalance;
@@ -56,9 +57,14 @@ public class GrpcChannelProxy extends Channel {
         Channel real = channelMap.computeIfAbsent(server, k -> {
             URI uri = URI.create(k);
             ManagedChannelBuilder builder = ManagedChannelBuilder
-                    .forAddress(uri.getHost(), uri.getPort())
-                    .usePlaintext();
-
+                    .forAddress(uri.getHost(), uri.getPort());
+            if (anno.negotiationType().equals(NegotiationType.TLS)) {
+                builder.useTransportSecurity();
+            } else if (anno.negotiationType().equals(NegotiationType.PLAINTEXT)) {
+                builder.usePlaintext();
+            } else {
+                builder.usePlaintext();
+            }
             return builder.build();
         });
 

@@ -16,6 +16,7 @@
 package io.grpc.solon.integration;
 
 import io.grpc.Channel;
+import io.grpc.stub.AbstractAsyncStub;
 import io.grpc.stub.AbstractBlockingStub;
 import io.grpc.stub.AbstractFutureStub;
 import io.grpc.solon.annotation.GrpcClient;
@@ -61,6 +62,12 @@ public class GrpcClientBeanInjector implements BeanInjector<GrpcClient> {
                 //异步
                 if (AbstractFutureStub.class.isAssignableFrom(vh.getType())) {
                     method = grpcClz.getDeclaredMethod("newFutureStub", Channel.class);
+                    grpcCli = method.invoke(null, new Object[]{grpcChannel});
+                }
+
+                //流式
+                if (AbstractAsyncStub.class.isAssignableFrom(vh.getType())) {
+                    method = grpcClz.getDeclaredMethod("newStub", Channel.class);
                     grpcCli = method.invoke(null, new Object[]{grpcChannel});
                 }
 

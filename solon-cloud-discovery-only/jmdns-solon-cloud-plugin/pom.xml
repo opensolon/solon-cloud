@@ -7,11 +7,12 @@
     <parent>
         <groupId>org.noear</groupId>
         <artifactId>solon-parent</artifactId>
-        <version>3.3.1</version>
+        <version>3.3.2</version>
         <relativePath/>
     </parent>
 
     <artifactId>jmdns-solon-cloud-plugin</artifactId>
+    <name>${project.artifactId}</name>
     <packaging>jar</packaging>
 
     <dependencies>

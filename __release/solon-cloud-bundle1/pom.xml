@@ -20,6 +20,7 @@
         <module>../../solon-cloud-config-and-discovery/local-solon-cloud-plugin</module>
         <module>../../solon-cloud-config-and-discovery/water-solon-cloud-plugin</module>
         <module>../../solon-cloud-config-and-discovery/consul-solon-cloud-plugin</module>
+        <module>../../solon-cloud-config-and-discovery/nacos3-solon-cloud-plugin</module>
         <module>../../solon-cloud-config-and-discovery/nacos2-solon-cloud-plugin</module>
         <module>../../solon-cloud-config-and-discovery/nacos-solon-cloud-plugin</module>
         <module>../../solon-cloud-config-and-discovery/zookeeper-solon-cloud-plugin</module>

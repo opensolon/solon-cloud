@@ -24,6 +24,7 @@ import org.noear.solon.cloud.gateway.exchange.ExFilter;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -91,14 +92,14 @@ public class Route implements Comparable<Route> {
      * 匹配检测器
      */
     public List<ExPredicate> getPredicates() {
-        return predicates;
+        return Collections.unmodifiableList(predicates);
     }
 
     /**
      * 过滤器
      */
     public List<RankEntity<ExFilter>> getFilters() {
-        return filters;
+        return Collections.unmodifiableList(filters);
     }
 
     /**

@@ -58,8 +58,7 @@ public class CloudGatewayHandler implements VxHandler {
      */
     @Override
     public void handle(HttpServerRequest request) {
-        ExContextImpl ctx = new ExContextImpl(request);
-        ctx.bind(configuration.routeFind(ctx));
+        ExContextImpl ctx = new ExContextImpl(request, configuration);
 
         if (ctx.route() == null) {
             //没有路由，采用经典接口处理

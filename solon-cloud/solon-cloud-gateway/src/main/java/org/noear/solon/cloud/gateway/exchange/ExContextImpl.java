@@ -22,6 +22,7 @@ import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.net.SocketAddress;
 import org.noear.solon.Utils;
+import org.noear.solon.cloud.gateway.CloudGatewayConfiguration;
 import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
 import org.noear.solon.cloud.gateway.route.Route;
 import org.noear.solon.core.handle.Context;
@@ -41,16 +42,20 @@ import java.util.Set;
 public class ExContextImpl implements ExContext {
     private final Map<String, Object> attrMap;
     private final HttpServerRequest rawRequest;
+    private final Route route;
 
     private ExNewRequest newRequest;
     private ExNewResponse newResponse;
 
-    private Route route;
     private URI targetNew;
 
-    public ExContextImpl(HttpServerRequest rawRequest) {
+    public ExContextImpl(HttpServerRequest rawRequest, CloudGatewayConfiguration configuration) {
         this.rawRequest = rawRequest;
         this.attrMap = new HashMap<>();
+
+        /// ////////
+
+        this.route = configuration.routeFind(this);
     }
 
     public HttpServerRequest rawRequest() {
@@ -75,17 +80,9 @@ public class ExContextImpl implements ExContext {
     ////////////////////////////////////////////////////
 
     /**
-     * 绑定路由信息
-     */
-    public void bind(Route route) {
-        if (route != null) {
-            this.route = route;
-        }
-    }
-
-    /**
      * 路由
      */
+    @Override
     public Route route() {
         return route;
     }

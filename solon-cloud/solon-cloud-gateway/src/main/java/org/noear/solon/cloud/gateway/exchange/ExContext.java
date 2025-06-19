@@ -21,6 +21,7 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.net.SocketAddress;
 import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
+import org.noear.solon.cloud.gateway.route.Route;
 import org.noear.solon.core.handle.Context;
 
 import java.net.URI;
@@ -42,6 +43,11 @@ public interface ExContext {
      * 属性设置
      */
     void attrSet(String key, Object value);
+
+    /**
+     * 路由
+     */
+    Route route();
 
     /**
      * 路由目标

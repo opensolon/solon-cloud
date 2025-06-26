@@ -61,8 +61,6 @@ public class CloudConfigServiceNacosImp implements CloudConfigService {
             group = Solon.cfg().appGroup();
         }
 
-        //String getConfig(String dataId, String group, long timeoutMs)
-
         try {
             group = groupReview(group);
             String value = real.getConfig(name, group, 3000);

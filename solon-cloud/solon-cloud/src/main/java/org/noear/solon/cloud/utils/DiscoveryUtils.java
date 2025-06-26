@@ -17,6 +17,7 @@ package org.noear.solon.cloud.utils;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudClient;
+import org.noear.solon.cloud.model.Config;
 import org.noear.solon.cloud.model.Discovery;
 
 /**
@@ -36,7 +37,11 @@ public class DiscoveryUtils {
 
         if (CloudClient.config() != null) {
             //前缀在前，方便相同配置在一起
-            String agent = CloudClient.config().pull(group, "discovery.agent." + service).value();
+            Config agentConfig = CloudClient.config().pull(group, "discovery.agent." + service);
+            String agent = null;
+            if (agentConfig != null) {
+                agent = agentConfig.value();
+            }
 
             if (Utils.isNotEmpty(agent)) {
                 discovery.agent(agent);

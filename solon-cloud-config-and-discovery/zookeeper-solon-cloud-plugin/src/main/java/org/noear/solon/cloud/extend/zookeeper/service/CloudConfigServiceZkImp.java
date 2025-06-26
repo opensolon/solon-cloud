@@ -45,15 +45,15 @@ public class CloudConfigServiceZkImp implements CloudConfigService {
     }
 
     @Override
-    public Config pull(String group, String key) {
+    public Config pull(String group, String name) {
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
         }
 
         String value = client.getNodeData(
-                String.format("%s/%s/%s", PATH_ROOT, group, key));
+                String.format("%s/%s/%s", PATH_ROOT, group, name));
 
-        return new Config(group, key, value, 0);
+        return new Config(group, name, value, 0);
     }
 
     @Override

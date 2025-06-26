@@ -78,7 +78,7 @@ public class CloudConfigServiceConsulImpl extends TimerTask implements CloudConf
      * 获取配置
      */
     @Override
-    public Config pull(String group, String key) {
+    public Config pull(String group, String name) {
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
 
@@ -87,7 +87,7 @@ public class CloudConfigServiceConsulImpl extends TimerTask implements CloudConf
             }
         }
 
-        String cfgKey = group + "/" + key;
+        String cfgKey = group + "/" + name;
 
         GetValue newV = client.getKVValue(cfgKey, token).getValue();
 
@@ -95,7 +95,7 @@ public class CloudConfigServiceConsulImpl extends TimerTask implements CloudConf
             Config oldV = configMap.get(cfgKey);
 
             if (oldV == null) {
-                oldV = new Config(group, key, newV.getDecodedValue(), newV.getModifyIndex());
+                oldV = new Config(group, name, newV.getDecodedValue(), newV.getModifyIndex());
                 configMap.put(cfgKey, oldV);
             } else if (newV.getModifyIndex() > oldV.version()) {
                 oldV.updateValue(newV.getDecodedValue(), newV.getModifyIndex());
@@ -103,7 +103,7 @@ public class CloudConfigServiceConsulImpl extends TimerTask implements CloudConf
 
             return oldV;
         } else {
-            return null;
+            return new Config(group, name, null, 0);
         }
     }
 

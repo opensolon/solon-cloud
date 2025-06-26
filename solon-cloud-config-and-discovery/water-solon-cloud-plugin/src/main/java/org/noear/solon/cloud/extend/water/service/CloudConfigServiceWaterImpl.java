@@ -92,7 +92,7 @@ public class CloudConfigServiceWaterImpl extends TimerTask implements CloudConfi
     }
 
     @Override
-    public Config pull(String group, String key) {
+    public Config pull(String group, String name) {
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
 
@@ -101,13 +101,13 @@ public class CloudConfigServiceWaterImpl extends TimerTask implements CloudConfi
             }
         }
 
-        ConfigM cfg = WaterClient.Config.get(group, key);
+        ConfigM cfg = WaterClient.Config.get(group, name);
 
-        String cfgKey = group + "/" + key;
+        String cfgKey = group + "/" + name;
         Config config = configMap.get(cfgKey);
 
         if (config == null) {
-            config = new Config(group, key, cfg.value, cfg.lastModified);
+            config = new Config(group, name, cfg.value, cfg.lastModified);
             configMap.put(cfgKey, config);
         } else if (cfg.lastModified > config.version()) {
             config.updateValue(cfg.value, cfg.lastModified);

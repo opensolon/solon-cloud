@@ -57,17 +57,17 @@ public class CloudConfigServiceK8sImpl extends TimerTask implements CloudConfigS
     public Config pull(String group, String name) {
         try {
             V1ConfigMap v1ConfigMap = configApi.readNamespacedConfigMap(name, group, null);
+            String value = null;
 
-            if(v1ConfigMap == null){
-                return null;
+            if(v1ConfigMap != null){
+                StringBuilder kvs = new StringBuilder();
+                v1ConfigMap.getData().forEach((k, v) -> {
+                    kvs.append(k).append("=").append(v).append("\n");
+                });
+                value = kvs.toString();
             }
 
-            StringBuilder kvs = new StringBuilder();
-            v1ConfigMap.getData().forEach((k, v) -> {
-                kvs.append(k).append("=").append(v).append("\n");
-            });
-
-            return new Config(group, name, kvs.toString(), 0);
+            return new Config(group, name,value, 0);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

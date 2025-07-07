@@ -1,3 +1,8 @@
+### v3.4.0
+
+* 优化 solon-cloud DiscoveryUtils:tryLoadAgent 兼容性
+* 优化 solon-cloud Config pull 方法，确保不输出 null
+
 ### v3.3.3
 
 * 新增 nacos3-solon-cloud-plugin 插件

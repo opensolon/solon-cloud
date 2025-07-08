@@ -26,6 +26,7 @@ import org.noear.solon.net.http.HttpUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URLEncoder;
 import java.time.Duration;
 import java.util.*;
 
@@ -103,7 +104,25 @@ public class CloudFileServiceOssImpl implements CloudFileService {
 
     @Override
     public String getTempUrl(String bucket, String key, Duration duration) throws CloudFileException, UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        if (Utils.isEmpty(bucket)) {
+            bucket = bucketDef;
+        }
+
+        try {
+            long expires = System.currentTimeMillis() / 1000 + duration.getSeconds();
+
+            String objPath = "/" + bucket + "/" + key;
+            String url = buildUrl(bucket, key);
+
+            String signData = buildSignData("GET", Long.toString(expires), objPath, null);
+            String signature = hmacSha1(signData, secretKey);
+
+            String encodedSignature = URLEncoder.encode(signature, CHARSET_UTF8);
+
+            return url + "?Expires=" + expires + "&OSSAccessKeyId=" + accessKey + "&Signature=" + encodedSignature;
+        } catch (Exception ex) {
+            throw new CloudFileException(ex);
+        }
     }
 
     @Override

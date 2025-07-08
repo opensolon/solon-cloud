@@ -15,10 +15,6 @@
  */
 package org.noear.solon.cloud.extend.aliyun.oss.service;
 
-import com.aliyun.oss.ClientBuilderConfiguration;
-import com.aliyun.oss.OSS;
-import com.aliyun.oss.OSSClientBuilder;
-import com.aliyun.oss.common.comm.Protocol;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.exception.CloudFileException;
@@ -30,6 +26,7 @@ import org.noear.solon.net.http.HttpUtils;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.net.URLEncoder;
 import java.time.Duration;
 import java.util.*;
 
@@ -42,7 +39,6 @@ import java.util.*;
 public class CloudFileServiceOssImpl implements CloudFileService {
     private static final String CHARSET_UTF8 = "utf8";
     private static final String ALGORITHM = "HmacSHA1";
-    public static OSS client;
 
     private final String bucketDef;
 
@@ -72,26 +68,6 @@ public class CloudFileServiceOssImpl implements CloudFileService {
 
         this.accessKey = accessKey;
         this.secretKey = secretKey;
-    }
-
-    public OSS getClient() {
-        if (client != null) {
-            return client;
-        }
-        synchronized (this) {
-            if (client != null) {
-                return client;
-            }
-            ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
-            clientBuilderConfiguration.setSupportCname(true);
-            clientBuilderConfiguration.setProtocol(Protocol.HTTPS);
-            clientBuilderConfiguration.setMaxConnections(200);
-            clientBuilderConfiguration.setConnectionTimeout(5000);
-            clientBuilderConfiguration.setMaxErrorRetry(3);
-            OSS ossClient = new OSSClientBuilder().build(endpoint, accessKey, secretKey, clientBuilderConfiguration);
-            CloudFileServiceOssImpl.client = ossClient;
-            return ossClient;
-        }
     }
 
 
@@ -131,8 +107,22 @@ public class CloudFileServiceOssImpl implements CloudFileService {
         if (Utils.isEmpty(bucket)) {
             bucket = bucketDef;
         }
-        Date expiration = new Date(System.currentTimeMillis() + duration.getSeconds() * 1000);
-        return getClient().generatePresignedUrl(bucket, key, expiration).toString();
+
+        try {
+            long expires = System.currentTimeMillis() / 1000 + duration.getSeconds();
+
+            String objPath = "/" + bucket + "/" + key;
+            String url = buildUrl(bucket, key);
+
+            String signData = buildSignData("GET", Long.toString(expires), objPath, null);
+            String signature = hmacSha1(signData, secretKey);
+
+            String encodedSignature = URLEncoder.encode(signature, CHARSET_UTF8);
+
+            return url + "?Expires=" + expires + "&OSSAccessKeyId=" + accessKey + "&Signature=" + encodedSignature;
+        } catch (Exception ex) {
+            throw new CloudFileException(ex);
+        }
     }
 
     @Override

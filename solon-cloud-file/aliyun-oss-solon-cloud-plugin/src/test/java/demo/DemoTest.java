@@ -16,16 +16,15 @@
 package demo;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.noear.solon.cloud.CloudClient;
 import org.noear.solon.cloud.model.Media;
 import org.noear.solon.core.handle.Result;
-import org.noear.solon.test.SolonJUnit5Extension;
 import org.noear.solon.test.SolonTest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Duration;
 
 /**
  * @author noear 2021/10/18 created
@@ -59,5 +58,12 @@ public class DemoTest {
         assert result.getCode() == 200;
 
         System.out.println("times: " + (System.currentTimeMillis() - start));
+    }
+
+    @Test
+    public void testGetTempUrl() {
+        CloudClient.file().put(key, media);
+        String url = CloudClient.file().getTempUrl(key, Duration.ofMinutes(10));
+        System.out.println(url);
     }
 }

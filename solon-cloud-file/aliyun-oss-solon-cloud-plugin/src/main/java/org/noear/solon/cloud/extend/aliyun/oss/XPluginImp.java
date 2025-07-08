@@ -39,4 +39,11 @@ public class XPluginImp implements Plugin {
             CloudManager.register(new CloudFileServiceOssImpl(cloudProps));
         }
     }
+
+    @Override
+    public void stop() {
+        if (CloudFileServiceOssImpl.client != null) {
+            CloudFileServiceOssImpl.client.shutdown();
+        }
+    }
 }

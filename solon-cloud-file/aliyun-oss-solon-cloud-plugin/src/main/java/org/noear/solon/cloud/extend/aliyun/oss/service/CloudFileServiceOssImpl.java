@@ -15,6 +15,10 @@
  */
 package org.noear.solon.cloud.extend.aliyun.oss.service;
 
+import com.aliyun.oss.ClientBuilderConfiguration;
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.OSSClientBuilder;
+import com.aliyun.oss.common.comm.Protocol;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.exception.CloudFileException;
@@ -38,6 +42,7 @@ import java.util.*;
 public class CloudFileServiceOssImpl implements CloudFileService {
     private static final String CHARSET_UTF8 = "utf8";
     private static final String ALGORITHM = "HmacSHA1";
+    public static OSS client;
 
     private final String bucketDef;
 
@@ -67,6 +72,26 @@ public class CloudFileServiceOssImpl implements CloudFileService {
 
         this.accessKey = accessKey;
         this.secretKey = secretKey;
+    }
+
+    public OSS getClient() {
+        if (client != null) {
+            return client;
+        }
+        synchronized (this) {
+            if (client != null) {
+                return client;
+            }
+            ClientBuilderConfiguration clientBuilderConfiguration = new ClientBuilderConfiguration();
+            clientBuilderConfiguration.setSupportCname(true);
+            clientBuilderConfiguration.setProtocol(Protocol.HTTPS);
+            clientBuilderConfiguration.setMaxConnections(200);
+            clientBuilderConfiguration.setConnectionTimeout(5000);
+            clientBuilderConfiguration.setMaxErrorRetry(3);
+            OSS ossClient = new OSSClientBuilder().build(endpoint, accessKey, secretKey, clientBuilderConfiguration);
+            CloudFileServiceOssImpl.client = ossClient;
+            return ossClient;
+        }
     }
 
 
@@ -103,7 +128,11 @@ public class CloudFileServiceOssImpl implements CloudFileService {
 
     @Override
     public String getTempUrl(String bucket, String key, Duration duration) throws CloudFileException, UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        if (Utils.isEmpty(bucket)) {
+            bucket = bucketDef;
+        }
+        Date expiration = new Date(System.currentTimeMillis() + duration.getSeconds() * 1000);
+        return getClient().generatePresignedUrl(bucket, key, expiration).toString();
     }
 
     @Override

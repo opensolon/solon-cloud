@@ -26,6 +26,7 @@ import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
 import org.noear.solon.core.util.LogUtil;
 import org.noear.solon.core.util.ResourceUtil;
+import org.noear.solon.core.util.RunUtil;
 
 /**
  * @author noear
@@ -60,6 +61,9 @@ public class XPluginImp implements Plugin {
         }
 
         if (cloudProps.getJobEnable()) {
+            //预热调度线程池
+            RunUtil.preheat();
+
             CloudManager.register(new CloudJobServiceLocalImpl());
 
             context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, () -> {

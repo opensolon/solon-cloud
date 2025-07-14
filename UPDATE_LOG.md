@@ -1,3 +1,9 @@
+### v3.4.1
+
+* 添加 aliyun-oss-solon-cloud-plugin 阿里云oss获取临时文件url逻辑
+* 优化 RunUtil.parallel（已弃用） 改用 RunUtil.async
+* 优化 local-solon-cloud-plugin 在启动时，预热 RunUtil
+
 ### v3.4.0
 
 * 优化 solon-cloud DiscoveryUtils:tryLoadAgent 兼容性

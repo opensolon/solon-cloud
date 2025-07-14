@@ -42,7 +42,7 @@ public class MqttMessageListenerImpl implements IMqttMessageListener {
         MqttMessageHandler handler = new MqttMessageHandler(clientManager, eventChannelName, eventHandler, topic, message);
 
         if (clientManager.getAsync()) {
-            RunUtil.parallel(handler);
+            RunUtil.async(handler);
         } else {
             handler.run();
         }

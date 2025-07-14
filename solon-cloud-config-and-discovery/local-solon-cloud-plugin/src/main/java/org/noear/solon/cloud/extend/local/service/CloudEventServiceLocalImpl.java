@@ -65,7 +65,7 @@ public class CloudEventServiceLocalImpl implements CloudEventServicePlus {
             RunUtil.delay(new EventRunnable(this, event), scheduled_millis);
         } else {
             //异步执行
-            RunUtil.parallel(() -> {
+            RunUtil.async(() -> {
                 try {
                     //派发
                     distribute(event);

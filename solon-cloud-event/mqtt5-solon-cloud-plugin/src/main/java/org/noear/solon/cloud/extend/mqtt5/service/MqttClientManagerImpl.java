@@ -137,7 +137,7 @@ public class MqttClientManagerImpl implements MqttClientManager, MqttCallback {
         if (eventHandler != null) {
             MqttMessageHandler handler = new MqttMessageHandler(this, eventChannelName, eventHandler, topic, message);
             if (getAsync()) {
-                RunUtil.parallel(handler);
+                RunUtil.async(handler);
             } else {
                 handler.run();
             }

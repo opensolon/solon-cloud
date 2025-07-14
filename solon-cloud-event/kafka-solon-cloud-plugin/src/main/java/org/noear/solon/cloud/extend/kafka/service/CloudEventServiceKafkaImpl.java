@@ -180,7 +180,7 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
             consumer.subscribe(observerManger.topicAll());
 
             //开始拉取
-            consumerFuture = RunUtil.parallel(this::subscribePull);
+            consumerFuture = RunUtil.async(this::subscribePull);
         }
     }
 
@@ -216,7 +216,7 @@ public class CloudEventServiceKafkaImpl implements CloudEventServicePlus, Closea
 
             consumerFuture = RunUtil.delay(this::subscribePull, ExpirationUtils.getExpiration(times));
         } else {
-            consumerFuture = RunUtil.parallel(this::subscribePull);
+            consumerFuture = RunUtil.async(this::subscribePull);
         }
     }
 

@@ -1,3 +1,8 @@
+### v3.4.3
+
+* 修正 file-s3-solon-cloud-plugin 文件分隔符
+* 修正 local-solon-cloud-plugin 文件分隔符
+
 ### v3.4.1
 
 * 添加 aliyun-oss-solon-cloud-plugin 阿里云oss获取临时文件url逻辑

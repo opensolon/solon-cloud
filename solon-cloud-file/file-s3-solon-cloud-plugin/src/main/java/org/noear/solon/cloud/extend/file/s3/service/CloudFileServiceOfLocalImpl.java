@@ -167,19 +167,15 @@ public class CloudFileServiceOfLocalImpl implements CloudFileService {
 
         try {
             if (dir.exists() == false) {
-                if (dir.exists() == false) {
-                    dir.mkdirs();
-                }
+                dir.mkdirs();
             }
 
-            int last = key.lastIndexOf('/');
+            int last = key.lastIndexOf(File.separator);
             if (last > 0) {
                 String dir2Str = key.substring(0, last);
                 File dir2Tmp = new File(dir, dir2Str);
                 if (dir2Tmp.exists() == false) {
-                    if (dir2Tmp.exists() == false) {
-                        dir2Tmp.mkdirs();
-                    }
+                    dir2Tmp.mkdirs();
                 }
             }
         } finally {

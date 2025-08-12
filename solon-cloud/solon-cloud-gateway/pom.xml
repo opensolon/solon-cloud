@@ -17,7 +17,7 @@
     <dependencies>
         <dependency>
             <groupId>org.noear</groupId>
-            <artifactId>solon-boot-vertx</artifactId>
+            <artifactId>solon-server-vertx</artifactId>
         </dependency>
 
         <dependency>

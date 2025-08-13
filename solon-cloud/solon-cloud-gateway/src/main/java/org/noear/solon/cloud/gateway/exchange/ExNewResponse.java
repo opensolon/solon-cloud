@@ -17,7 +17,7 @@ package org.noear.solon.cloud.gateway.exchange;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.streams.ReadStream;
-import org.noear.solon.boot.web.Constants;
+import org.noear.solon.server.handle.HeaderNames;
 import org.noear.solon.cloud.gateway.exchange.impl.ExBodyOfBuffer;
 import org.noear.solon.cloud.gateway.exchange.impl.ExBodyOfStream;
 import org.noear.solon.core.util.MultiMap;
@@ -78,7 +78,7 @@ public class ExNewResponse {
      */
     public ExNewResponse redirect(int code, String url) {
         status(code);
-        header(Constants.HEADER_LOCATION, url);
+        header(HeaderNames.HEADER_LOCATION, url);
         return this;
     }
 

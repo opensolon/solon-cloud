@@ -41,7 +41,7 @@ public class CloudGatewayPlugin implements Plugin {
         VxHandlerSupplierDefault webHandlerSupplier = new VxHandlerSupplierDefault();
         CloudGatewayHandler cloudGateway = new CloudGatewayHandler(webHandlerSupplier.get());
 
-        //替代 solon.boot.vertx 的默认处理
+        //替代 solon.server.vertx 的默认处理
         CloudGatewayHandlerSupplier gatewayHandlerSupplier = new CloudGatewayHandlerSupplier(cloudGateway);
         context.wrapAndPut(VxHandlerSupplier.class, gatewayHandlerSupplier);
 

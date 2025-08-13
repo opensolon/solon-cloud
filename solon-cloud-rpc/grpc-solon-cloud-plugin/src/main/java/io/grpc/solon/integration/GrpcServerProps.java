@@ -15,7 +15,7 @@
  */
 package io.grpc.solon.integration;
 
-import org.noear.solon.boot.prop.impl.BaseServerProps;
+import org.noear.solon.server.prop.impl.BaseServerProps;
 
 /**
  * @author noear

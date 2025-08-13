@@ -49,6 +49,20 @@ public class HeaderPredicateTest {
         Assertions.assertTrue(test);
     }
 
+    @Test
+    public void testMatchesHeader2() {
+        ExPredicate header = RouteFactoryManager.getPredicate("Header", "X-Request-Id, abc");
+        Assertions.assertNotNull(header);
+
+        boolean test = header.test(new ExContextEmpty() {
+            @Override
+            public String rawHeader(String key) {
+                return "abc";
+            }
+        });
+        Assertions.assertTrue(test);
+    }
+
 
     @Test
     public void testNotMatchesHeader() {

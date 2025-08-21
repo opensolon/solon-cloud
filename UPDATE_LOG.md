@@ -1,6 +1,6 @@
 ### 待定
 
-* solon-cloud-gateway 添加 ws 协议支持
+* solon-cloud-gateway 增加 websocket 的转发支持（协议头：ws）
 
 ### v3.4.3
 

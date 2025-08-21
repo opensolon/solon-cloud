@@ -1,3 +1,7 @@
+### 待定
+
+* solon-cloud-gateway 添加 ws 协议支持
+
 ### v3.4.3
 
 * 修正 file-s3-solon-cloud-plugin 文件分隔符

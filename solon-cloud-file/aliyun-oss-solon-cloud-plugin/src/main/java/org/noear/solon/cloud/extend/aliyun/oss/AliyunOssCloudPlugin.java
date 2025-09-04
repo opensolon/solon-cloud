@@ -26,7 +26,7 @@ import org.noear.solon.core.Plugin;
  * @author noear
  * @since 1.3
  */
-public class XPluginImp implements Plugin {
+public class AliyunOssCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
         CloudProps cloudProps = new CloudProps(context,"aliyun.oss");

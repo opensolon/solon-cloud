@@ -28,7 +28,7 @@ import java.io.IOException;
  * @author noear
  * @since 1.10
  */
-public class XPluginImp implements Plugin {
+public class JmdnsCloudPlugin implements Plugin {
     CloudDiscoveryServiceJmdnsImpl discoveryServiceJmdnsImpl;
 
     @Override

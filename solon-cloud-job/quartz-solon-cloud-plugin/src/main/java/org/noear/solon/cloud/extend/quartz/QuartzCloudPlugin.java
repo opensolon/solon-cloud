@@ -27,7 +27,7 @@ import org.noear.solon.core.event.AppLoadEndEvent;
  * @author noear
  * @since 1.11
  */
-public class XPluginImp implements Plugin {
+public class QuartzCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) throws Throwable {
         CloudProps cloudProps = new CloudProps(context, "quartz");

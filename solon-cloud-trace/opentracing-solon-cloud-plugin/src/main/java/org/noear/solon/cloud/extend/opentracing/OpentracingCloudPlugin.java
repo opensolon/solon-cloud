@@ -25,7 +25,7 @@ import org.noear.solon.core.Plugin;
  * @author noear
  * @since 1.4
  */
-public class XPluginImp implements Plugin {
+public class OpentracingCloudPlugin implements Plugin {
 
     @Override
     public void start(AppContext context) {

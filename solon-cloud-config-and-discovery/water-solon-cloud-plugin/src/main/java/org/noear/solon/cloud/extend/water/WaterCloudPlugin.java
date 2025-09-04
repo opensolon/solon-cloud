@@ -41,12 +41,12 @@ import java.util.Timer;
  * @author noear
  * @since 1.2
  */
-public class XPluginImp implements Plugin {
+public class WaterCloudPlugin implements Plugin {
     private Timer clientTimer = new Timer();
     private CloudProps cloudProps;
     private boolean inited = false;
 
-    public XPluginImp() {
+    public WaterCloudPlugin() {
         if (initDo(Solon.context()) == false) {
             return;
         }

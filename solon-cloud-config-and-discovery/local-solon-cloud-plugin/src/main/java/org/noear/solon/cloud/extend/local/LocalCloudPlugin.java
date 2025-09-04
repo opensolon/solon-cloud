@@ -32,7 +32,7 @@ import org.noear.solon.core.util.RunUtil;
  * @author noear
  * @since 1.11
  */
-public class XPluginImp implements Plugin {
+public class LocalCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) throws Throwable {
         CloudProps cloudProps = new CloudProps(context,"local");

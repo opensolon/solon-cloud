@@ -26,7 +26,7 @@ import org.noear.solon.core.Plugin;
  * @author noear
  * @since 1.7
  */
-public class XPluginImp implements Plugin {
+public class JaegerCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
         CloudProps cloudProps = new CloudProps(context, "jaeger");

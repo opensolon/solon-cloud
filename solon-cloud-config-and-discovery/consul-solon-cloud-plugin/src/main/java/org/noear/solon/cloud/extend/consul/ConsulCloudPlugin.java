@@ -31,7 +31,7 @@ import java.util.*;
  * @author 夜の孤城
  * @since 1.2
  * */
-public class XPluginImp implements Plugin {
+public class ConsulCloudPlugin implements Plugin {
     private Timer clientTimer = new Timer();
 
 

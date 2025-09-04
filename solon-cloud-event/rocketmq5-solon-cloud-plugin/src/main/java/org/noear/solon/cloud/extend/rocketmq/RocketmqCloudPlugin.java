@@ -27,7 +27,7 @@ import org.noear.solon.core.Plugin;
  * @author noear
  * @since 1.2
  */
-public class XPluginImp implements Plugin {
+public class RocketmqCloudPlugin implements Plugin {
     CloudEventServiceRocketmqImp eventService;
 
     @Override

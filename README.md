@@ -4,7 +4,7 @@
 Solon
 </h1>
 <p align="center">
-	<strong>面向全场景的 Java 企业级应用开发框架</strong>
+	<strong>面向全场景的 Java 企业级“分布式”应用开发套件</strong>
     <br/>
     <strong>克制、高效、开放</strong>
 </p>

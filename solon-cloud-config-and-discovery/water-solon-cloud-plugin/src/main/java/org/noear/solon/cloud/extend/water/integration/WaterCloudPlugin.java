@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.water;
+package org.noear.solon.cloud.extend.water.integration;
 
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
@@ -21,6 +21,7 @@ import org.noear.solon.cloud.CloudClient;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.annotation.EventLevel;
+import org.noear.solon.cloud.extend.water.WaterProps;
 import org.noear.solon.cloud.extend.water.integration.http.*;
 import org.noear.solon.cloud.extend.water.integration.msg.HandlerCacheUpdate;
 import org.noear.solon.cloud.extend.water.integration.msg.HandlerConfigUpdate;

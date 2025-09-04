@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.consul;
+package org.noear.solon.cloud.extend.consul.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudClient;

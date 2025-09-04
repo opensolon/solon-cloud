@@ -13,32 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.polaris;
+package org.noear.solon.cloud.extend.etcd.integration;
 
+import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudClient;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.polaris.service.CloudConfigServicePolarisImp;
-import org.noear.solon.cloud.extend.polaris.service.CloudDiscoveryServicePolarisImp;
+import org.noear.solon.cloud.extend.etcd.service.CloudConfigServiceEtcdImpl;
+import org.noear.solon.cloud.extend.etcd.service.CloudDiscoveryServiceEtcdImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
 
 /**
- * @author 何荣振
- * @since 1.11
+ * @author luke
+ * @since 2.2
  */
-public class PolarisCloudPlugin implements Plugin {
-    CloudConfigServicePolarisImp cloudConfigServicePolarisImp;
-    CloudDiscoveryServicePolarisImp cloudDiscoveryServicePolarisImp;
+public class EtcdCloudPlugin implements Plugin {
+
+    CloudConfigServiceEtcdImpl configServiceEtcdImp;
+    CloudDiscoveryServiceEtcdImpl discoveryServiceEtcdImp;
 
     @Override
     public void start(AppContext context) throws Throwable {
-        CloudProps cloudProps = new CloudProps(context,"polaris");
+        CloudProps cloudProps = new CloudProps(context,"etcd");
+
+        if (Utils.isEmpty(cloudProps.getServer())) {
+            return;
+        }
 
         //1.登记配置服务
         if (cloudProps.getConfigEnable()) {
-            cloudConfigServicePolarisImp = new CloudConfigServicePolarisImp(cloudProps);
-            CloudManager.register(cloudConfigServicePolarisImp);
+            configServiceEtcdImp = new CloudConfigServiceEtcdImpl(cloudProps);
+            CloudManager.register(configServiceEtcdImp);
 
             //1.1.加载配置
             CloudClient.configLoad(cloudProps.getConfigLoad());
@@ -46,19 +52,19 @@ public class PolarisCloudPlugin implements Plugin {
 
         //2.登记发现服务
         if (cloudProps.getDiscoveryEnable()) {
-            cloudDiscoveryServicePolarisImp = new CloudDiscoveryServicePolarisImp(cloudProps);
-            CloudManager.register(cloudDiscoveryServicePolarisImp);
+            discoveryServiceEtcdImp = new CloudDiscoveryServiceEtcdImpl(cloudProps);
+            CloudManager.register(discoveryServiceEtcdImp);
         }
     }
 
     @Override
     public void stop() throws Throwable {
-        if (cloudConfigServicePolarisImp != null) {
-            cloudConfigServicePolarisImp.close();
+        if (configServiceEtcdImp != null) {
+            configServiceEtcdImp.close();
         }
 
-        if (cloudDiscoveryServicePolarisImp != null) {
-            cloudDiscoveryServicePolarisImp.close();
+        if (discoveryServiceEtcdImp != null) {
+            discoveryServiceEtcdImp.close();
         }
     }
 }

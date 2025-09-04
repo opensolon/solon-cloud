@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.semaphore;
+package org.noear.solon.cloud.extend.guava.integration;
 
 import org.noear.solon.cloud.CloudManager;
-import org.noear.solon.cloud.extend.semaphore.impl.CloudBreakerServiceImpl;
+import org.noear.solon.cloud.extend.guava.impl.CloudBreakerServiceImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
 
@@ -24,7 +24,7 @@ import org.noear.solon.core.Plugin;
  * @author noear
  * @since 1.3
  */
-public class CloudBreakerSemaphorePlugin implements Plugin {
+public class CloudBreakerGuavaPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
         CloudManager.register(new CloudBreakerServiceImpl());

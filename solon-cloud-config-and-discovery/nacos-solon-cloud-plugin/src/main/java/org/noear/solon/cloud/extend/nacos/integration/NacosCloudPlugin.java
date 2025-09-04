@@ -13,29 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.zookeeper;
+package org.noear.solon.cloud.extend.nacos.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudClient;
-import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.zookeeper.service.CloudConfigServiceZkImp;
-import org.noear.solon.cloud.extend.zookeeper.service.CloudDiscoveryServiceZkImp;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
+import org.noear.solon.cloud.CloudManager;
+import org.noear.solon.cloud.extend.nacos.service.CloudConfigServiceNacosImp;
+import org.noear.solon.cloud.extend.nacos.service.CloudDiscoveryServiceNacosImp;
 
 /**
  * @author noear
- * @since 1.3
+ * @since 1.2
  */
-public class ZookeeperCloudPlugin implements Plugin {
-
-    CloudConfigServiceZkImp configServiceZkImp;
-    CloudDiscoveryServiceZkImp discoveryServiceZkImp;
-
+public class NacosCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context,"zookeeper");
+        CloudProps cloudProps = new CloudProps(context,"nacos");
 
         if (Utils.isEmpty(cloudProps.getServer())) {
             return;
@@ -43,8 +39,7 @@ public class ZookeeperCloudPlugin implements Plugin {
 
         //1.登记配置服务
         if (cloudProps.getConfigEnable()) {
-            configServiceZkImp = new CloudConfigServiceZkImp(cloudProps);
-            CloudManager.register(configServiceZkImp);
+            CloudManager.register(new CloudConfigServiceNacosImp(cloudProps));
 
             //1.1.加载配置
             CloudClient.configLoad(cloudProps.getConfigLoad());
@@ -52,19 +47,7 @@ public class ZookeeperCloudPlugin implements Plugin {
 
         //2.登记发现服务
         if (cloudProps.getDiscoveryEnable()) {
-            discoveryServiceZkImp = new CloudDiscoveryServiceZkImp(cloudProps);
-            CloudManager.register(discoveryServiceZkImp);
-        }
-    }
-
-    @Override
-    public void stop() throws Throwable {
-        if (configServiceZkImp != null) {
-            configServiceZkImp.close();
-        }
-
-        if (discoveryServiceZkImp != null) {
-            discoveryServiceZkImp.close();
+            CloudManager.register(new CloudDiscoveryServiceNacosImp(cloudProps));
         }
     }
 }

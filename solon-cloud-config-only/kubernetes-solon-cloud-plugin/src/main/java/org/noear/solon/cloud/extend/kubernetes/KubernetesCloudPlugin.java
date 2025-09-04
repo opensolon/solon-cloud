@@ -31,7 +31,7 @@ import java.util.Timer;
  * @author noear
  * @since 1.10
  */
-public class XPluginImp implements Plugin {
+public class KubernetesCloudPlugin implements Plugin {
     private Timer clientTimer = new Timer();
 
     /*

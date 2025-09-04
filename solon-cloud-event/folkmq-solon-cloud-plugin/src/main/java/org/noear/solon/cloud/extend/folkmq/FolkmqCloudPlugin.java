@@ -30,7 +30,7 @@ import org.noear.solon.core.Plugin;
  * @author noear
  * @since 2.6
  */
-public class XPluginImpl implements Plugin {
+public class FolkmqCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) throws Throwable {
         CloudProps cloudProps = new CloudProps(context, "folkmq");

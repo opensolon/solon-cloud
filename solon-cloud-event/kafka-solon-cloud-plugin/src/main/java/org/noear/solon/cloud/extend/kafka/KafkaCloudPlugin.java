@@ -27,7 +27,7 @@ import org.noear.solon.core.Plugin;
  * @author noear
  * @since 1.3
  */
-public class XPluginImpl implements Plugin {
+public class KafkaCloudPlugin implements Plugin {
     CloudEventServiceKafkaImpl eventServiceImpl;
 
     @Override

@@ -25,7 +25,7 @@ import org.noear.solon.core.Plugin;
  * @author 等風來再離開
  * @since 1.11
  */
-public class XPluginImp implements Plugin {
+public class FileS3CloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
         CloudProps cloudProps = new CloudProps(context,"file.s3");

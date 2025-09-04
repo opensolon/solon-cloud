@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.thrift.solon;
+package org.apache.thrift.solon.integration;
 
 import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.TProcessor;
@@ -22,9 +22,6 @@ import org.apache.thrift.server.TThreadedSelectorServer;
 import org.apache.thrift.solon.annotation.EnableThrift;
 import org.apache.thrift.solon.annotation.ThriftClient;
 import org.apache.thrift.solon.annotation.ThriftService;
-import org.apache.thrift.solon.integration.ThriftClientBeanInjector;
-import org.apache.thrift.solon.integration.ThriftServerProps;
-import org.apache.thrift.solon.integration.ThriftServiceBeanBuilder;
 import org.apache.thrift.transport.TNonblockingServerSocket;
 import org.apache.thrift.transport.TTransportException;
 import org.noear.solon.Solon;

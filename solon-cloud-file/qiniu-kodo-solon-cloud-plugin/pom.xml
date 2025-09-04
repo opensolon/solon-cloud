@@ -14,8 +14,6 @@
     <name>${project.artifactId}</name>
     <packaging>jar</packaging>
 
-
-
     <dependencies>
         <dependency>
             <groupId>org.noear</groupId>

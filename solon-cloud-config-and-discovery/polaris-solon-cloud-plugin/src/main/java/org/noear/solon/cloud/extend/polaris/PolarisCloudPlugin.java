@@ -27,7 +27,7 @@ import org.noear.solon.core.Plugin;
  * @author 何荣振
  * @since 1.11
  */
-public class XPluginImp implements Plugin {
+public class PolarisCloudPlugin implements Plugin {
     CloudConfigServicePolarisImp cloudConfigServicePolarisImp;
     CloudDiscoveryServicePolarisImp cloudDiscoveryServicePolarisImp;
 

@@ -44,7 +44,7 @@ import java.util.Map;
  * @author noear
  * @since 1.10
  */
-public class XPluginImp implements Plugin {
+public class ThriftCloudPlugin implements Plugin {
     private static Signal _signal;
 
     public static Signal signal() {

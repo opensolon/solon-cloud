@@ -28,18 +28,10 @@ import org.noear.solon.cloud.extend.nacos.service.CloudDiscoveryServiceNacosImp;
  * @author noear
  * @since 1.2
  */
-public class XPluginImp implements Plugin {
-    private static final String SERVER2 = "solon.cloud.nacos2.server";
-
+public class NacosCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps;
-        if (context.cfg().get(SERVER2) == null) {
-            cloudProps = new CloudProps(context, "nacos");
-        } else {
-            //@Deprecated //历史原因出了个2，需要更正
-            cloudProps = new CloudProps(context, "nacos2");
-        }
+        CloudProps cloudProps = new CloudProps(context, "nacos");
 
         if (Utils.isEmpty(cloudProps.getServer())) {
             return;

@@ -13,25 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.file.s3;
+package org.noear.solon.cloud.extend.snowflake.integration;
 
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.file.s3.service.CloudFileServiceImpl;
+import org.noear.solon.cloud.extend.snowflake.service.CloudIdServiceFactoryImp;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
 
 /**
- * @author 等風來再離開
- * @since 1.11
+ * @author noear
+ * @since 1.3
  */
-public class FileS3CloudPlugin implements Plugin {
+public class SnowflakeCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context,"file.s3");
+        CloudProps cloudProps = new CloudProps(context,"snowflake");
 
-        if (cloudProps.getFileEnable()) {
-            CloudManager.register(new CloudFileServiceImpl(cloudProps));
+        if (cloudProps.getIdEnable()) {
+            CloudManager.register(new CloudIdServiceFactoryImp(cloudProps));
         }
     }
 }

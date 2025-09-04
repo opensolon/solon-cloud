@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.qiniu.kodo;
+package org.noear.solon.cloud.extend.qiniu.kodo.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;

@@ -13,30 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.minio;
+package org.noear.solon.cloud.extend.fastdfs.integration;
 
-import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.minio.service.CloudFileServiceMinioImpl;
+import org.noear.solon.cloud.extend.fastdfs.service.CloudFileServiceFastDFSImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
 
 /**
- * @author iYarnFog
- * @since 1.5
+ * @author liaocp
+ * @since 1.12
  */
-public class MinioCloudPlugin implements Plugin {
+public class FastdfsCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context, "minio");
+        CloudProps cloudProps = new CloudProps(context, "fastdfs");
 
         if (cloudProps.getFileEnable()) {
-            if (Utils.isEmpty(cloudProps.getFileAccessKey())) {
-                return;
-            }
-
-            CloudManager.register(new CloudFileServiceMinioImpl(cloudProps));
+            CloudManager.register(new CloudFileServiceFastDFSImpl(context, cloudProps));
         }
     }
 }

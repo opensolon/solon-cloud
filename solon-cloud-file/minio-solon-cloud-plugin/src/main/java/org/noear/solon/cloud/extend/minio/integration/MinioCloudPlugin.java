@@ -13,25 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.snowflake;
+package org.noear.solon.cloud.extend.minio.integration;
 
+import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.snowflake.service.CloudIdServiceFactoryImp;
+import org.noear.solon.cloud.extend.minio.service.CloudFileServiceMinioImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
 
 /**
- * @author noear
- * @since 1.3
+ * @author iYarnFog
+ * @since 1.5
  */
-public class SnowflakeCloudPlugin implements Plugin {
+public class MinioCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context,"snowflake");
+        CloudProps cloudProps = new CloudProps(context,"minio");
 
-        if (cloudProps.getIdEnable()) {
-            CloudManager.register(new CloudIdServiceFactoryImp(cloudProps));
+        if (cloudProps.getFileEnable()) {
+            if (Utils.isEmpty(cloudProps.getFileAccessKey())) {
+                return;
+            }
+
+            CloudManager.register(new CloudFileServiceMinioImpl(cloudProps));
         }
     }
 }

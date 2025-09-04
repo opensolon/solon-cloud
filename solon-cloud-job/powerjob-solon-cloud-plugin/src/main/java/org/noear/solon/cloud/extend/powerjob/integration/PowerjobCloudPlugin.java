@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.powerjob;
+package org.noear.solon.cloud.extend.powerjob.integration;
 
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;

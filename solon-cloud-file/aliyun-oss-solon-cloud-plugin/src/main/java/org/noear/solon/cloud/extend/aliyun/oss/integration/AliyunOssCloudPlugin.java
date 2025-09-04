@@ -13,25 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.fastdfs;
+package org.noear.solon.cloud.extend.aliyun.oss.integration;
 
+import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.fastdfs.service.CloudFileServiceFastDFSImpl;
+import org.noear.solon.cloud.extend.aliyun.oss.service.CloudFileServiceOssImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
 
 /**
- * @author liaocp
- * @since 1.12
+ * @author noear
+ * @since 1.3
  */
-public class FastdfsCloudPlugin implements Plugin {
+public class AliyunOssCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context, "fastdfs");
+        CloudProps cloudProps = new CloudProps(context,"aliyun.oss");
 
         if (cloudProps.getFileEnable()) {
-            CloudManager.register(new CloudFileServiceFastDFSImpl(context, cloudProps));
+            if (Utils.isEmpty(cloudProps.getFileAccessKey())) {
+                return;
+            }
+
+            CloudManager.register(new CloudFileServiceOssImpl(cloudProps));
         }
     }
 }

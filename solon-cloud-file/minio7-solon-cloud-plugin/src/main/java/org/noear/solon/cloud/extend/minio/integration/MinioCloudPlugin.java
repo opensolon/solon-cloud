@@ -13,38 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.aws.s3;
+package org.noear.solon.cloud.extend.minio.integration;
 
+import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.aws.s3.service.CloudFileServiceOfS3HttpImpl;
-import org.noear.solon.cloud.extend.aws.s3.service.CloudFileServiceOfS3SdkImpl;
+import org.noear.solon.cloud.extend.minio.service.CloudFileServiceMinioImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
-import org.noear.solon.core.util.ClassUtil;
-import software.amazon.awssdk.services.s3.S3Client;
 
 /**
- * @author noear
- * @since 1.3
+ * @author iYarnFog
+ * @since 1.5
  */
-public class AwsS3CloudPlugin implements Plugin {
+public class MinioCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context, "aws.s3");
+        CloudProps cloudProps = new CloudProps(context, "minio");
 
         if (cloudProps.getFileEnable()) {
-            //支持直接使用 AWS 环境（不需要配置）
-            if (cloudProps.getProp().size() == 0) {
-                //没有任何属性时，必须增加 "..file.enable=true"
+            if (Utils.isEmpty(cloudProps.getFileAccessKey())) {
                 return;
             }
 
-            if (ClassUtil.hasClass(() -> S3Client.class)) {
-                CloudManager.register(new CloudFileServiceOfS3SdkImpl(cloudProps));
-            } else {
-                CloudManager.register(new CloudFileServiceOfS3HttpImpl(cloudProps));
-            }
+            CloudManager.register(new CloudFileServiceMinioImpl(cloudProps));
         }
     }
 }

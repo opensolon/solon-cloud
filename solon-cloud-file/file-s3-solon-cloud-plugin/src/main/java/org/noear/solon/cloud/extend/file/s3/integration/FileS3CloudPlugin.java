@@ -13,30 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.aliyun.oss;
+package org.noear.solon.cloud.extend.file.s3.integration;
 
-import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.aliyun.oss.service.CloudFileServiceOssImpl;
+import org.noear.solon.cloud.extend.file.s3.service.CloudFileServiceImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
 
 /**
- * @author noear
- * @since 1.3
+ * @author 等風來再離開
+ * @since 1.11
  */
-public class AliyunOssCloudPlugin implements Plugin {
+public class FileS3CloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context,"aliyun.oss");
+        CloudProps cloudProps = new CloudProps(context,"file.s3");
 
         if (cloudProps.getFileEnable()) {
-            if (Utils.isEmpty(cloudProps.getFileAccessKey())) {
-                return;
-            }
-
-            CloudManager.register(new CloudFileServiceOssImpl(cloudProps));
+            CloudManager.register(new CloudFileServiceImpl(cloudProps));
         }
     }
 }

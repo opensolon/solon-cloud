@@ -15,8 +15,6 @@
  */
 package org.noear.solon.cloud.extend.pulsar;
 
-import org.noear.solon.cloud.CloudProps;
-
 /**
  * @author noear
  * @since 1.5

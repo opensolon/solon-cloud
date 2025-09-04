@@ -28,7 +28,7 @@ import org.noear.solon.core.Plugin;
  * @author noear
  * @since 1.3
  */
-public class XPluginImpl implements Plugin {
+public class MqttCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
         CloudProps cloudProps = new CloudProps(context,"mqtt");

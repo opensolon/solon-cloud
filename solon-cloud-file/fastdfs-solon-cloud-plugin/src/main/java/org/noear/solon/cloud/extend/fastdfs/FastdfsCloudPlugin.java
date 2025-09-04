@@ -25,7 +25,7 @@ import org.noear.solon.core.Plugin;
  * @author liaocp
  * @since 1.12
  */
-public class XPluginImp implements Plugin {
+public class FastdfsCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
         CloudProps cloudProps = new CloudProps(context, "fastdfs");

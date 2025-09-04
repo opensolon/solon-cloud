@@ -15,7 +15,6 @@
  */
 package org.noear.solon.cloud.extend.activemq;
 
-import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
@@ -23,13 +22,12 @@ import org.noear.solon.cloud.extend.activemq.service.CloudEventServiceActivemqIm
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
-import org.noear.solon.core.event.AppLoadEndEvent;
 
 /**
  * @author liuxuehua12
  * @since 2.0
  */
-public class XPluginImp implements Plugin {
+public class ActivemqCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) throws Throwable {
         CloudProps cloudProps = new CloudProps(context,"activemq");

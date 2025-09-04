@@ -38,9 +38,9 @@ import tech.powerjob.worker.core.processor.sdk.BasicProcessor;
  * @author fzdwx
  * @since 2.0
  */
-public class XPluginImp implements Plugin {
+public class PowerjobCloudPlugin implements Plugin {
 
-    private static final Logger logger = LoggerFactory.getLogger(XPluginImp.class);
+    private static final Logger logger = LoggerFactory.getLogger(PowerjobCloudPlugin.class);
 
     @Override
     public void start(AppContext context) throws Throwable {

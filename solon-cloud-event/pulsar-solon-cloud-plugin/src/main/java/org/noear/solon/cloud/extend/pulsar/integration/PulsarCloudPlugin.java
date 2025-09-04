@@ -13,43 +13,34 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.kafka;
+package org.noear.solon.cloud.extend.pulsar.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.kafka.service.CloudEventServiceKafkaImpl;
+import org.noear.solon.cloud.extend.pulsar.service.CloudEventServicePulsarImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
 
 /**
  * @author noear
- * @since 1.3
+ * @since 1.5
  */
-public class KafkaCloudPlugin implements Plugin {
-    CloudEventServiceKafkaImpl eventServiceImpl;
-
+public class PulsarCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context, "kafka");
+        CloudProps cloudProps = new CloudProps(context,"pulsar");
 
         if (Utils.isEmpty(cloudProps.getEventServer())) {
             return;
         }
 
         if (cloudProps.getEventEnable()) {
-            eventServiceImpl = new CloudEventServiceKafkaImpl(cloudProps);
-            CloudManager.register(eventServiceImpl);
+            CloudEventServicePulsarImpl eventServiceImp = new CloudEventServicePulsarImpl(cloudProps);
+            CloudManager.register(eventServiceImp);
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImpl);
-        }
-    }
-
-    @Override
-    public void stop() throws Throwable {
-        if (eventServiceImpl != null) {
-            eventServiceImpl.close();
+            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
         }
     }
 }

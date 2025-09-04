@@ -13,43 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.rocketmq;
+package org.noear.solon.cloud.extend.kafka.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.rocketmq.service.CloudEventServiceRocketmqImp;
+import org.noear.solon.cloud.extend.kafka.service.CloudEventServiceKafkaImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
 
 /**
  * @author noear
- * @since 1.2
+ * @since 1.3
  */
-public class RocketmqCloudPlugin implements Plugin {
-    CloudEventServiceRocketmqImp eventService;
+public class KafkaCloudPlugin implements Plugin {
+    CloudEventServiceKafkaImpl eventServiceImpl;
 
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context, "rocketmq");
+        CloudProps cloudProps = new CloudProps(context, "kafka");
 
         if (Utils.isEmpty(cloudProps.getEventServer())) {
             return;
         }
 
         if (cloudProps.getEventEnable()) {
-            eventService = new CloudEventServiceRocketmqImp(cloudProps);
-            CloudManager.register(eventService);
+            eventServiceImpl = new CloudEventServiceKafkaImpl(cloudProps);
+            CloudManager.register(eventServiceImpl);
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventService);
+            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImpl);
         }
     }
 
     @Override
-    public void prestop() throws Throwable {
-        if (eventService != null) {
-            eventService.close();
+    public void stop() throws Throwable {
+        if (eventServiceImpl != null) {
+            eventServiceImpl.close();
         }
     }
 }

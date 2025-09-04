@@ -13,34 +13,43 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.aliyun.ons;
+package org.noear.solon.cloud.extend.rocketmq.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.aliyun.ons.service.CloudEventServiceOnsImpl;
+import org.noear.solon.cloud.extend.rocketmq.service.CloudEventServiceRocketmqImp;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
 
 /**
- * @author cgy
- * @since 1.11
+ * @author noear
+ * @since 1.2
  */
-public class AliyunOnsCloudPlugin implements Plugin {
+public class RocketmqCloudPlugin implements Plugin {
+    CloudEventServiceRocketmqImp eventService;
+
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context,"aliyun.ons");
+        CloudProps cloudProps = new CloudProps(context, "rocketmq");
 
         if (Utils.isEmpty(cloudProps.getEventServer())) {
             return;
         }
 
         if (cloudProps.getEventEnable()) {
-            CloudEventServiceOnsImpl eventServiceImp = new CloudEventServiceOnsImpl(cloudProps);
-            CloudManager.register(eventServiceImp);
+            eventService = new CloudEventServiceRocketmqImp(cloudProps);
+            CloudManager.register(eventService);
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
+            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventService);
+        }
+    }
+
+    @Override
+    public void prestop() throws Throwable {
+        if (eventService != null) {
+            eventService.close();
         }
     }
 }

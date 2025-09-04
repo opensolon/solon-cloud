@@ -13,42 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.jmdns;
+package org.noear.solon.cloud.extend.activemq.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.jmdns.service.CloudDiscoveryServiceJmdnsImpl;
+import org.noear.solon.cloud.extend.activemq.service.CloudEventServiceActivemqImpl;
 import org.noear.solon.core.AppContext;
+import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
 
-import java.io.IOException;
-
 /**
- * @author noear
- * @since 1.10
+ * @author liuxuehua12
+ * @since 2.0
  */
-public class JmdnsCloudPlugin implements Plugin {
-    CloudDiscoveryServiceJmdnsImpl discoveryServiceJmdnsImpl;
-
+public class ActivemqCloudPlugin implements Plugin {
     @Override
-    public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context, "jmdns");
+    public void start(AppContext context) throws Throwable {
+        CloudProps cloudProps = new CloudProps(context,"activemq");
 
-        if (Utils.isEmpty(cloudProps.getServer())) {
+        if (Utils.isEmpty(cloudProps.getEventServer())) {
             return;
         }
 
-        if (cloudProps.getDiscoveryEnable()) {
-            discoveryServiceJmdnsImpl = new CloudDiscoveryServiceJmdnsImpl(cloudProps);
-            CloudManager.register(discoveryServiceJmdnsImpl);
-        }
-    }
+        if (cloudProps.getEventEnable()) {
+        	CloudEventServiceActivemqImpl eventServiceImp = new CloudEventServiceActivemqImpl(cloudProps);
+            CloudManager.register(eventServiceImp);
 
-    @Override
-    public void stop() throws IOException {
-        if (discoveryServiceJmdnsImpl != null) {
-            discoveryServiceJmdnsImpl.close();
+
+            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
         }
     }
 }

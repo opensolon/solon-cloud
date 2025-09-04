@@ -13,51 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.folkmq;
+package org.noear.solon.cloud.extend.mqtt5.integration;
 
-import org.noear.folkmq.client.MqClient;
-import org.noear.folkmq.client.MqConsumeListener;
-import org.noear.folkmq.client.MqTransactionCheckback;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.folkmq.service.CloudEventServiceFolkMqImpl;
+import org.noear.solon.cloud.extend.mqtt5.service.CloudEventServiceMqtt5;
+import org.noear.solon.cloud.extend.mqtt5.service.MqttClientManager;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
 
 /**
  * @author noear
- * @since 2.6
+ * @since 2.4
  */
-public class FolkmqCloudPlugin implements Plugin {
+public class Mqtt5CloudPlugin implements Plugin {
     @Override
-    public void start(AppContext context) throws Throwable {
-        CloudProps cloudProps = new CloudProps(context, "folkmq");
+    public void start(AppContext context) {
+        CloudProps cloudProps = new CloudProps(context, "mqtt");
 
         if (Utils.isEmpty(cloudProps.getEventServer())) {
             return;
         }
 
         if (cloudProps.getEventEnable()) {
-            CloudEventServiceFolkMqImpl eventServiceImp = new CloudEventServiceFolkMqImpl(cloudProps);
+            CloudEventServiceMqtt5 eventServiceImp = new CloudEventServiceMqtt5(cloudProps);
             CloudManager.register(eventServiceImp);
 
+            context.wrapAndPut(MqttClientManager.class, eventServiceImp.getClientManager());
             context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
-
-
-            //加入容器
-            context.wrapAndPut(MqClient.class, eventServiceImp.getClient());
-
-            //异步获取 MqTransactionCheckback
-            context.getBeanAsync(MqTransactionCheckback.class, bean -> {
-                eventServiceImp.getClient().transactionCheckback(bean);
-            });
-
-            //异步获取 MqConsumeListener
-            context.getBeanAsync(MqConsumeListener.class, bean -> {
-                eventServiceImp.getClient().listen(bean);
-            });
         }
     }
 }

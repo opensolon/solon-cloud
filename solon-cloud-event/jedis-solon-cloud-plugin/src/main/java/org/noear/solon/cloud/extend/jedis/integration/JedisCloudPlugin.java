@@ -13,33 +13,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.activemq;
+package org.noear.solon.cloud.extend.jedis.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.activemq.service.CloudEventServiceActivemqImpl;
+import org.noear.solon.cloud.extend.jedis.service.CloudEventServiceJedisImpl;
+import org.noear.solon.cloud.extend.jedis.service.CloudLockServiceJedisImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
 
 /**
- * @author liuxuehua12
- * @since 2.0
+ * @author noear
+ * @since 1.10
  */
-public class ActivemqCloudPlugin implements Plugin {
-    @Override
-    public void start(AppContext context) throws Throwable {
-        CloudProps cloudProps = new CloudProps(context,"activemq");
+public class JedisCloudPlugin implements Plugin {
 
-        if (Utils.isEmpty(cloudProps.getEventServer())) {
-            return;
+    @Override
+    public void start(AppContext context) {
+        CloudProps cloudProps = new CloudProps(context,"jedis");
+
+        if (cloudProps.getLockEnable() && Utils.isNotEmpty(cloudProps.getLockServer())) {
+            CloudLockServiceJedisImpl lockServiceImp = new CloudLockServiceJedisImpl(cloudProps);
+            CloudManager.register(lockServiceImp);
         }
 
-        if (cloudProps.getEventEnable()) {
-        	CloudEventServiceActivemqImpl eventServiceImp = new CloudEventServiceActivemqImpl(cloudProps);
+        if (cloudProps.getEventEnable() && Utils.isNotEmpty(cloudProps.getEventServer())) {
+            CloudEventServiceJedisImpl eventServiceImp = new CloudEventServiceJedisImpl(cloudProps);
             CloudManager.register(eventServiceImp);
-
 
             context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
         }

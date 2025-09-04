@@ -13,31 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.rabbitmq;
+package org.noear.solon.cloud.extend.aliyun.ons.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.rabbitmq.service.CloudEventServiceRabbitmqImpl;
+import org.noear.solon.cloud.extend.aliyun.ons.service.CloudEventServiceOnsImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
 
 /**
- * @author noear
- * @since 1.2
+ * @author cgy
+ * @since 1.11
  */
-public class RabbitmqCloudPlugin implements Plugin {
+public class AliyunOnsCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context,"rabbitmq");
+        CloudProps cloudProps = new CloudProps(context,"aliyun.ons");
 
         if (Utils.isEmpty(cloudProps.getEventServer())) {
             return;
         }
 
         if (cloudProps.getEventEnable()) {
-            CloudEventServiceRabbitmqImpl eventServiceImp = new CloudEventServiceRabbitmqImpl(cloudProps);
+            CloudEventServiceOnsImpl eventServiceImp = new CloudEventServiceOnsImpl(cloudProps);
             CloudManager.register(eventServiceImp);
 
             context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);

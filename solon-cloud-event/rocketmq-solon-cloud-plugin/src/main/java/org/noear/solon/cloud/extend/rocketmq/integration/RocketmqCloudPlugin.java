@@ -13,35 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.mqtt;
+package org.noear.solon.cloud.extend.rocketmq.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.mqtt.service.CloudEventServiceMqtt3;
-import org.noear.solon.cloud.extend.mqtt.service.MqttClientManager;
+import org.noear.solon.cloud.extend.rocketmq.service.CloudEventServiceRocketmqImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
 
 /**
  * @author noear
- * @since 1.3
+ * @since 1.2
  */
-public class MqttCloudPlugin implements Plugin {
+public class RocketmqCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context,"mqtt");
+        CloudProps cloudProps = new CloudProps(context,"rocketmq");
 
         if (Utils.isEmpty(cloudProps.getEventServer())) {
             return;
         }
 
         if (cloudProps.getEventEnable()) {
-            CloudEventServiceMqtt3 eventServiceImp = new CloudEventServiceMqtt3(cloudProps);
+            CloudEventServiceRocketmqImpl eventServiceImp = new CloudEventServiceRocketmqImpl(cloudProps);
             CloudManager.register(eventServiceImp);
 
-            context.wrapAndPut(MqttClientManager.class, eventServiceImp.getClientManager());
             context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
         }
     }

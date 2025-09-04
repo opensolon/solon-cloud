@@ -13,37 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.jedis;
+package org.noear.solon.cloud.extend.jmdns.integration;
 
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
-import org.noear.solon.cloud.extend.jedis.service.CloudEventServiceJedisImpl;
-import org.noear.solon.cloud.extend.jedis.service.CloudLockServiceJedisImpl;
+import org.noear.solon.cloud.extend.jmdns.service.CloudDiscoveryServiceJmdnsImpl;
 import org.noear.solon.core.AppContext;
-import org.noear.solon.core.LifecycleIndex;
 import org.noear.solon.core.Plugin;
+
+import java.io.IOException;
 
 /**
  * @author noear
  * @since 1.10
  */
-public class JedisCloudPlugin implements Plugin {
+public class JmdnsCloudPlugin implements Plugin {
+    CloudDiscoveryServiceJmdnsImpl discoveryServiceJmdnsImpl;
 
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context,"jedis");
+        CloudProps cloudProps = new CloudProps(context, "jmdns");
 
-        if (cloudProps.getLockEnable() && Utils.isNotEmpty(cloudProps.getLockServer())) {
-            CloudLockServiceJedisImpl lockServiceImp = new CloudLockServiceJedisImpl(cloudProps);
-            CloudManager.register(lockServiceImp);
+        if (Utils.isEmpty(cloudProps.getServer())) {
+            return;
         }
 
-        if (cloudProps.getEventEnable() && Utils.isNotEmpty(cloudProps.getEventServer())) {
-            CloudEventServiceJedisImpl eventServiceImp = new CloudEventServiceJedisImpl(cloudProps);
-            CloudManager.register(eventServiceImp);
+        if (cloudProps.getDiscoveryEnable()) {
+            discoveryServiceJmdnsImpl = new CloudDiscoveryServiceJmdnsImpl(cloudProps);
+            CloudManager.register(discoveryServiceJmdnsImpl);
+        }
+    }
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
+    @Override
+    public void stop() throws IOException {
+        if (discoveryServiceJmdnsImpl != null) {
+            discoveryServiceJmdnsImpl.close();
         }
     }
 }

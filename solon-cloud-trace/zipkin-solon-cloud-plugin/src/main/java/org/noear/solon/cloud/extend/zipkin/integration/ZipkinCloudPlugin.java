@@ -26,7 +26,7 @@ import org.noear.solon.core.Plugin;
  * @author blackbear2003
  * @since 2.3
  */
-public class XPluginImp implements Plugin {
+public class ZipkinCloudPlugin implements Plugin {
     @Override
     public void start(AppContext context) {
         CloudProps cloudProps = new CloudProps(context, "zipkin");

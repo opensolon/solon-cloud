@@ -259,7 +259,7 @@ public class CloudManager {
     /**
      * 登记Job拦截器
      */
-    public void register(int index, CloudJobInterceptor jobInterceptor) {
+    public static void register(int index, CloudJobInterceptor jobInterceptor) {
         if (jobServiceManager != null) {
             jobServiceManager.addJobInterceptor(index, jobInterceptor);
         }

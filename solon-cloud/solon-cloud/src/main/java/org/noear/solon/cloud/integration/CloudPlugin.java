@@ -18,10 +18,12 @@ package org.noear.solon.cloud.integration;
 import org.noear.nami.NamiManager;
 import org.noear.solon.cloud.CloudClient;
 import org.noear.solon.cloud.CloudJobHandler;
+import org.noear.solon.cloud.CloudJobInterceptor;
 import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.annotation.CloudBreaker;
 import org.noear.solon.cloud.annotation.CloudJob;
 import org.noear.solon.cloud.impl.*;
+import org.noear.solon.cloud.service.*;
 import org.noear.solon.cloud.trace.HttpTraceExtension;
 import org.noear.solon.cloud.trace.NamiTraceFilter;
 import org.noear.solon.core.*;
@@ -125,7 +127,67 @@ public class CloudPlugin implements Plugin {
             NamiTraceFilter.register();
         }
 
+        /// ///
+
         context.getBeanAsync(CloudLoadStrategy.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        /// ///
+
+        context.getBeanAsync(CloudDiscoveryService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudConfigService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudEventServicePlus.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudLockService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudLogService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudListService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudFileService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudI18nService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudBreakerService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudTraceService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudMetricService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.getBeanAsync(CloudJobService.class, bean -> {
+            CloudManager.register(bean);
+        });
+
+        context.subWrapsOfType(CloudJobInterceptor.class, bw -> {
+            CloudManager.register(bw.index(),bw.raw());
+        });
+
+        context.getBeanAsync(CloudIdServiceFactory.class, bean -> {
             CloudManager.register(bean);
         });
     }

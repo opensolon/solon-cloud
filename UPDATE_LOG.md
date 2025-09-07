@@ -2,6 +2,11 @@
 
 * solon-cloud-gateway 增加 websocket 的转发支持（协议头：ws）
 
+
+### 3.5.2
+
+* 完善 solon-cloud 组件自动注册
+
 ### v3.4.3
 
 * 修正 file-s3-solon-cloud-plugin 文件分隔符

@@ -15,7 +15,6 @@
  */
 package org.noear.solon.cloud.impl;
 
-import org.noear.solon.Solon;
 import org.noear.solon.cloud.CloudJobHandler;
 import org.noear.solon.cloud.CloudJobInterceptor;
 import org.noear.solon.cloud.service.CloudJobService;
@@ -35,9 +34,6 @@ public class CloudJobServiceManagerImpl implements CloudJobServiceManager {
 
     public CloudJobServiceManagerImpl(CloudJobService service) {
         this.service = service;
-        Solon.context().subWrapsOfType(CloudJobInterceptor.class, bw -> {
-            addJobInterceptor(bw.index(), bw.raw());
-        });
     }
 
     /**
@@ -48,6 +44,7 @@ public class CloudJobServiceManagerImpl implements CloudJobServiceManager {
     @Override
     public void addJobInterceptor(int index, CloudJobInterceptor jobInterceptor) {
         jobInterceptors.add(new RankEntity<>(jobInterceptor, index));
+        Collections.sort(jobInterceptors);
     }
 
     /**

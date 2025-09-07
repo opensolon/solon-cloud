@@ -52,7 +52,7 @@ public class CloudPlugin implements Plugin {
 
     @Override
     public void start(AppContext context) {
-        if(CloudClient.enableConfig()) {
+        if (CloudClient.enableConfig()) {
             CloudConfigBeanInjector injector = new CloudConfigBeanInjector();
             CloudConfigBeanBuilder builder = new CloudConfigBeanBuilder();
 
@@ -60,19 +60,19 @@ public class CloudPlugin implements Plugin {
             context.beanBuilderAdd(CloudConfig.class, builder);
         }
 
-        if(CloudClient.enableEvent()) {
+        if (CloudClient.enableEvent()) {
             CloudEventBeanBuilder builder = new CloudEventBeanBuilder();
 
             context.beanBuilderAdd(CloudEvent.class, builder);
         }
 
-        if(CloudClient.enableBreaker()) {
+        if (CloudClient.enableBreaker()) {
             CloudBreakerInterceptor interceptor = new CloudBreakerInterceptor();
 
             context.beanInterceptorAdd(CloudBreaker.class, interceptor);
         }
 
-        if(CloudClient.enableJob()) {
+        if (CloudClient.enableJob()) {
             CloudJobBeanExtractor extractor = new CloudJobBeanExtractor();
             CloudJobBeanBuilder builder = new CloudJobBeanBuilder();
 
@@ -184,7 +184,7 @@ public class CloudPlugin implements Plugin {
         });
 
         context.subWrapsOfType(CloudJobInterceptor.class, bw -> {
-            CloudManager.register(bw.index(),bw.raw());
+            CloudManager.register(bw.index(), bw.raw());
         });
 
         context.getBeanAsync(CloudIdServiceFactory.class, bean -> {

@@ -16,6 +16,8 @@
 package org.noear.solon.cloud.annotation;
 
 import org.noear.solon.annotation.Alias;
+import org.noear.solon.cloud.fallback.Fallback;
+import org.noear.solon.cloud.fallback.FallbackThrow;
 
 import java.lang.annotation.*;
 
@@ -31,12 +33,18 @@ import java.lang.annotation.*;
 public @interface CloudBreaker {
     /**
      * 名称，支持${xxx}配置
-     * */
+     */
     @Alias("name")
     String value() default "";
+
     /**
      * 名称，支持${xxx}配置
-     * */
+     */
     @Alias("value")
     String name() default "";
+
+    /**
+     * 应急处理（降级处理）
+     */
+    Class<? extends Fallback> fallback() default FallbackThrow.class;
 }

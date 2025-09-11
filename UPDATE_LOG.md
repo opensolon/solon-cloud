@@ -6,6 +6,7 @@
 ### 3.5.2
 
 * 完善 solon-cloud 组件自动注册
+* 添加 solon-cloud CloudBreaker 注解的降级处理配置支持
 
 ### v3.4.3
 

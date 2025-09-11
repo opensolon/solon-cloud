@@ -19,9 +19,8 @@ import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudClient;
 import org.noear.solon.cloud.annotation.CloudBreaker;
-import org.noear.solon.cloud.exception.CloudBreakerException;
+import org.noear.solon.cloud.fallback.Fallback;
 import org.noear.solon.cloud.model.BreakerException;
-import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.aspect.Interceptor;
 import org.noear.solon.core.aspect.Invocation;
 
@@ -50,17 +49,8 @@ public class CloudBreakerInterceptor implements Interceptor {
             try (AutoCloseable entry = CloudClient.breaker().entry(name)) {
                 return inv.invoke();
             } catch (BreakerException ex) {
-                Context ctx = Context.current();
-                if (ctx == null) {
-                    //说明不是 web
-                    throw ex;
-                } else {
-                    //说明是 web
-                    throw new CloudBreakerException("Too many requests, path=" + ctx.path());
-                    //ctx.status(429);
-                    //ctx.setHandled(true);
-                    //throw new DataThrowable(ex);
-                }
+                Fallback fallback = inv.context().getBeanOrNew(anno.fallback());
+                return fallback.fallback(inv, ex);
             }
         } else {
             return inv.invoke();

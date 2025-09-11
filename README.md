@@ -36,7 +36,7 @@ Solon
 	</a>
     <br />
     <a target="_blank" href='https://gitee.com/noear/solon/stargazers'>
-		<img src='https://gitee.com/noear/solon/badge/star.svg' alt='gitee star'/>
+		<img src='https://gitee.com/opensolon/solon/badge/star.svg?theme=gvp' alt='gitee star'/>
 	</a>
     <a target="_blank" href='https://github.com/noear/solon/stargazers'>
 		<img src="https://img.shields.io/github/stars/noear/solon.svg?style=flat&logo=github" alt="github star"/>

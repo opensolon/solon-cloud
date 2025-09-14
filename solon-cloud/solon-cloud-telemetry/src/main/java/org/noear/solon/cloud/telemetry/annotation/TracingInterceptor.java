@@ -24,7 +24,7 @@ import org.noear.solon.Utils;
 import org.noear.solon.cloud.telemetry.slf4j.TracingMDC;
 import org.noear.solon.core.aspect.Interceptor;
 import org.noear.solon.core.aspect.Invocation;
-import org.noear.solon.core.util.TmplUtil;
+import org.noear.solon.core.util.SnelUtil;
 
 /**
  * @author noear
@@ -87,7 +87,7 @@ public class TracingInterceptor implements Interceptor {
         spanBuilder.setAttribute("clz.fullname", inv.getTargetClz().getName());
 
         //添加标志
-        String tags = TmplUtil.parse(anno.tags(), inv);
+        String tags = SnelUtil.evalTmpl(anno.tags(), inv);
         if (Utils.isNotEmpty(tags)) {
             for (String tag : tags.split(",")) {
                 String[] kv = tag.split("=");

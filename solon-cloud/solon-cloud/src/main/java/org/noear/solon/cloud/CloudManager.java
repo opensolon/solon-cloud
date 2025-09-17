@@ -20,8 +20,9 @@ import org.noear.solon.cloud.annotation.CloudConfig;
 import org.noear.solon.cloud.annotation.CloudEvent;
 import org.noear.solon.cloud.impl.*;
 import org.noear.solon.cloud.service.*;
-import org.noear.solon.core.util.LogUtil;
 import org.noear.solon.core.util.RankEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -34,6 +35,8 @@ import java.util.Map;
  * @since 1.2
  */
 public class CloudManager {
+    static final Logger log = LoggerFactory.getLogger(CloudManager.class);
+
     private static CloudLoadBalanceFactory loadBalance = new CloudLoadBalanceFactory();
     private static CloudLoadStrategy loadStrategy = new CloudLoadStrategyDefault();
 
@@ -151,7 +154,7 @@ public class CloudManager {
      */
     public static void register(CloudBreakerService service) {
         breakerService = service;
-        LogUtil.global().info("Cloud: CloudBreakerService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudBreakerService registered from the " + service.getClass().getTypeName());
     }
 
     /**
@@ -159,7 +162,7 @@ public class CloudManager {
      */
     public static void register(CloudConfigService service) {
         configService = service;
-        LogUtil.global().info("Cloud: CloudConfigService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudConfigService registered from the " + service.getClass().getTypeName());
     }
 
     /**
@@ -167,7 +170,7 @@ public class CloudManager {
      */
     public static void register(CloudDiscoveryService service) {
         discoveryService = new CloudDiscoveryServiceProxy(service);
-        LogUtil.global().info("Cloud: CloudDiscoveryService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudDiscoveryService registered from the " + service.getClass().getTypeName());
     }
 
     /**
@@ -176,9 +179,9 @@ public class CloudManager {
     public static void register(CloudEventServicePlus service) {
         eventServiceManager.register(service);
         if (Utils.isEmpty(service.getChannel())) {
-            LogUtil.global().info("Cloud: CloudEventService registered from the " + service.getClass().getTypeName());
+            log.info("Cloud: CloudEventService registered from the " + service.getClass().getTypeName());
         } else {
-            LogUtil.global().info("Cloud: CloudEventService registered from the " + service.getClass().getTypeName() + " as &" + service.getChannel());
+            log.info("Cloud: CloudEventService registered from the " + service.getClass().getTypeName() + " as &" + service.getChannel());
         }
     }
 
@@ -187,7 +190,7 @@ public class CloudManager {
      */
     public static void register(CloudLockService service) {
         lockService = service;
-        LogUtil.global().info("Cloud: CloudLockService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudLockService registered from the " + service.getClass().getTypeName());
     }
 
     /**
@@ -195,7 +198,7 @@ public class CloudManager {
      */
     public static void register(CloudLogService service) {
         logService = service;
-        LogUtil.global().info("Cloud: CloudLogService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudLogService registered from the " + service.getClass().getTypeName());
     }
 
     /**
@@ -203,7 +206,7 @@ public class CloudManager {
      */
     public static void register(CloudListService service) {
         listService = service;
-        LogUtil.global().info("Cloud: CloudListService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudListService registered from the " + service.getClass().getTypeName());
     }
 
     /**
@@ -211,7 +214,7 @@ public class CloudManager {
      */
     public static void register(CloudFileService service) {
         fileService = service;
-        LogUtil.global().info("Cloud: CloudFileService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudFileService registered from the " + service.getClass().getTypeName());
     }
 
     /**
@@ -219,7 +222,7 @@ public class CloudManager {
      */
     public static void register(CloudI18nService service) {
         i18nService = service;
-        LogUtil.global().info("Cloud: CloudI18nService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudI18nService registered from the " + service.getClass().getTypeName());
     }
 
 
@@ -228,7 +231,7 @@ public class CloudManager {
      */
     public static void register(CloudTraceService service) {
         traceService = service;
-        LogUtil.global().info("Cloud: CloudTraceService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudTraceService registered from the " + service.getClass().getTypeName());
     }
 
     /**
@@ -236,7 +239,7 @@ public class CloudManager {
      */
     public static void register(CloudMetricService service) {
         metricServiceManager.register(service);
-        LogUtil.global().info("Cloud: CloudMetricService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudMetricService registered from the " + service.getClass().getTypeName());
     }
 
     /**
@@ -244,7 +247,7 @@ public class CloudManager {
      */
     public static void register(CloudJobService service) {
         jobServiceManager = new CloudJobServiceManagerImpl(service);
-        LogUtil.global().info("Cloud: CloudJobService registered from the " + service.getClass().getTypeName());
+        log.info("Cloud: CloudJobService registered from the " + service.getClass().getTypeName());
     }
 
     /**
@@ -253,7 +256,7 @@ public class CloudManager {
     public static void register(CloudIdServiceFactory factory) {
         idServiceFactory = factory;
         idServiceDef = factory.create();
-        LogUtil.global().info("Cloud: CloudIdServiceFactory registered from the " + factory.getClass().getTypeName());
+        log.info("Cloud: CloudIdServiceFactory registered from the " + factory.getClass().getTypeName());
     }
 
     /**
@@ -264,7 +267,7 @@ public class CloudManager {
             jobServiceManager.addJobInterceptor(index, jobInterceptor);
         }
 
-        LogUtil.global().info("Cloud: CloudJobInterceptor registered from the " + jobInterceptor.getClass().getTypeName());
+        log.info("Cloud: CloudJobInterceptor registered from the " + jobInterceptor.getClass().getTypeName());
     }
 
     protected static CloudBreakerService breakerService() {

@@ -25,6 +25,8 @@ import org.noear.solon.cloud.service.*;
 import org.noear.solon.core.Signal;
 import org.noear.solon.core.event.AppLoadEndEvent;
 import org.noear.solon.core.util.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 
@@ -35,6 +37,8 @@ import java.util.Properties;
  * @since 1.2
  */
 public class CloudClient {
+    static final Logger log = LoggerFactory.getLogger(CloudClient.class);
+
     private static boolean enableConfig = true;
     private static boolean enableEvent = true;
     private static boolean enableBreaker = true;
@@ -200,14 +204,14 @@ public class CloudClient {
             for (Signal signal : Solon.app().signals()) {
                 Instance instance = Instance.localNew(signal);
                 CloudClient.discovery().register(Solon.cfg().appGroup(), instance);
-                LogUtil.global().info("Cloud: Service registered " + instance.service() + "@" + instance.uri());
+                log.info("Cloud: Service registered " + instance.service() + "@" + instance.uri());
             }
         });
 
         Solon.app().onEvent(Signal.class, signal -> {
             Instance instance = Instance.localNew(signal);
             CloudClient.discovery().register(Solon.cfg().appGroup(), instance);
-            LogUtil.global().info("Cloud: Service registered " + instance.service() + "@" + instance.uri());
+            log.info("Cloud: Service registered " + instance.service() + "@" + instance.uri());
         });
     }
 

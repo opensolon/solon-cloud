@@ -38,6 +38,8 @@ import org.noear.solon.Utils;
 import org.noear.solon.cloud.annotation.CloudConfig;
 import org.noear.solon.cloud.annotation.CloudEvent;
 import org.noear.solon.cloud.model.Instance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -45,6 +47,8 @@ import org.noear.solon.cloud.model.Instance;
  * @since 1.2
  */
 public class CloudPlugin implements Plugin {
+    static final Logger log = LoggerFactory.getLogger(CloudPlugin.class);
+
     public CloudPlugin() {
         //设置日志添加器（为了早点打印日志）
         AppenderManager.register("cloud", new CloudLogAppender());
@@ -208,7 +212,7 @@ public class CloudPlugin implements Plugin {
                     Instance instance = Instance.localNew(signal);
 
                     CloudClient.discovery().deregister(Solon.cfg().appGroup(), instance);
-                    LogUtil.global().info("Cloud: Service deregistered " + instance.service() + "@" + instance.uri());
+                    log.info("Cloud: Service deregistered " + instance.service() + "@" + instance.uri());
                 }
             }
         }

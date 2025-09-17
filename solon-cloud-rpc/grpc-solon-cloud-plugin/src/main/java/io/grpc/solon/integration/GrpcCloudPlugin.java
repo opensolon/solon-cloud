@@ -27,6 +27,8 @@ import org.noear.solon.Solon;
 import org.noear.solon.SolonApp;
 import org.noear.solon.core.*;
 import org.noear.solon.core.util.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -38,6 +40,8 @@ import java.util.Map;
  * @since 1.9
  * */
 public class GrpcCloudPlugin implements Plugin {
+    static final Logger log = LoggerFactory.getLogger(GrpcCloudPlugin.class);
+
     private static Signal _signal;
 
     public static Signal signal() {
@@ -105,8 +109,8 @@ public class GrpcCloudPlugin implements Plugin {
 
         long time_end = System.currentTimeMillis();
 
-        LogUtil.global().info("Connector:main: grpc: Started ServerConnector@{grpc://localhost:" + _port + "}");
-        LogUtil.global().info("Server:main: grpc: Started ("+solon_boot_ver()+") @" + (time_end - time_start) + "ms");
+        log.info("Connector:main: grpc: Started ServerConnector@{grpc://localhost:" + _port + "}");
+        log.info("Server:main: grpc: Started ("+solon_boot_ver()+") @" + (time_end - time_start) + "ms");
     }
 
     @Override
@@ -115,7 +119,7 @@ public class GrpcCloudPlugin implements Plugin {
             server.shutdown();
             server = null;
 
-            LogUtil.global().info("Server:main: grpc: Has Stopped (" + solon_boot_ver() + ")");
+            log.info("Server:main: grpc: Has Stopped (" + solon_boot_ver() + ")");
         }
     }
 }

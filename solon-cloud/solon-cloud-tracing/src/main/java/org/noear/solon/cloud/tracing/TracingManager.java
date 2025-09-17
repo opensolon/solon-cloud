@@ -24,6 +24,8 @@ import org.noear.solon.cloud.tracing.integration.NamiFilterTracing;
 import org.noear.solon.cloud.tracing.integration.SolonFilterTracing;
 import org.noear.solon.cloud.tracing.service.TracerFactory;
 import org.noear.solon.core.util.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -34,6 +36,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @since 1.7
  */
 public class TracingManager {
+    static final Logger log = LoggerFactory.getLogger(TracingManager.class);
+
     private static AtomicBoolean enabled = new AtomicBoolean(false);
 
     /**
@@ -59,7 +63,7 @@ public class TracingManager {
         try {
             Solon.context().wrapAndPut(Tracer.class, service.create());
 
-            LogUtil.global().info("Cloud: TracerFactory registered from the " + service.getClass().getTypeName());
+            log.info("Cloud: TracerFactory registered from the " + service.getClass().getTypeName());
         } catch (RuntimeException e) {
             throw e;
         } catch (Throwable e) {

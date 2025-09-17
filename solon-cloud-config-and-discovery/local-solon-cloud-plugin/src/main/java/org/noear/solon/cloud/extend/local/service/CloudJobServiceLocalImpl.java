@@ -22,8 +22,9 @@ import org.noear.solon.cloud.extend.local.impl.job.Cron7X;
 import org.noear.solon.cloud.extend.local.impl.job.JobManager;
 import org.noear.solon.cloud.model.JobHolder;
 import org.noear.solon.cloud.service.CloudJobService;
-import org.noear.solon.core.util.LogUtil;
 import org.noear.solon.logging.utils.TagsMDC;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 
@@ -34,6 +35,8 @@ import java.text.ParseException;
  * @since 1.11
  */
 public class CloudJobServiceLocalImpl implements CloudJobService {
+    static final Logger log = LoggerFactory.getLogger(CloudJobServiceLocalImpl.class);
+
     @Override
     public boolean register(String name, String cron7x, String description, CloudJobHandler handler) {
         try {
@@ -47,7 +50,7 @@ public class CloudJobServiceLocalImpl implements CloudJobService {
             }
 
             TagsMDC.tag0("CloudJob");
-            LogUtil.global().info("CloudJob: Handler registered name:" + name + ", class:" + handler.getClass().getName());
+            log.info("CloudJob: Handler registered name:" + name + ", class:" + handler.getClass().getName());
             TagsMDC.tag0("");
 
             return true;

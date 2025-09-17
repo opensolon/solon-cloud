@@ -27,12 +27,16 @@ import org.noear.solon.core.Plugin;
 import org.noear.solon.core.util.LogUtil;
 import org.noear.solon.core.util.ResourceUtil;
 import org.noear.solon.core.util.RunUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author noear
  * @since 1.11
  */
 public class LocalCloudPlugin implements Plugin {
+    static final Logger log = LoggerFactory.getLogger(LocalCloudPlugin.class);
+
     @Override
     public void start(AppContext context) throws Throwable {
         CloudProps cloudProps = new CloudProps(context,"local");
@@ -83,7 +87,7 @@ public class LocalCloudPlugin implements Plugin {
                     ResourceUtil.hasClasspath(cloudProps.getServer()) == false) {
                 CloudManager.register(new CloudFileServiceLocalImpl(cloudProps.getServer()));
             } else {
-                LogUtil.global().warn("The local file service cannot be enabled: no server configuration");
+                log.warn("The local file service cannot be enabled: no server configuration");
             }
         }
     }

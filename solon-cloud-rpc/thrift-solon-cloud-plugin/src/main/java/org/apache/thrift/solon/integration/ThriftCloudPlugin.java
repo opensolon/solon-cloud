@@ -28,6 +28,8 @@ import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.core.*;
 import org.noear.solon.core.util.LogUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -42,6 +44,9 @@ import java.util.Map;
  * @since 1.10
  */
 public class ThriftCloudPlugin implements Plugin {
+
+    static final Logger log = LoggerFactory.getLogger(ThriftCloudPlugin.class);
+
     private static Signal _signal;
 
     public static Signal signal() {
@@ -105,11 +110,11 @@ public class ThriftCloudPlugin implements Plugin {
 
         long time_end = System.currentTimeMillis();
 
-        LogUtil.global().info("Connector:main: thrift: Started ServerConnector@{thrift://localhost:" + _port + "}");
-        LogUtil.global().info("Server:main: thrift: Started ("+solon_boot_ver()+") @" + (time_end - time_start) + "ms");
+        log.info("Connector:main: thrift: Started ServerConnector@{thrift://localhost:" + _port + "}");
+        log.info("Server:main: thrift: Started ("+solon_boot_ver()+") @" + (time_end - time_start) + "ms");
 
-        LogUtil.global().info(solon_boot_ver());
-        LogUtil.global().info("Server:main: thrift: Started ServerConnector@{localhost:" + props.getPort() + "}(" + solon_boot_ver() + ")");
+        log.info(solon_boot_ver());
+        log.info("Server:main: thrift: Started ServerConnector@{localhost:" + props.getPort() + "}(" + solon_boot_ver() + ")");
     }
 
     /**
@@ -170,7 +175,7 @@ public class ThriftCloudPlugin implements Plugin {
                 serverThread.interrupt();
             }
 
-            LogUtil.global().info("Server:main: thrift: Has Stopped (" + solon_boot_ver() + ")");
+            log.info("Server:main: thrift: Has Stopped (" + solon_boot_ver() + ")");
         }
     }
 }

@@ -3,7 +3,7 @@
 * solon-cloud-gateway 增加 websocket 的转发支持（协议头：ws）
 
 
-### 3.5.2
+### 3.5.3
 
 * 完善 solon-cloud 组件自动注册
 * 添加 solon-cloud CloudBreaker 注解的降级处理配置支持

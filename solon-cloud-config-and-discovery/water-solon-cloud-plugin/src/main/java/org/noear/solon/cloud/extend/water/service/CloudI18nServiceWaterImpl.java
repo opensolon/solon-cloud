@@ -83,7 +83,7 @@ public class CloudI18nServiceWaterImpl implements CloudI18nService {
                 if (pack == null) {
                     pack = new Pack(locale);
                     Map<String, String> data = WaterClient.I18n.getI18n(group, packName, pack.getLang());
-                    pack.setData(new Props(data));
+                    pack.setData(new Props().addAll(data));
                 }
 
                 packMap.put(packKey, pack);
@@ -103,7 +103,7 @@ public class CloudI18nServiceWaterImpl implements CloudI18nService {
         if (pack != null) {
             try {
                 Map<String, String> data = WaterClient.I18n.getI18nNoCache(group, packName, pack.getLang());
-                pack.setData(new Props(data));
+                pack.setData(new Props().addAll(data));
             } catch (Throwable e) {
                 log.warn(e.getMessage(), e);
             }

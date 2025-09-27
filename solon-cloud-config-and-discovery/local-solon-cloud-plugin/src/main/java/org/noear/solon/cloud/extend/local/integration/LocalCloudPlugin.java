@@ -22,9 +22,8 @@ import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.extend.local.impl.job.JobManager;
 import org.noear.solon.cloud.extend.local.service.*;
 import org.noear.solon.core.AppContext;
-import org.noear.solon.core.LifecycleIndex;
+import org.noear.solon.core.Constants;
 import org.noear.solon.core.Plugin;
-import org.noear.solon.core.util.LogUtil;
 import org.noear.solon.core.util.ResourceUtil;
 import org.noear.solon.core.util.RunUtil;
 import org.slf4j.Logger;
@@ -70,7 +69,7 @@ public class LocalCloudPlugin implements Plugin {
 
             CloudManager.register(new CloudJobServiceLocalImpl());
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, () -> {
+            context.lifecycle(Constants.LF_IDX_PLUGIN_BEAN_USES, () -> {
                 if (JobManager.count() > 0) {
                     JobManager.start();
                 }

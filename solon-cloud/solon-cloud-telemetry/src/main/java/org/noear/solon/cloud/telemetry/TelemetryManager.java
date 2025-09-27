@@ -23,7 +23,6 @@ import org.noear.solon.cloud.telemetry.annotation.TracingInterceptor;
 import org.noear.solon.cloud.telemetry.integration.NamiFilterTracing;
 import org.noear.solon.cloud.telemetry.integration.SolonFilterTracing;
 import org.noear.solon.cloud.telemetry.service.TracerFactory;
-import org.noear.solon.core.util.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

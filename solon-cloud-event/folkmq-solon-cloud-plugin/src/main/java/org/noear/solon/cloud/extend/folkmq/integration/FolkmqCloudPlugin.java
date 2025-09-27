@@ -23,7 +23,7 @@ import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.extend.folkmq.service.CloudEventServiceFolkMqImpl;
 import org.noear.solon.core.AppContext;
-import org.noear.solon.core.LifecycleIndex;
+import org.noear.solon.core.Constants;
 import org.noear.solon.core.Plugin;
 
 /**
@@ -43,7 +43,7 @@ public class FolkmqCloudPlugin implements Plugin {
             CloudEventServiceFolkMqImpl eventServiceImp = new CloudEventServiceFolkMqImpl(cloudProps);
             CloudManager.register(eventServiceImp);
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
+            context.lifecycle(Constants.LF_IDX_PLUGIN_BEAN_USES, eventServiceImp);
 
 
             //加入容器

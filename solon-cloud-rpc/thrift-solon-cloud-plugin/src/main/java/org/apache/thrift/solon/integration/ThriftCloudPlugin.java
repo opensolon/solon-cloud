@@ -27,7 +27,6 @@ import org.apache.thrift.transport.TTransportException;
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.core.*;
-import org.noear.solon.core.util.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +73,7 @@ public class ThriftCloudPlugin implements Plugin {
         context.beanBuilderAdd(ThriftService.class, new ThriftServiceBeanBuilder(serviceMap));
         context.beanInjectorAdd(ThriftClient.class, new ThriftClientBeanInjector(clientMap));
 
-        context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, this::startForServer);
+        context.lifecycle(Constants.LF_IDX_PLUGIN_BEAN_USES, this::startForServer);
 
     }
 

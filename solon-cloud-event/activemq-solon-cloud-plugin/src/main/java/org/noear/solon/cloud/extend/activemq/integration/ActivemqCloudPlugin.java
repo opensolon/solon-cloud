@@ -20,7 +20,7 @@ import org.noear.solon.cloud.CloudManager;
 import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.extend.activemq.service.CloudEventServiceActivemqImpl;
 import org.noear.solon.core.AppContext;
-import org.noear.solon.core.LifecycleIndex;
+import org.noear.solon.core.Constants;
 import org.noear.solon.core.Plugin;
 
 /**
@@ -41,7 +41,7 @@ public class ActivemqCloudPlugin implements Plugin {
             CloudManager.register(eventServiceImp);
 
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
+            context.lifecycle(Constants.LF_IDX_PLUGIN_BEAN_USES, eventServiceImp);
         }
     }
 }

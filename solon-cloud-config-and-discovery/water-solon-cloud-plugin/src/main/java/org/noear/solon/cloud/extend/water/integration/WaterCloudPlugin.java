@@ -29,7 +29,7 @@ import org.noear.solon.cloud.extend.water.service.*;
 import org.noear.solon.cloud.model.Config;
 import org.noear.solon.cloud.model.Instance;
 import org.noear.solon.core.AppContext;
-import org.noear.solon.core.LifecycleIndex;
+import org.noear.solon.core.Constants;
 import org.noear.solon.core.Plugin;
 import org.noear.water.WW;
 import org.noear.water.WaterAddress;
@@ -192,7 +192,7 @@ public class WaterCloudPlugin implements Plugin {
                         0, new HandlerConfigUpdate(configServiceImp));
             }
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, eventServiceImp);
+            context.lifecycle(Constants.LF_IDX_PLUGIN_BEAN_USES, eventServiceImp);
         }
 
         if (cloudProps.getLockEnable()) {
@@ -206,7 +206,7 @@ public class WaterCloudPlugin implements Plugin {
         if (cloudProps.getJobEnable()) {
             CloudManager.register(CloudJobServiceWaterImpl.instance);
 
-            context.lifecycle(LifecycleIndex.PLUGIN_BEAN_USES, CloudJobServiceWaterImpl.instance);
+            context.lifecycle(Constants.LF_IDX_PLUGIN_BEAN_USES, CloudJobServiceWaterImpl.instance);
         }
 
 

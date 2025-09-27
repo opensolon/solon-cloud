@@ -24,7 +24,6 @@ import org.noear.solon.cloud.model.Instance;
 import org.noear.solon.cloud.service.*;
 import org.noear.solon.core.Signal;
 import org.noear.solon.core.event.AppLoadEndEvent;
-import org.noear.solon.core.util.LogUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

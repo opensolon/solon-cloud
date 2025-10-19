@@ -16,7 +16,7 @@
 package org.noear.solon.cloud.extend.pulsar.service;
 
 import org.apache.pulsar.client.api.*;
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
@@ -93,7 +93,7 @@ public class CloudEventServicePulsarImpl implements CloudEventServicePlus, Lifec
             topicNew = event.group() + PulsarProps.GROUP_SPLIT_MARK + event.topic();
         }
 
-        byte[] event_data = ONode.stringify(event).getBytes(StandardCharsets.UTF_8);
+        byte[] event_data = ONode.serialize(event).getBytes(StandardCharsets.UTF_8);
 
 
         try (Producer<byte[]> producer = client.newProducer().topic(topicNew).create()) {

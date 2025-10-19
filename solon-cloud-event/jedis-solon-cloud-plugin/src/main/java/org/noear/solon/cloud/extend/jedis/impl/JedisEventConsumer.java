@@ -15,7 +15,7 @@
  */
 package org.noear.solon.cloud.extend.jedis.impl;
 
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.CloudProps;

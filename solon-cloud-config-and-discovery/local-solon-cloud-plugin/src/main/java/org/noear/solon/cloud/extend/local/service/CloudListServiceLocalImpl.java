@@ -15,7 +15,7 @@
  */
 package org.noear.solon.cloud.extend.local.service;
 
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.cloud.CloudProps;
 import org.noear.solon.cloud.extend.local.impl.CloudLocalUtils;
 import org.noear.solon.cloud.service.CloudListService;
@@ -78,9 +78,9 @@ public class CloudListServiceLocalImpl implements CloudListService {
                     } else {
                         listVal = new ArrayList<>();
 
-                        ONode oNode = ONode.load(value2);
+                        ONode oNode = ONode.ofJson(value2);
                         if (oNode.isArray()) {
-                            for (ONode o1 : oNode.ary()) {
+                            for (ONode o1 : oNode.getArrayUnsafe()) {
                                 listVal.add(o1.getString());
                             }
                         }

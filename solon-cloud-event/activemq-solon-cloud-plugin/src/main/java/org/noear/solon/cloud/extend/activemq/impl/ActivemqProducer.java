@@ -17,7 +17,7 @@ package org.noear.solon.cloud.extend.activemq.impl;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.activemq.ScheduledMessage;
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.cloud.model.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +98,7 @@ public class ActivemqProducer {
         MessageProducer producer = session.createProducer(destination);
 
         //创建消息
-        TextMessage textMessage = session.createTextMessage(ONode.stringify(event));
+        TextMessage textMessage = session.createTextMessage(ONode.serialize(event));
 
         //支持延时消息
         if (delay > 0) {

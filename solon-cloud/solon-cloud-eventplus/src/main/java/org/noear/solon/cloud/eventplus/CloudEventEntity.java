@@ -15,7 +15,7 @@
  */
 package org.noear.solon.cloud.eventplus;
 
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudClient;
@@ -68,7 +68,7 @@ public interface CloudEventEntity {
         //支持${xxx}配置
         String group2 = Solon.cfg().getByTmpl(anno2.group());
 
-        String content = ONode.stringify(this);
+        String content = ONode.serialize(this);
 
         return CloudClient.event().publish(new Event(topic2, content).qos(anno2.qos()).group(group2).tags(anno2.tag()).channel(anno2.channel()));
     }

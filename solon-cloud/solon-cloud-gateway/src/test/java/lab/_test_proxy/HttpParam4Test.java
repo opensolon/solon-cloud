@@ -17,7 +17,7 @@ package lab._test_proxy;
 
 import features._utils.Datetime;
 import org.junit.jupiter.api.Test;
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.test.HttpTester;
 import org.noear.solon.test.SolonTest;
 
@@ -35,7 +35,7 @@ public class HttpParam4Test extends HttpTester {
 
         String json2 = path("/demo2/param4/json").bodyOfJson(json).post();
 
-        ONode oNode2 = ONode.loadStr(json2);
+        ONode oNode2 = ONode.ofJson(json2);
 
         assert oNode2.get("id").getInt() == 1;
         assert new Datetime(oNode2.get("date").getDate()).getYear() > 2000;
@@ -48,7 +48,7 @@ public class HttpParam4Test extends HttpTester {
 
         String json2 = path("/demo2/param4/json_2").bodyOfJson(json).post();
 
-        ONode oNode2 = ONode.loadStr(json2);
+        ONode oNode2 = ONode.ofJson(json2);
 
         assert oNode2.get("id").getInt() == 1;
         assert new Datetime(oNode2.get("date").getDate()).getYear() > 2000;
@@ -82,7 +82,7 @@ public class HttpParam4Test extends HttpTester {
 
         String json2 = path("/demo2/param4/json").bodyOfJson(json).post();
 
-        ONode oNode2 = ONode.loadStr(json2);
+        ONode oNode2 = ONode.ofJson(json2);
 
         assert oNode2.get("id").getInt() == 1;
         assert new Datetime(oNode2.get("date").getDate()).getYear() > 2000;
@@ -95,7 +95,7 @@ public class HttpParam4Test extends HttpTester {
 
         String json2 = path("/demo2/param4/json2").bodyOfJson(json).post();
 
-        ONode oNode2 = ONode.loadStr(json2);
+        ONode oNode2 = ONode.ofJson(json2);
 
         assert oNode2.isArray();
         assert oNode2.get(0).get("id").getInt() == 1;
@@ -141,7 +141,7 @@ public class HttpParam4Test extends HttpTester {
                 .data("date", "2021-12-12")
                 .post();
 
-        ONode oNode2 = ONode.loadStr(json2);
+        ONode oNode2 = ONode.ofJson(json2);
 
         assert oNode2.get("id").getInt() == 1;
         assert new Datetime(oNode2.get("date").getDate()).getYear() > 2000;
@@ -156,7 +156,7 @@ public class HttpParam4Test extends HttpTester {
                 .data("type", "vip")
                 .post();
 
-        ONode oNode2 = ONode.loadStr(json2);
+        ONode oNode2 = ONode.ofJson(json2);
 
         assert oNode2.get("id").getInt() == 1;
     }
@@ -168,7 +168,7 @@ public class HttpParam4Test extends HttpTester {
                 .data("type", "vip")
                 .post();
 
-        ONode oNode2 = ONode.loadStr(json2);
+        ONode oNode2 = ONode.ofJson(json2);
 
         assert oNode2.getInt() == 1;
     }
@@ -182,7 +182,7 @@ public class HttpParam4Test extends HttpTester {
                 .data("date", "2021-12-12 12:12:12")
                 .post();
 
-        ONode oNode2 = ONode.loadStr(json2);
+        ONode oNode2 = ONode.ofJson(json2);
 
         assert oNode2.get("id").getInt() == 1;
         assert new Datetime(oNode2.get("date").getDate()).getYear() > 2000;
@@ -198,7 +198,7 @@ public class HttpParam4Test extends HttpTester {
                 .data("date", "2021-12-12 12:12:12")
                 .post();
 
-        ONode oNode2 = ONode.loadStr(json2);
+        ONode oNode2 = ONode.ofJson(json2);
 
         assert oNode2.get("id").getInt() == 1;
         assert new Datetime(oNode2.get("date").getDate()).getYear() > 2000;
@@ -217,7 +217,7 @@ public class HttpParam4Test extends HttpTester {
         //走param，@Param 的格式化会起效果
         String json2 = path("/demo2/param4/param3").bodyOfJson(oNode.toJson()).post();
 
-        ONode oNode2 = ONode.loadStr(json2);
+        ONode oNode2 = ONode.ofJson(json2);
 
         assert oNode2.get("id").getInt() == 1;
         assert new Datetime(oNode2.get("date").getDate()).getYear() > 2000;
@@ -279,7 +279,7 @@ public class HttpParam4Test extends HttpTester {
 
         System.out.println(body);
         String body2 = path("/demo2/param4/body2").bodyOfJson(body).post();
-        ONode oNode = ONode.loadStr(body2);
+        ONode oNode = ONode.ofJson(body2);
 
 
         assert oNode.get("username").getString().equals("noear");
@@ -292,7 +292,7 @@ public class HttpParam4Test extends HttpTester {
 
         System.out.println(body);
         String body2 = path("/demo2/param4/body2_t").bodyOfJson(body).post();
-        ONode oNode = ONode.loadStr(body2);
+        ONode oNode = ONode.ofJson(body2);
 
 
         assert oNode.get("page").getInt() == 1;
@@ -315,7 +315,7 @@ public class HttpParam4Test extends HttpTester {
     public void test2() throws IOException {
         String body2 = path("/demo2/param4/test2?id=3&aaa[0]=1&aaa[1]=2").get();
 
-        ONode oNode = ONode.loadStr(body2);
+        ONode oNode = ONode.ofJson(body2);
 
         assert oNode.get("id").getInt() == 3;
         assert oNode.get("aaa").get(0).getInt() == 1;

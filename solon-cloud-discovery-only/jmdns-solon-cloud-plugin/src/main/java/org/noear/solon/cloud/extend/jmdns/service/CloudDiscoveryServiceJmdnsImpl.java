@@ -15,7 +15,7 @@
  */
 package org.noear.solon.cloud.extend.jmdns.service;
 
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudDiscoveryHandler;
@@ -85,7 +85,7 @@ public class CloudDiscoveryServiceJmdnsImpl implements CloudDiscoveryService {
         int priority = (int) (10 - instance.weight() % 10); // 只取个位和十分位作为权重和优先级，优先级越小越优先
         int weight = (int) ((instance.weight()*10) % 10);   // 权重越大越优先
         Map<String, String> props = new HashMap<>();
-        props.put(instance.address(), ONode.stringify(instance));
+        props.put(instance.address(), ONode.serialize(instance));
 
         ServiceInfo serviceInfo = ServiceInfo.create(
                 getType(group),

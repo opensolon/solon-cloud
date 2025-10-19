@@ -17,7 +17,7 @@ package org.noear.solon.cloud.extend.rabbitmq.impl;
 
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.Envelope;
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.extend.rabbitmq.RabbitmqProps;

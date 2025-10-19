@@ -17,7 +17,7 @@ package org.noear.solon.cloud.extend.folkmq.impl;
 
 import org.noear.folkmq.client.MqMessageReceived;
 import org.noear.folkmq.client.MqConsumeHandler;
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.extend.folkmq.FolkmqProps;

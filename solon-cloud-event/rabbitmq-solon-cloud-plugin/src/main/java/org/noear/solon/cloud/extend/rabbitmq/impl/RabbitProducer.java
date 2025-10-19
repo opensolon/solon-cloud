@@ -18,7 +18,7 @@ package org.noear.solon.cloud.extend.rabbitmq.impl;
 import com.rabbitmq.client.AMQP;
 import com.rabbitmq.client.BuiltinExchangeType;
 import com.rabbitmq.client.Channel;
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.cloud.model.Event;
 
 import java.nio.charset.StandardCharsets;
@@ -49,7 +49,7 @@ public class RabbitProducer {
     }
 
     public boolean publish(Event event, String topic, long delay) throws Exception {
-        byte[] event_data = ONode.stringify(event).getBytes(StandardCharsets.UTF_8);
+        byte[] event_data = ONode.serialize(event).getBytes(StandardCharsets.UTF_8);
 
         AMQP.BasicProperties props;
         if (delay > 0) {

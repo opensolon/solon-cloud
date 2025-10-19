@@ -15,7 +15,7 @@
  */
 package org.noear.solon.cloud.extend.zookeeper.service;
 
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudDiscoveryHandler;
@@ -75,7 +75,7 @@ public class CloudDiscoveryServiceZkImp implements CloudDiscoveryService {
             client.createNode(
                     String.format("%s/%s/%s", PATH_ROOT, group, instance.service()));
 
-            String info = ONode.stringify(instance);
+            String info = ONode.serialize(instance);
             client.createNode(
                     String.format("%s/%s/%s/%s", PATH_ROOT, group, instance.service(), instance.address()),
                     info, false);

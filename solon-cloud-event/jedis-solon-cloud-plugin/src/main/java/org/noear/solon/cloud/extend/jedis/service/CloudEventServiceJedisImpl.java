@@ -16,7 +16,7 @@
 package org.noear.solon.cloud.extend.jedis.service;
 
 import org.noear.redisx.RedisClient;
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.CloudProps;
@@ -100,7 +100,7 @@ public class CloudEventServiceJedisImpl implements CloudEventServicePlus, Lifecy
             topicNew = event.group() + JedisProps.GROUP_SPLIT_MARK + event.topic();
         }
 
-        client.open(s -> s.publish(topicNew, ONode.stringify(event)));
+        client.open(s -> s.publish(topicNew, ONode.serialize(event)));
         return true;
     }
 

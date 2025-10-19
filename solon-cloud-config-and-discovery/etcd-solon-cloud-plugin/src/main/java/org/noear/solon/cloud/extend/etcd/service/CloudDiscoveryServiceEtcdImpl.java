@@ -23,7 +23,7 @@ import io.etcd.jetcd.watch.WatchEvent;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudDiscoveryHandler;
@@ -64,7 +64,7 @@ public class CloudDiscoveryServiceEtcdImpl implements CloudDiscoveryService {
     public void registerState(String group, Instance instance, boolean health) {
         if (health) {
 
-            String info = ONode.stringify(instance);
+            String info = ONode.serialize(instance);
             String key = String.format("%s/%s/%s/%s",
                     PATH_ROOT, group, instance.service(),instance.address());
             client.putWithLease(key,info);

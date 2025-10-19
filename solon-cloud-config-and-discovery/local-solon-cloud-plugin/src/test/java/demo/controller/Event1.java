@@ -15,7 +15,7 @@
  */
 package demo.controller;
 
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.annotation.CloudEvent;
 import org.noear.solon.cloud.model.Event;
@@ -27,7 +27,7 @@ import org.noear.solon.cloud.model.Event;
 public class Event1 implements CloudEventHandler {
     @Override
     public boolean handle(Event event) throws Throwable {
-        System.out.println("云端事件打印: " + ONode.stringify(event));
+        System.out.println("云端事件打印: " + ONode.serialize(event));
         return true;
     }
 }

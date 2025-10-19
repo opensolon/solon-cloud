@@ -15,7 +15,7 @@
  */
 package demo;
 
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.cloud.CloudJobHandler;
 import org.noear.solon.cloud.annotation.CloudJob;
 import org.noear.solon.core.handle.Context;
@@ -27,6 +27,6 @@ public class Job1 implements CloudJobHandler {
     public void handle(Context ctx) throws Throwable {
         JobExecutionContext jobContext = (JobExecutionContext)ctx.request();
 
-        System.out.println(ONode.stringify(jobContext));
+        System.out.println(ONode.serialize(jobContext));
     }
 }

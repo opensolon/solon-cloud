@@ -16,7 +16,7 @@
 package org.noear.solon.cloud.extend.activemq.impl;
 
 import org.apache.activemq.command.ActiveMQTextMessage;
-import org.noear.snack.ONode;
+import org.noear.snack4.ONode;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.extend.activemq.ActivemqProps;

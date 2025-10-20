@@ -13,7 +13,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 This project includes:
-  Apache Commons Pool under Apache License, Version 2.0
+  Apache Commons Pool under Apache-2.0
+  BSON under The Apache License, Version 2.0
+  BSON Record Codec under The Apache License, Version 2.0
+  error-prone annotations under Apache 2.0
   Gson under Apache-2.0
   HikariCP under The Apache Software License, Version 2.0
   IntelliJ IDEA Annotations under The Apache Software License, Version 2.0
@@ -23,24 +26,30 @@ This project includes:
   Kotlin Stdlib Common under The Apache License, Version 2.0
   Kotlin Stdlib Jdk7 under The Apache License, Version 2.0
   Kotlin Stdlib Jdk8 under The Apache License, Version 2.0
-  MongoDB Java Driver (unmaintained) under The Apache License, Version 2.0
+  MongoDB Driver under The Apache License, Version 2.0
+  MongoDB Java Driver Core under The Apache License, Version 2.0
   mongox under The Apache Software License, Version 2.0
   okhttp under The Apache Software License, Version 2.0
   okio under The Apache Software License, Version 2.0
+  redis-authx-core under MIT
   redisx under The Apache Software License, Version 2.0
-  SLF4J API Module under MIT License
+  SLF4J API Module under MIT
   snack3 under The Apache Software License, Version 2.0
+  snack4 under The Apache Software License, Version 2.0
   solon under The Apache Software License, Version 2.0
-  solon.cloud under The Apache Software License, Version 2.0
-  solon.data under The Apache Software License, Version 2.0
-  solon.health under The Apache Software License, Version 2.0
-  solon.logging under The Apache Software License, Version 2.0
-  solon.logging.simple under The Apache Software License, Version 2.0
-  solon.security.vault under The Apache Software License, Version 2.0
+  solon-cache under The Apache Software License, Version 2.0
+  solon-cloud under The Apache Software License, Version 2.0
+  solon-data under The Apache Software License, Version 2.0
+  solon-expression under The Apache Software License, Version 2.0
+  solon-health under The Apache Software License, Version 2.0
+  solon-logging under The Apache Software License, Version 2.0
+  solon-logging-simple under The Apache Software License, Version 2.0
+  solon-security-vault under The Apache Software License, Version 2.0
+  solonx-licence under The Apache Software License, Version 2.0
   Spymemcached under The Apache Software License, Version 2.0
   water-solon-cloud-plugin under The Apache Software License, Version 2.0
-  water.client under The Apache Software License, Version 2.0
-  water.utils under The Apache Software License, Version 2.0
+  water.client under GNU AFFERO GENERAL PUBLIC LICENSE Version 3
+  water.utils under GNU AFFERO GENERAL PUBLIC LICENSE Version 3
   wood under The Apache Software License, Version 2.0
   wood.cache.memcached under The Apache Software License, Version 2.0
   wood.cache.redis under The Apache Software License, Version 2.0

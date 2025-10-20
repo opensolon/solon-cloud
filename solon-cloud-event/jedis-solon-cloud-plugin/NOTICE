@@ -13,18 +13,22 @@ See the License for the specific language governing permissions and
 limitations under the License.
 
 This project includes:
-  Apache Commons Pool under Apache License, Version 2.0
+  Apache Commons Pool under Apache-2.0
+  error-prone annotations under Apache 2.0
   Gson under Apache-2.0
   Jedis under MIT
   jedis-solon-cloud-plugin under The Apache Software License, Version 2.0
   JSON in Java under Public Domain
+  redis-authx-core under MIT
   redisx under The Apache Software License, Version 2.0
-  SLF4J API Module under MIT License
-  snack3 under The Apache Software License, Version 2.0
+  SLF4J API Module under MIT
+  snack4 under The Apache Software License, Version 2.0
   solon under The Apache Software License, Version 2.0
-  solon.cloud under The Apache Software License, Version 2.0
-  solon.data under The Apache Software License, Version 2.0
-  solon.health under The Apache Software License, Version 2.0
-  solon.logging under The Apache Software License, Version 2.0
-  solon.security.vault under The Apache Software License, Version 2.0
+  solon-cache under The Apache Software License, Version 2.0
+  solon-cloud under The Apache Software License, Version 2.0
+  solon-data under The Apache Software License, Version 2.0
+  solon-expression under The Apache Software License, Version 2.0
+  solon-health under The Apache Software License, Version 2.0
+  solon-logging under The Apache Software License, Version 2.0
+  solon-security-vault under The Apache Software License, Version 2.0
 

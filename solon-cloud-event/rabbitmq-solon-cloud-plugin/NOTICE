@@ -15,12 +15,14 @@ limitations under the License.
 This project includes:
   RabbitMQ Java Client under AL 2.0 or GPL v2 or MPL 2.0
   rabbitmq-solon-cloud-plugin under The Apache Software License, Version 2.0
-  SLF4J API Module under MIT License
-  snack3 under The Apache Software License, Version 2.0
+  SLF4J API Module under MIT
+  snack4 under The Apache Software License, Version 2.0
   solon under The Apache Software License, Version 2.0
-  solon.cloud under The Apache Software License, Version 2.0
-  solon.data under The Apache Software License, Version 2.0
-  solon.health under The Apache Software License, Version 2.0
-  solon.logging under The Apache Software License, Version 2.0
-  solon.security.vault under The Apache Software License, Version 2.0
+  solon-cache under The Apache Software License, Version 2.0
+  solon-cloud under The Apache Software License, Version 2.0
+  solon-data under The Apache Software License, Version 2.0
+  solon-expression under The Apache Software License, Version 2.0
+  solon-health under The Apache Software License, Version 2.0
+  solon-logging under The Apache Software License, Version 2.0
+  solon-security-vault under The Apache Software License, Version 2.0
 

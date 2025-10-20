@@ -50,14 +50,16 @@ This project includes:
   proto-google-common-protos under Apache-2.0
   Protocol Buffers [Core] under BSD-3-Clause
   Protocol Buffers [Util] under BSD-3-Clause
-  SLF4J API Module under MIT License
-  snack3 under The Apache Software License, Version 2.0
+  SLF4J API Module under MIT
+  snack4 under The Apache Software License, Version 2.0
   solon under The Apache Software License, Version 2.0
-  solon.cloud under The Apache Software License, Version 2.0
-  solon.data under The Apache Software License, Version 2.0
-  solon.health under The Apache Software License, Version 2.0
-  solon.logging under The Apache Software License, Version 2.0
-  solon.security.vault under The Apache Software License, Version 2.0
+  solon-cache under The Apache Software License, Version 2.0
+  solon-cloud under The Apache Software License, Version 2.0
+  solon-data under The Apache Software License, Version 2.0
+  solon-expression under The Apache Software License, Version 2.0
+  solon-health under The Apache Software License, Version 2.0
+  solon-logging under The Apache Software License, Version 2.0
+  solon-security-vault under The Apache Software License, Version 2.0
   Vert.x Core under The Apache Software License, Version 2.0 or Eclipse Public License - v 2.0
   Vert.x gRPC under The Apache Software License, Version 2.0 or Eclipse Public License - v 1.0
 

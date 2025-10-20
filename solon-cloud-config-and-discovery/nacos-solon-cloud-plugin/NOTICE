@@ -20,7 +20,6 @@ This project includes:
   Apache HttpClient under Apache License, Version 2.0
   Apache HttpCore under Apache License, Version 2.0
   Apache HttpCore NIO under Apache License, Version 2.0
-  Byte Buddy (without dependencies) under Apache License, Version 2.0
   Checker Qual under The MIT License
   error-prone annotations under Apache 2.0
   FindBugs-jsr305 under The Apache Software License, Version 2.0
@@ -31,21 +30,23 @@ This project includes:
   Jackson-annotations under The Apache Software License, Version 2.0
   Jackson-core under The Apache Software License, Version 2.0
   jackson-databind under The Apache Software License, Version 2.0
-  nacos-api 1.4.7 under Apache License, Version 2.0
-  nacos-client 1.4.7 under Apache License, Version 2.0
-  nacos-common 1.4.7 under Apache License, Version 2.0
+  nacos-api 1.4.8 under Apache License, Version 2.0
+  nacos-client 1.4.8 under Apache License, Version 2.0
+  nacos-common 1.4.8 under Apache License, Version 2.0
   nacos-solon-cloud-plugin under The Apache Software License, Version 2.0
   Prometheus Java Simpleclient under The Apache Software License, Version 2.0
   Prometheus Java Span Context Supplier - Common under The Apache Software License, Version 2.0
   Prometheus Java Span Context Supplier - OpenTelemetry under The Apache Software License, Version 2.0
   Prometheus Java Span Context Supplier - OpenTelemetry Agent under The Apache Software License, Version 2.0
-  SLF4J API Module under MIT License
-  snack3 under The Apache Software License, Version 2.0
+  SLF4J API Module under MIT
+  snack4 under The Apache Software License, Version 2.0
   SnakeYAML under Apache License, Version 2.0
   solon under The Apache Software License, Version 2.0
-  solon.cloud under The Apache Software License, Version 2.0
-  solon.data under The Apache Software License, Version 2.0
-  solon.health under The Apache Software License, Version 2.0
-  solon.logging under The Apache Software License, Version 2.0
-  solon.security.vault under The Apache Software License, Version 2.0
+  solon-cache under The Apache Software License, Version 2.0
+  solon-cloud under The Apache Software License, Version 2.0
+  solon-data under The Apache Software License, Version 2.0
+  solon-expression under The Apache Software License, Version 2.0
+  solon-health under The Apache Software License, Version 2.0
+  solon-logging under The Apache Software License, Version 2.0
+  solon-security-vault under The Apache Software License, Version 2.0
 

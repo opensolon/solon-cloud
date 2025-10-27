@@ -15,8 +15,8 @@
  */
 package org.noear.solon.cloud.metrics.export;
 
-import io.micrometer.prometheus.PrometheusConfig;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusConfig;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.BeanWrap;

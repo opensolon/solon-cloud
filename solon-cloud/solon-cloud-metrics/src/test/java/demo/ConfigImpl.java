@@ -16,6 +16,9 @@
 package demo;
 
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.binder.jvm.JvmMemoryMetrics;
+import io.micrometer.core.instrument.binder.jvm.JvmThreadMetrics;
+import io.micrometer.core.instrument.binder.system.ProcessorMetrics;
 import org.noear.solon.annotation.Bean;
 import org.noear.solon.annotation.Configuration;
 
@@ -28,5 +31,11 @@ public class ConfigImpl {
     public void bind(MeterRegistry registry){
         registry.config().commonTags().commonTags("author","noear");
         new MeterBinderImpl().bindTo(registry);
+
+        new JvmMemoryMetrics().bindTo(registry);
+        new JvmThreadMetrics().bindTo(registry);
+        new ProcessorMetrics().bindTo(registry);
+
+
     }
 }

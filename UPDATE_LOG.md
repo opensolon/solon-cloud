@@ -2,6 +2,9 @@
 
 * solon-cloud-gateway 增加 websocket 的转发支持（协议头：ws）
 
+### 3.7.0
+
+* 移除 solon.xxx 和 nami.xxx 风格的发布包
 
 ### 3.5.2
 

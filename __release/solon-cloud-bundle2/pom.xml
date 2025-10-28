@@ -35,9 +35,5 @@
 
         <module>../../solon-cloud-rpc/grpc-solon-cloud-plugin</module>
         <module>../../solon-cloud-rpc/thrift-solon-cloud-plugin</module>
-
-        <module>../../solon-cloud-trace/opentracing-solon-cloud-plugin</module>
-        <module>../../solon-cloud-trace/jaeger-solon-cloud-plugin</module>
-        <module>../../solon-cloud-trace/zipkin-solon-cloud-plugin</module>
     </modules>
 </project>

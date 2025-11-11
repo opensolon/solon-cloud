@@ -74,6 +74,7 @@ public class RouteFactoryManager {
         //----------
         addHandler(new HttpRouteHandler());
         addHandler(new LbRouteHandler());
+        addHandler(new WebSocketRouteHandler());
     }
 
 

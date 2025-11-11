@@ -1,0 +1,20 @@
+server.port: 8901
+
+solon.app:
+  name: websocket-gateway
+  group: gateway
+
+solon.cloud.gateway:
+  routes:
+    - id: "websocket-test"
+      target: "ws://localhost:8081"
+      predicates:
+        - "Path=/websocket/**"
+    - id: "wss-test"
+      target: "wss://localhost:8082"
+      predicates:
+        - "Path=/wss/**"
+
+solon.logging.logger:
+  root:
+    level: "INFO"

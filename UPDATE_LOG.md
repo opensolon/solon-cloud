@@ -6,6 +6,7 @@
 ### 3.7.2
 
 * 新增 resilience4j-solon-cloud-plugin 插件
+* 新增 solon-cloud-gateway websocket 代理支持
 
 ### 3.7.0
 

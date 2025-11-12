@@ -24,6 +24,8 @@ import org.noear.solon.cloud.gateway.route.RouteHandler;
 import org.noear.solon.rx.Completable;
 import org.noear.solon.rx.CompletableEmitter;
 import org.noear.solon.core.exception.StatusException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * WebSocket 路由处理器
@@ -32,6 +34,8 @@ import org.noear.solon.core.exception.StatusException;
  * @since 3.7.1
  */
 public class WebSocketRouteHandler implements RouteHandler {
+    static final Logger log = LoggerFactory.getLogger(WebSocketRouteHandler.class);
+
     private WebSocketClient webSocketClient;
 
     public WebSocketRouteHandler() {
@@ -83,15 +87,11 @@ public class WebSocketRouteHandler implements RouteHandler {
      */
     private Future<WebSocket> buildWebSocketRequest(ExContext ctx) {
         // 配置绝对地址
-        String targetUri = ctx.targetNew().toString();
-        String pathAndQuery = ctx.newRequest().getPathAndQueryString();
-        
-        // 构建完整的 URI
-        String fullUri = targetUri + pathAndQuery;
-        
+        String targetUri = ctx.targetNew().toString() + ctx.newRequest().getPathAndQueryString();
+
         // 构建 WebSocket 选项
         WebSocketConnectOptions options = new WebSocketConnectOptions()
-                .setAbsoluteURI(fullUri)
+                .setAbsoluteURI(targetUri)
                 .setMethod(HttpMethod.GET);
 
         // 配置超时
@@ -111,31 +111,20 @@ public class WebSocketRouteHandler implements RouteHandler {
             // 获取原始连接的 WebSocket
             ExContextImpl ctxImpl = (ExContextImpl) ctx;
             HttpServerRequest rawRequest = ctxImpl.rawRequest();
-            
-            // 检查是否支持 WebSocket 升级
-            if (!isWebSocketUpgradeRequest(rawRequest)) {
-                emitter.onError(new StatusException("Not a WebSocket upgrade request", 400));
-                return;
-            }
 
-            // 升级当前请求为 WebSocket
-            Future<ServerWebSocket> serverWebSocketFuture = rawRequest.toWebSocket();
-            
-            serverWebSocketFuture.onComplete(serverAr -> {
-                if (serverAr.succeeded()) {
-                    ServerWebSocket serverWebSocket = serverAr.result();
-                    
+            // 升级当前请求为 WebSocket（会自动转发 header）
+            Future<ServerWebSocket> sourceWebSocketFuture = rawRequest.toWebSocket();
+
+            sourceWebSocketFuture.onComplete(sourceAr -> {
+                if (sourceAr.succeeded()) {
+                    ServerWebSocket sourceWebSocket = sourceAr.result();
+
                     // 双向转发消息
-                    setupWebSocketForwarding(serverWebSocket, targetWebSocket, emitter);
-                    
-                    // 设置响应头
-                    ctx.newResponse().status(101); // Switching Protocols
-                    ctx.newResponse().header("Upgrade", "websocket");
-                    ctx.newResponse().header("Connection", "Upgrade");
-                    
+                    setupWebSocketForwarding(sourceWebSocket, targetWebSocket);
+
                     emitter.onComplete();
                 } else {
-                    emitter.onError(serverAr.cause());
+                    emitter.onError(sourceAr.cause());
                 }
             });
 
@@ -143,74 +132,60 @@ public class WebSocketRouteHandler implements RouteHandler {
             emitter.onError(ex);
         }
     }
-    
-    /**
-     * 检查是否为 WebSocket 升级请求
-     */
-    private boolean isWebSocketUpgradeRequest(HttpServerRequest request) {
-        String upgradeHeader = request.getHeader("Upgrade");
-        String connectionHeader = request.getHeader("Connection");
-        
-        return "websocket".equalsIgnoreCase(upgradeHeader) && 
-               connectionHeader != null && 
-               connectionHeader.toLowerCase().contains("upgrade");
-    }
 
     /**
-     * 设置 WebSocket 消息双向转发
+     * 设置 WebSocket 消息双向转发和关闭/错误处理
      */
-    private void setupWebSocketForwarding(ServerWebSocket serverWebSocket, WebSocket targetWebSocket, CompletableEmitter emitter) {
-        // 从客户端到目标服务器的消息转发
-        serverWebSocket.textMessageHandler(message -> {
-            if (!targetWebSocket.isClosed()) {
-                targetWebSocket.writeTextMessage(message);
+    private void setupWebSocketForwarding(ServerWebSocket clientWS, WebSocket targetWS) {
+        // 使用 frameHandler 处理，以确保转发所有类型的帧（文本、二进制、Ping/Pong等）
+        clientWS.frameHandler(frame -> {
+            if (!targetWS.isClosed()) {
+                targetWS.writeFrame(frame);
             }
         });
 
-        serverWebSocket.binaryMessageHandler(message -> {
-            if (!targetWebSocket.isClosed()) {
-                targetWebSocket.writeBinaryMessage(message);
+        // 客户端连接关闭时，关闭目标连接
+        clientWS.closeHandler(v -> {
+            if (!targetWS.isClosed()) {
+                // 可以发送一个 close frame 到目标服务器
+                targetWS.close();
             }
         });
 
-        // 从目标服务器到客户端的消息转发
-        targetWebSocket.textMessageHandler(message -> {
-            if (!serverWebSocket.isClosed()) {
-                serverWebSocket.writeTextMessage(message);
+        // 客户端连接错误时，关闭目标连接
+        clientWS.exceptionHandler(error -> {
+            log.warn("Client WS Error: " + error.getMessage());
+
+            if (!targetWS.isClosed()) {
+                targetWS.close();
             }
         });
 
-        targetWebSocket.binaryMessageHandler(message -> {
-            if (!serverWebSocket.isClosed()) {
-                serverWebSocket.writeBinaryMessage(message);
+        // ----------------------------------------------------
+        // 2. 目标服务器 (targetWS) 到 客户端 (clientWS) 转发
+        // ----------------------------------------------------
+
+        // 使用 frameHandler 处理所有类型的帧
+        targetWS.frameHandler(frame -> {
+            if (!clientWS.isClosed()) {
+                clientWS.writeFrame(frame);
             }
         });
 
-        // 错误处理
-        serverWebSocket.exceptionHandler(error -> {
-            if (!targetWebSocket.isClosed()) {
-                targetWebSocket.close();
-            }
-            emitter.onError(error);
-        });
-
-        targetWebSocket.exceptionHandler(error -> {
-            if (!serverWebSocket.isClosed()) {
-                serverWebSocket.close();
-            }
-            emitter.onError(error);
-        });
-
-        // 关闭处理
-        serverWebSocket.closeHandler(v -> {
-            if (!targetWebSocket.isClosed()) {
-                targetWebSocket.close();
+        // 目标连接关闭时，关闭客户端连接
+        targetWS.closeHandler(v -> {
+            if (!clientWS.isClosed()) {
+                // 可以发送一个 close frame 到客户端
+                clientWS.close();
             }
         });
 
-        targetWebSocket.closeHandler(v -> {
-            if (!serverWebSocket.isClosed()) {
-                serverWebSocket.close();
+        // 目标连接错误时，关闭客户端连接
+        targetWS.exceptionHandler(error -> {
+            log.warn("Target WS Error: " + error.getMessage());
+
+            if (!clientWS.isClosed()) {
+                clientWS.close();
             }
         });
     }

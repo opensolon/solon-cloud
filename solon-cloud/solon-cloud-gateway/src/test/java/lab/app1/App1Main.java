@@ -19,6 +19,8 @@ import org.noear.solon.Solon;
 
 public class App1Main {
     public static void main(String[] args) {
-        Solon.start(App1Main.class, new String[]{"--cfg=app1.yml"});
+        Solon.start(App1Main.class, new String[]{"--cfg=app1.yml"}, app -> {
+            app.enableWebSocket(true);
+        });
     }
 }

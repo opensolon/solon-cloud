@@ -26,6 +26,10 @@ solon.cloud.gateway:
         - "Path=/h5/**"
       filters:
         - "StripPrefix=1"
+    - id: "ws-test"
+      target: "ws://localhost:8080"
+      predicates:
+        - "Path=/ws/**"
 
 solon.logging.logger:
   root:

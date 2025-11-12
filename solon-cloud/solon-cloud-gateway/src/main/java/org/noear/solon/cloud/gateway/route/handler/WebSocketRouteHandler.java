@@ -100,17 +100,6 @@ public class WebSocketRouteHandler implements RouteHandler {
             options.setTimeout(ctx.timeout().getResponseTimeout() * 1000);
         }
 
-        // 添加 WebSocket 升级头
-        options.addHeader("Upgrade", "websocket");
-        options.addHeader("Connection", "Upgrade");
-
-        // 复制原始请求头
-        for (org.noear.solon.core.util.KeyValues<String> kv : ctx.newRequest().getHeaders()) {
-            if (kv.getValues() != null && !kv.getValues().isEmpty()) {
-                options.addHeader(kv.getKey(), kv.getValues().get(0));
-            }
-        }
-
         return webSocketClient.connect(options);
     }
 
@@ -172,12 +161,6 @@ public class WebSocketRouteHandler implements RouteHandler {
      */
     private void setupWebSocketForwarding(ServerWebSocket serverWebSocket, WebSocket targetWebSocket, CompletableEmitter emitter) {
         // 从客户端到目标服务器的消息转发
-        serverWebSocket.frameHandler(frame -> {
-            if (!targetWebSocket.isClosed()) {
-                targetWebSocket.writeFrame(frame);
-            }
-        });
-
         serverWebSocket.textMessageHandler(message -> {
             if (!targetWebSocket.isClosed()) {
                 targetWebSocket.writeTextMessage(message);
@@ -191,12 +174,6 @@ public class WebSocketRouteHandler implements RouteHandler {
         });
 
         // 从目标服务器到客户端的消息转发
-        targetWebSocket.frameHandler(frame -> {
-            if (!serverWebSocket.isClosed()) {
-                serverWebSocket.writeFrame(frame);
-            }
-        });
-
         targetWebSocket.textMessageHandler(message -> {
             if (!serverWebSocket.isClosed()) {
                 serverWebSocket.writeTextMessage(message);

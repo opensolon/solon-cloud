@@ -6,7 +6,7 @@ solon.app:
 
 solon.cloud.gateway:
   routes:
-    - id: "websocket-test"
+    - id: "ws-test"
       target: "ws://localhost:8081"
       predicates:
         - "Path=/websocket/**"

@@ -26,6 +26,8 @@ public class DemoWebSocket implements WebSocketListener {
     @Override
     public void onMessage(WebSocket socket, String text) throws IOException {
         log.warn("onMessage: {}", text);
+
+        socket.send("收到：" + text);
     }
 
     @Override

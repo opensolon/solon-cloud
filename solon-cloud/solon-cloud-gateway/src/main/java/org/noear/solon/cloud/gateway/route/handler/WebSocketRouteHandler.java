@@ -83,12 +83,15 @@ public class WebSocketRouteHandler implements RouteHandler {
      */
     private Future<WebSocket> buildWebSocketRequest(ExContext ctx) {
         // 配置绝对地址
-        String targetUri = ctx.targetNew().toString() + ctx.newRequest().getPathAndQueryString();
-        targetUri = targetUri.replaceFirst("ws", "http").replaceFirst("wss", "https");
+        String targetUri = ctx.targetNew().toString();
+        String pathAndQuery = ctx.newRequest().getPathAndQueryString();
+        
+        // 构建完整的 URI
+        String fullUri = targetUri + pathAndQuery;
         
         // 构建 WebSocket 选项
         WebSocketConnectOptions options = new WebSocketConnectOptions()
-                .setURI(targetUri)
+                .setAbsoluteURI(fullUri)
                 .setMethod(HttpMethod.GET);
 
         // 配置超时
@@ -100,6 +103,13 @@ public class WebSocketRouteHandler implements RouteHandler {
         // 添加 WebSocket 升级头
         options.addHeader("Upgrade", "websocket");
         options.addHeader("Connection", "Upgrade");
+
+        // 复制原始请求头
+        for (org.noear.solon.core.util.KeyValues<String> kv : ctx.newRequest().getHeaders()) {
+            if (kv.getValues() != null && !kv.getValues().isEmpty()) {
+                options.addHeader(kv.getKey(), kv.getValues().get(0));
+            }
+        }
 
         return webSocketClient.connect(options);
     }

@@ -20,7 +20,7 @@ public class DemoWebSocket implements WebSocketListener {
 
     @Override
     public void onOpen(WebSocket socket) {
-        log.warn("onOpen: {}", socket.remoteAddress());
+        log.warn("onOpen: {}", "it's ok");
     }
 
     @Override
@@ -37,11 +37,11 @@ public class DemoWebSocket implements WebSocketListener {
 
     @Override
     public void onClose(WebSocket socket) {
-
+        log.warn("close");
     }
 
     @Override
     public void onError(WebSocket socket, Throwable error) {
-
+        log.error(error.getMessage(), error);
     }
 }

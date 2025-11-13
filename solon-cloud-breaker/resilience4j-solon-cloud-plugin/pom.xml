@@ -25,6 +25,12 @@
             <artifactId>resilience4j-ratelimiter</artifactId>
             <version>1.7.1</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.noear</groupId>
+            <artifactId>solon-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

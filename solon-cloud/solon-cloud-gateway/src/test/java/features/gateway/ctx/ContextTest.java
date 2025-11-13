@@ -1,8 +1,10 @@
 package features.gateway.ctx;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.SimpleSolonApp;
+import org.noear.solon.Solon;
 import org.noear.solon.test.HttpTester;
 import org.noear.solon.test.SolonTest;
 

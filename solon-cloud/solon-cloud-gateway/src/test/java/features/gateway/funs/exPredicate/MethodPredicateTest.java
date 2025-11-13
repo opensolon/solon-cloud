@@ -14,9 +14,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SolonTest
 public class MethodPredicateTest {
 
+    RouteFactoryManager routeFactoryManager = new RouteFactoryManager();
+
     @Test
     public void testValidMethods() {
-        ExPredicate predicate = RouteFactoryManager
+        ExPredicate predicate = routeFactoryManager
                 .getPredicate("Method", "GET,POST");
 
         assert predicate != null;
@@ -57,21 +59,21 @@ public class MethodPredicateTest {
     @Test
     public void testInvalidMethodConfig() {
         assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Method", "INVALID_METHOD");
+            routeFactoryManager.getPredicate("Method", "INVALID_METHOD");
         });
     }
 
     @Test
     public void testEmptyConfig() {
         assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Method", "");
+            routeFactoryManager.getPredicate("Method", "");
         });
     }
 
     @Test
     public void testNoValidMethods() {
         assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Method", "UNKNOWN_METHOD");
+            routeFactoryManager.getPredicate("Method", "UNKNOWN_METHOD");
         });
     }
 }

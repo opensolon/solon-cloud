@@ -1,5 +1,6 @@
 package features.gateway.funs.websocket;
 
+import io.vertx.core.Vertx;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.cloud.gateway.route.RouteFactoryManager;
 import org.noear.solon.cloud.gateway.route.RouteHandler;
@@ -16,8 +17,9 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 @SolonTest
 public class WebSocketHandlerTest {
-    
-    private final WebSocketRouteHandler handler = new WebSocketRouteHandler();
+    private final Vertx vertx = Vertx.vertx();
+    private final RouteFactoryManager routeFactoryManager = new RouteFactoryManager(vertx);
+    private final WebSocketRouteHandler handler = new WebSocketRouteHandler(vertx);
     
     @Test
     public void testWebSocketProtocolSchemas() {
@@ -32,8 +34,8 @@ public class WebSocketHandlerTest {
     @Test
     public void testRouteFactoryManagerRegistration() {
         // 测试 WebSocket 处理器在路由工厂管理器中的注册
-        RouteHandler wsHandler = RouteFactoryManager.getHandler("ws");
-        RouteHandler wssHandler = RouteFactoryManager.getHandler("wss");
+        RouteHandler wsHandler = routeFactoryManager.getHandler("ws");
+        RouteHandler wssHandler = routeFactoryManager.getHandler("wss");
         
         assertNotNull(wsHandler, "ws协议处理器应被正确注册");
         assertNotNull(wssHandler, "wss协议处理器应被正确注册");
@@ -45,8 +47,8 @@ public class WebSocketHandlerTest {
     @Test
     public void testNonWebSocketProtocolHandling() {
         // 测试非WebSocket协议不应由WebSocket处理器处理
-        RouteHandler httpHandler = RouteFactoryManager.getHandler("http");
-        RouteHandler httpsHandler = RouteFactoryManager.getHandler("https");
+        RouteHandler httpHandler = routeFactoryManager.getHandler("http");
+        RouteHandler httpsHandler = routeFactoryManager.getHandler("https");
         
         assertNotNull(httpHandler, "http协议处理器应存在");
         assertNotNull(httpsHandler, "https协议处理器应存在");
@@ -57,7 +59,7 @@ public class WebSocketHandlerTest {
     @Test
     public void testHandlerInstanceCreation() {
         // 测试处理器实例创建
-        WebSocketRouteHandler newHandler = new WebSocketRouteHandler();
+        WebSocketRouteHandler newHandler = new WebSocketRouteHandler(vertx);
         
         assertNotNull(newHandler, "WebSocket处理器应能被正确实例化");
         assertArrayEquals(new String[]{"ws", "wss"}, newHandler.schemas(), "新实例的协议支持应与默认实例相同");
@@ -66,9 +68,9 @@ public class WebSocketHandlerTest {
     @Test
     public void testHandlerSingletonPattern() {
         // 验证处理器在工厂中的单例模式
-        RouteHandler handler1 = RouteFactoryManager.getHandler("ws");
-        RouteHandler handler2 = RouteFactoryManager.getHandler("wss");
-        RouteHandler handler3 = RouteFactoryManager.getHandler("ws");
+        RouteHandler handler1 = routeFactoryManager.getHandler("ws");
+        RouteHandler handler2 = routeFactoryManager.getHandler("wss");
+        RouteHandler handler3 = routeFactoryManager.getHandler("ws");
         
         assertSame(handler1, handler2, "同一协议的不同获取应返回相同实例");
         assertSame(handler1, handler3, "多次获取同一协议应返回相同实例");

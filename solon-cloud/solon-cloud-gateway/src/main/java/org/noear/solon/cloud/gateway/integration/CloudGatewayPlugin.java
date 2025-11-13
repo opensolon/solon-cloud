@@ -15,7 +15,10 @@
  */
 package org.noear.solon.cloud.gateway.integration;
 
+import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import org.noear.solon.Utils;
+import org.noear.solon.core.event.EventBus;
 import org.noear.solon.server.vertx.http.VxHandlerSupplier;
 import org.noear.solon.server.vertx.http.VxHandlerSupplierDefault;
 import org.noear.solon.cloud.gateway.*;
@@ -28,8 +31,20 @@ import org.noear.solon.core.*;
  * @since 2.9
  */
 public class CloudGatewayPlugin implements Plugin {
+    private Vertx vertx;
+
     @Override
     public void start(AppContext context) throws Throwable {
+        //vertxOptions.setWorkerPoolSize(20);
+        //vertxOptions.setEventLoopPoolSize(2 * Runtime.getRuntime().availableProcessors());
+        //vertxOptions.setInternalBlockingPoolSize(20);
+        //vertx
+        VertxOptions vertxOptions = new VertxOptions();
+        EventBus.publish(vertxOptions); //添加总线扩展
+        vertx = Vertx.vertx(vertxOptions);
+        context.wrapAndPut(Vertx.class, vertx);
+
+        //gatewayProperties
         final Props gatewayProps = context.cfg().getProp(GatewayProperties.SOLON_CLOUD_GATEWAY);
         final GatewayProperties gatewayProperties;
         if (gatewayProps.size() > 0) {
@@ -38,8 +53,13 @@ public class CloudGatewayPlugin implements Plugin {
             gatewayProperties = new GatewayProperties();
         }
 
+        //routeManager
+        RouteFactoryManager routeManager = new RouteFactoryManager(vertx);
+        context.wrapAndPut(RouteFactoryManager.class, routeManager);
+
+        //cloudGateway
         VxHandlerSupplierDefault webHandlerSupplier = new VxHandlerSupplierDefault();
-        CloudGatewayHandler cloudGateway = new CloudGatewayHandler(webHandlerSupplier.get());
+        CloudGatewayHandler cloudGateway = new CloudGatewayHandler(routeManager, webHandlerSupplier.get());
 
         //替代 solon.server.vertx 的默认处理
         CloudGatewayHandlerSupplier gatewayHandlerSupplier = new CloudGatewayHandlerSupplier(cloudGateway);
@@ -48,7 +68,8 @@ public class CloudGatewayPlugin implements Plugin {
         //添加默认过滤器
         if (Utils.isNotEmpty(gatewayProperties.getDefaultFilters())) {
             for (String defaultFilter : gatewayProperties.getDefaultFilters()) {
-                cloudGateway.getConfiguration().routeDefaultFilter(RouteFactoryManager.buildFilter(defaultFilter));
+                cloudGateway.getConfiguration()
+                        .routeDefaultFilter(routeManager.buildFilter(defaultFilter));
             }
         }
 
@@ -62,21 +83,28 @@ public class CloudGatewayPlugin implements Plugin {
 
         //添加路由处理器（可多个）
         context.subBeansOfType(RouteHandler.class, b -> {
-            RouteFactoryManager.addHandler(b);
+            routeManager.addHandler(b);
         });
 
         //添加路由过滤器工厂（可多个）
         context.subBeansOfType(RouteFilterFactory.class, b -> {
-            RouteFactoryManager.addFactory(b);
+            routeManager.addFactory(b);
         });
 
         //添加路由检测器工厂（可多个）
         context.subBeansOfType(RoutePredicateFactory.class, b -> {
-            RouteFactoryManager.addFactory(b);
+            routeManager.addFactory(b);
         });
 
         //加载配置（同步服务发现）
         CloudGatewayLocator gatewayLocator = new CloudGatewayLocator(gatewayProperties, cloudGateway.getConfiguration());
         context.lifecycle(-1, gatewayLocator);
+    }
+
+    @Override
+    public void stop() throws Throwable {
+        if (vertx != null) {
+            vertx.close();
+        }
     }
 }

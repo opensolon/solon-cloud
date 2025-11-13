@@ -15,29 +15,30 @@ import org.noear.solon.test.SolonTest;
  */
 @SolonTest
 public class QueryPredicateTest {
+    RouteFactoryManager routeFactoryManager = new RouteFactoryManager();
 
     @Test
     public void testEmptyConfig() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Query", "");
+            routeFactoryManager.getPredicate("Query", "");
         });
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Query", null);
+            routeFactoryManager.getPredicate("Query", null);
         });
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Query", ",\\d+");
+            routeFactoryManager.getPredicate("Query", ",\\d+");
         });
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Query", ",");
+            routeFactoryManager.getPredicate("Query", ",");
         });
     }
 
     @Test
     public void testMatchesHeader() {
-        ExPredicate header = RouteFactoryManager.getPredicate("Query", "X-Request-Id, \\d+");
+        ExPredicate header = routeFactoryManager.getPredicate("Query", "X-Request-Id, \\d+");
         Assertions.assertNotNull(header);
 
         boolean test = header.test(new ExContextEmpty() {
@@ -52,7 +53,7 @@ public class QueryPredicateTest {
 
     @Test
     public void testNotMatchesHeader() {
-        ExPredicate header = RouteFactoryManager.getPredicate("Query", "X-Request-Id, \\d+");
+        ExPredicate header = routeFactoryManager.getPredicate("Query", "X-Request-Id, \\d+");
         Assertions.assertNotNull(header);
 
         boolean test = header.test(new ExContextEmpty() {

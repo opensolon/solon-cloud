@@ -30,7 +30,7 @@ import org.noear.solon.test.SolonTest;
 public class PrefixPathFilterTest {
     @Test
     public void testValidConfig() {
-        ExFilter filter = RouteFactoryManager.buildFilter(
+        ExFilter filter = new RouteFactoryManager().buildFilter(
                 "PrefixPath=/app");
 
         assert filter != null;

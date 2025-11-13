@@ -13,9 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 @SolonTest
 public class CookiePredicateTest {
+    RouteFactoryManager routeFactoryManager = new RouteFactoryManager();
+
     @Test
     public void testValidCookieWithPattern() {
-        ExPredicate predicate = RouteFactoryManager
+        ExPredicate predicate = routeFactoryManager
                 .getPredicate("Cookie", "token,^user.*");
 
         assert predicate != null;
@@ -47,7 +49,7 @@ public class CookiePredicateTest {
 
     @Test
     public void testValidCookieWithoutPattern() {
-        ExPredicate predicate = RouteFactoryManager
+        ExPredicate predicate = routeFactoryManager
                 .getPredicate("Cookie", "token");
 
         assert predicate != null;
@@ -73,11 +75,11 @@ public class CookiePredicateTest {
     public void testEmptyCookieName() {
         // 测试 Cookie 名称为空
         assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Cookie", ",^pattern");
+            routeFactoryManager.getPredicate("Cookie", ",^pattern");
         });
 
         assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Cookie", ",");
+            routeFactoryManager.getPredicate("Cookie", ",");
         });
     }
 }

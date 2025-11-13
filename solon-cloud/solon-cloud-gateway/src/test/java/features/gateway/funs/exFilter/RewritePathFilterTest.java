@@ -30,7 +30,7 @@ import org.noear.solon.test.SolonTest;
 public class RewritePathFilterTest {
     @Test
     public void testValidConfig() {
-        ExFilter filter = RouteFactoryManager.buildFilter(
+        ExFilter filter = new RouteFactoryManager().buildFilter(
                 "RewritePath=/red/?(?<segment>.*), /$\\{segment}");
 
         assert filter != null;
@@ -50,7 +50,7 @@ public class RewritePathFilterTest {
 
     @Test
     public void testValidConfig1() {
-        ExFilter filter = RouteFactoryManager.buildFilter(
+        ExFilter filter = new RouteFactoryManager().buildFilter(
                 "RewritePath=/(?<segment>.*), /$\\{segment}");
 
         assert filter != null;
@@ -70,7 +70,7 @@ public class RewritePathFilterTest {
 
     @Test
     public void testValidConfig2() {
-        ExFilter filter = RouteFactoryManager.buildFilter(
+        ExFilter filter = new RouteFactoryManager().buildFilter(
                 "RewritePath=/red/blue/(?<segment>.*), /$\\{segment}");
 
         assert filter != null;
@@ -90,7 +90,7 @@ public class RewritePathFilterTest {
 
     @Test
     public void testValidConfig3() {
-        ExFilter filter = RouteFactoryManager.buildFilter(
+        ExFilter filter = new RouteFactoryManager().buildFilter(
                 "RewritePath=/red/blue/?(?<segment>.*), /$\\{segment}");
 
         assert filter != null;

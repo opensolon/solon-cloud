@@ -17,13 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 @SolonTest
 public class BeforePredicateTest {
+    RouteFactoryManager routeFactoryManager = new RouteFactoryManager();
 
     @Test
     public void testBeforePredicateValidConfig() {
         // 使用一个未来的时间来确保测试时条件满足
         String validDateTime = ZonedDateTime.now().plusDays(1).toString();
         
-        ExPredicate predicate = RouteFactoryManager
+        ExPredicate predicate = routeFactoryManager
                 .getPredicate("Before", validDateTime);
 
         assert predicate != null;
@@ -36,7 +37,7 @@ public class BeforePredicateTest {
     public void testBeforePredicateInvalidConfig() {
         // 测试无效的时间配置
         assertThrows(DateTimeParseException.class, () -> {
-            RouteFactoryManager.getPredicate("Before", "invalid-date-time");
+            routeFactoryManager.getPredicate("Before", "invalid-date-time");
         });
     }
 
@@ -44,7 +45,7 @@ public class BeforePredicateTest {
     public void testBeforePredicateEmptyConfig() {
         // 测试配置为空
         assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Before", "");
+            routeFactoryManager.getPredicate("Before", "");
         });
     }
 
@@ -55,7 +56,7 @@ public class BeforePredicateTest {
 
         System.out.println(boundaryDateTime);
 
-        ExPredicate predicate = RouteFactoryManager
+        ExPredicate predicate = routeFactoryManager
                 .getPredicate("Before", boundaryDateTime);
 
         assert predicate != null;

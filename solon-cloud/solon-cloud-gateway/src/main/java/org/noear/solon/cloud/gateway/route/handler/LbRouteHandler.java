@@ -31,6 +31,12 @@ import java.net.URI;
  * @since 2.9
  */
 public class LbRouteHandler implements RouteHandler {
+    private final RouteFactoryManager routeManager;
+
+    public LbRouteHandler(RouteFactoryManager routeManager) {
+        this.routeManager = routeManager;
+    }
+
     @Override
     public String[] schemas() {
         return new String[]{"lb"};
@@ -51,7 +57,7 @@ public class LbRouteHandler implements RouteHandler {
         ctx.targetNew(targetUri);
 
         //重新查找处理器
-        RouteHandler handler = RouteFactoryManager.getHandler(targetUri.getScheme());
+        RouteHandler handler = routeManager.getHandler(targetUri.getScheme());
 
         if (handler == null) {
             throw new StatusException("The target handler does not exist", 404);

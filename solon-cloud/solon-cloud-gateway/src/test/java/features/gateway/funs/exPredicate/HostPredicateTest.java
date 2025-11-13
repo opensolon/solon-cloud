@@ -16,9 +16,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 @SolonTest
 public class HostPredicateTest {
+    RouteFactoryManager routeFactoryManager = new RouteFactoryManager();
+
     @Test
     public void testValidConfig() {
-        ExPredicate predicate = RouteFactoryManager
+        ExPredicate predicate = routeFactoryManager
                 .getPredicate("Host", "*.demo.com");
 
         assert predicate != null;
@@ -44,7 +46,7 @@ public class HostPredicateTest {
 
     @Test
     public void testValidConfig2() {
-        ExPredicate predicate = RouteFactoryManager
+        ExPredicate predicate = routeFactoryManager
                 .getPredicate("Host", "a*.demo.com");
 
         assert predicate != null;
@@ -77,7 +79,7 @@ public class HostPredicateTest {
     @Test
     public void testEmptyConfig() {
         assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Host", "");
+            new RouteFactoryManager().getPredicate("Host", "");
         });
     }
 }

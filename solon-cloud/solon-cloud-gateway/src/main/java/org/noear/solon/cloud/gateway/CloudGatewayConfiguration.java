@@ -45,6 +45,12 @@ public class CloudGatewayConfiguration implements CloudRouteRegister {
     //过滤器
     protected List<RankEntity<ExFilter>> filters = new ArrayList<>();
 
+    private final RouteFactoryManager routeManager;
+
+    public CloudGatewayConfiguration(RouteFactoryManager routeManager) {
+        this.routeManager = routeManager;
+    }
+
     /**
      * 配置过滤器
      *
@@ -83,7 +89,7 @@ public class CloudGatewayConfiguration implements CloudRouteRegister {
      * @param builder 路由构建器
      */
     public CloudRouteRegister route(String id, Consumer<RouteSpec> builder) {
-        RouteSpec route = routes.computeIfAbsent(id, k -> new RouteSpec(id).filters(routeDefaultFilters));
+        RouteSpec route = routes.computeIfAbsent(id, k -> new RouteSpec(this.routeManager, id).filters(routeDefaultFilters));
         builder.accept(route);
         return this;
     }
@@ -109,7 +115,7 @@ public class CloudGatewayConfiguration implements CloudRouteRegister {
 
         //routes
         for (RouteProperties rm : gatewayProperties.getRoutes()) {
-            RouteSpec route = new RouteSpec(rm.getId());
+            RouteSpec route = new RouteSpec(routeManager, rm.getId());
 
             route.index(rm.getIndex());
             route.target(URI.create(rm.getTarget()));
@@ -122,14 +128,14 @@ public class CloudGatewayConfiguration implements CloudRouteRegister {
             if (rm.getPredicates() != null) {
                 //route.predicates
                 for (String predicateStr : rm.getPredicates()) {
-                    route.predicate(RouteFactoryManager.buildPredicate(predicateStr));
+                    route.predicate(routeManager.buildPredicate(predicateStr));
                 }
             }
 
             if (rm.getFilters() != null) {
                 //route.filters
                 for (String filterStr : rm.getFilters()) {
-                    route.filter(RouteFactoryManager.buildFilter(filterStr));
+                    route.filter(routeManager.buildFilter(filterStr));
                 }
             }
 

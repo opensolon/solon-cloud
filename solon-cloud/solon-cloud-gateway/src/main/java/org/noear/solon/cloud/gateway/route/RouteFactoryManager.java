@@ -15,6 +15,7 @@
  */
 package org.noear.solon.cloud.gateway.route;
 
+import io.vertx.core.Vertx;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.gateway.exchange.ExFilter;
 import org.noear.solon.cloud.gateway.exchange.ExPredicate;
@@ -36,19 +37,16 @@ import java.util.Map;
  * @since 2.9
  */
 public class RouteFactoryManager {
-    private static final RouteFactoryManager global;
-
     private Map<String, RouteFilterFactory> filterFactoryMap = new HashMap<>();
     private Map<String, RoutePredicateFactory> predicateFactoryMap = new HashMap<>();
     private Map<String, RouteHandler> handlerMap = new HashMap<>();
 
-    private RouteFactoryManager() {
-
+    public RouteFactoryManager() {
+        //方便测试
+        this(Vertx.vertx());
     }
 
-    static {
-        global = new RouteFactoryManager();
-
+    public RouteFactoryManager(Vertx vertx) {
         addFactory(new AfterPredicateFactory());
         addFactory(new BeforePredicateFactory());
 
@@ -72,31 +70,31 @@ public class RouteFactoryManager {
         addFactory(new StripPrefixFilterFactory());
 
         //----------
-        addHandler(new HttpRouteHandler());
-        addHandler(new LbRouteHandler());
-        addHandler(new WebSocketRouteHandler());
+        addHandler(new HttpRouteHandler(vertx));
+        addHandler(new LbRouteHandler(this));
+        addHandler(new WebSocketRouteHandler(vertx));
     }
 
 
-    public static void addFactory(RouteFilterFactory factory) {
-        global.filterFactoryMap.put(factory.prefix(), factory);
+    public void addFactory(RouteFilterFactory factory) {
+        filterFactoryMap.put(factory.prefix(), factory);
     }
 
-    public static void addFactory(RoutePredicateFactory factory) {
-        global.predicateFactoryMap.put(factory.prefix(), factory);
+    public void addFactory(RoutePredicateFactory factory) {
+        predicateFactoryMap.put(factory.prefix(), factory);
     }
 
-    public static void addHandler(RouteHandler handler) {
+    public void addHandler(RouteHandler handler) {
         for (String s1 : handler.schemas()) {
-            global.handlerMap.put(s1, handler);
+            handlerMap.put(s1, handler);
         }
     }
 
     /**
      * 获取处理器
      */
-    public static RouteHandler getHandler(String schema) {
-        return global.handlerMap.get(schema);
+    public RouteHandler getHandler(String schema) {
+        return handlerMap.get(schema);
     }
 
     /**
@@ -105,8 +103,8 @@ public class RouteFactoryManager {
      * @param prefix 配置前缀
      * @param config 配置
      */
-    public static ExFilter getFilter(String prefix, String config) {
-        RouteFilterFactory factory = global.filterFactoryMap.get(prefix);
+    public ExFilter getFilter(String prefix, String config) {
+        RouteFilterFactory factory = filterFactoryMap.get(prefix);
         if (factory == null) {
             return null;
         } else {
@@ -120,8 +118,8 @@ public class RouteFactoryManager {
      * @param prefix 配置前缀
      * @param config 配置
      */
-    public static ExPredicate getPredicate(String prefix, String config) {
-        RoutePredicateFactory factory = global.predicateFactoryMap.get(prefix);
+    public ExPredicate getPredicate(String prefix, String config) {
+        RoutePredicateFactory factory = predicateFactoryMap.get(prefix);
         if (factory == null) {
             return null;
         } else {
@@ -132,7 +130,7 @@ public class RouteFactoryManager {
     /**
      * 构建检测器
      */
-    public static @Nullable ExPredicate buildPredicate(String predicateConfig) {
+    public @Nullable ExPredicate buildPredicate(String predicateConfig) {
         if (Utils.isEmpty(predicateConfig)) {
             return null;
         }
@@ -152,7 +150,7 @@ public class RouteFactoryManager {
     /**
      * 构建过滤器
      */
-    public static @Nullable ExFilter buildFilter(String filterConfig) {
+    public @Nullable ExFilter buildFilter(String filterConfig) {
         if (Utils.isEmpty(filterConfig)) {
             return null;
         }
@@ -172,7 +170,7 @@ public class RouteFactoryManager {
     /**
      * 构建过滤器链
      */
-    public static List<RankEntity<ExFilter>> buildFilterList(String... filterConfigs) throws IllegalArgumentException {
+    public List<RankEntity<ExFilter>> buildFilterList(String... filterConfigs) throws IllegalArgumentException {
         if (filterConfigs.length == 0) {
             throw new IllegalArgumentException("ExFilter configs is empty");
         }

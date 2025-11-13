@@ -30,7 +30,7 @@ import org.noear.solon.test.SolonTest;
 public class RemoveRequestHeaderFilterTest {
     @Test
     public void testValidConfig() {
-        ExFilter filter = RouteFactoryManager.buildFilter(
+        ExFilter filter = new RouteFactoryManager().buildFilter(
                 "RemoveRequestHeader=app.ver,1");
 
         assert filter != null;

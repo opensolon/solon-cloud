@@ -16,8 +16,8 @@
 package org.noear.solon.cloud.gateway.route.handler;
 
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.*;
-import io.vertx.solon.VertxHolder;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
 import org.noear.solon.cloud.gateway.exchange.ExContextImpl;
 import org.noear.solon.cloud.gateway.route.RouteHandler;
@@ -38,14 +38,14 @@ public class WebSocketRouteHandler implements RouteHandler {
 
     private WebSocketClient webSocketClient;
 
-    public WebSocketRouteHandler() {
+    public WebSocketRouteHandler(Vertx vertx) {
         WebSocketClientOptions options = new WebSocketClientOptions()
                 .setConnectTimeout(1000 * 3) // milliseconds: 3s
                 .setIdleTimeout(60) // seconds: 60s
                 .setClosingTimeout(10) // seconds: 10s
                 .setMaxConnections(200);
 
-        this.webSocketClient = VertxHolder.getVertx().createWebSocketClient(options);
+        this.webSocketClient = vertx.createWebSocketClient(options);
     }
 
     @Override

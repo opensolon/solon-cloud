@@ -17,8 +17,8 @@ package org.noear.solon.cloud.gateway.route.handler;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
+import io.vertx.core.Vertx;
 import io.vertx.core.http.*;
-import io.vertx.solon.VertxHolder;
 import org.noear.solon.cloud.gateway.exchange.ExBody;
 import org.noear.solon.cloud.gateway.exchange.ExConstants;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
@@ -41,7 +41,7 @@ import java.util.Map;
 public class HttpRouteHandler implements RouteHandler {
     private HttpClient httpClient;
 
-    public HttpRouteHandler() {
+    public HttpRouteHandler(Vertx vertx) {
         HttpClientOptions options = new HttpClientOptions()
                 .setMaxPoolSize(250)
                 .setConnectTimeout(1000 * 3) // milliseconds: 3s
@@ -49,7 +49,7 @@ public class HttpRouteHandler implements RouteHandler {
                 .setKeepAlive(true)
                 .setKeepAliveTimeout(60); // seconds: 60s
 
-        this.httpClient = VertxHolder.getVertx().createHttpClient(options);
+        this.httpClient = vertx.createHttpClient(options);
     }
 
     @Override

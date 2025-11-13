@@ -16,28 +16,30 @@ import org.noear.solon.test.SolonTest;
 @SolonTest
 public class HeaderPredicateTest {
 
+    RouteFactoryManager routeFactoryManager = new RouteFactoryManager();
+
     @Test
     public void testEmptyConfig() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Header", "");
+            routeFactoryManager.getPredicate("Header", "");
         });
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Header", null);
+            routeFactoryManager.getPredicate("Header", null);
         });
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Header", ",\\d+");
+            routeFactoryManager.getPredicate("Header", ",\\d+");
         });
 
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            RouteFactoryManager.getPredicate("Header", ",");
+            routeFactoryManager.getPredicate("Header", ",");
         });
     }
 
     @Test
     public void testMatchesHeader() {
-        ExPredicate header = RouteFactoryManager.getPredicate("Header", "X-Request-Id, \\d+");
+        ExPredicate header = routeFactoryManager.getPredicate("Header", "X-Request-Id, \\d+");
         Assertions.assertNotNull(header);
 
         boolean test = header.test(new ExContextEmpty() {
@@ -51,7 +53,7 @@ public class HeaderPredicateTest {
 
     @Test
     public void testMatchesHeader2() {
-        ExPredicate header = RouteFactoryManager.getPredicate("Header", "X-Request-Id, abc");
+        ExPredicate header = routeFactoryManager.getPredicate("Header", "X-Request-Id, abc");
         Assertions.assertNotNull(header);
 
         boolean test = header.test(new ExContextEmpty() {
@@ -66,7 +68,7 @@ public class HeaderPredicateTest {
 
     @Test
     public void testNotMatchesHeader() {
-        ExPredicate header = RouteFactoryManager.getPredicate("Header", "X-Request-Id, \\d+");
+        ExPredicate header = routeFactoryManager.getPredicate("Header", "X-Request-Id, \\d+");
         Assertions.assertNotNull(header);
 
         boolean test = header.test(new ExContextEmpty() {

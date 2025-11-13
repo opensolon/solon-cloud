@@ -36,11 +36,14 @@ import java.util.concurrent.Executor;
  */
 public class CloudGatewayHandler implements VxHandler {
     //网关摘要
-    private CloudGatewayConfiguration configuration = new CloudGatewayConfiguration();
+    private final RouteFactoryManager routeManager;
+    private CloudGatewayConfiguration configuration;
     private VxHandler webHandler;
 
-    public CloudGatewayHandler(VxHandler webHandler) {
+    public CloudGatewayHandler(RouteFactoryManager routeManager, VxHandler webHandler) {
+        this.routeManager = routeManager;
         this.webHandler = webHandler;
+        this.configuration = new CloudGatewayConfiguration(routeManager);
     }
 
     @Override
@@ -101,9 +104,9 @@ public class CloudGatewayHandler implements VxHandler {
             return Completable.complete();
         } else {
             //根据架构查找路由处理器
-            ExHandler handler = RouteFactoryManager.getHandler(ctx.targetNew().getScheme());
+            ExHandler handler = routeManager.getHandler(ctx.targetNew().getScheme());
 
-            if(handler == null) {
+            if (handler == null) {
                 throw new StatusException("The target handler does not exist", 404);
             }
 

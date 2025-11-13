@@ -15,6 +15,7 @@
  */
 package org.noear.solon.cloud.gateway;
 
+import org.noear.solon.Solon;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
 import org.noear.solon.cloud.gateway.exchange.ExFilter;
 import org.noear.solon.cloud.gateway.exchange.ExFilterChain;
@@ -34,9 +35,11 @@ import java.util.List;
  */
 public abstract class CloudGatewayFilterMix implements CloudGatewayFilter {
     private List<RankEntity<ExFilter>> filters = new ArrayList<>();
+    private RouteFactoryManager routeManager;
 
     public CloudGatewayFilterMix() {
         this.register();
+        this.routeManager = Solon.context().getBean(RouteFactoryManager.class);
     }
 
     /**
@@ -45,7 +48,8 @@ public abstract class CloudGatewayFilterMix implements CloudGatewayFilter {
     public abstract void register();
 
     public void filter(String filterConfig) {
-        ExFilter filter = RouteFactoryManager.buildFilter(filterConfig);
+        ExFilter filter = routeManager.buildFilter(filterConfig);
+
         if (filter != null) {
             throw new IllegalArgumentException("ExFilter config wrong: " + filterConfig);
         }

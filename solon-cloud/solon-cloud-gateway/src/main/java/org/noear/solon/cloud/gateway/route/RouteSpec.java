@@ -32,8 +32,11 @@ import java.util.Comparator;
  * @since 2.9
  */
 public class RouteSpec extends Route {
-    public RouteSpec(String id) {
+    private final RouteFactoryManager routeManager;
+
+    public RouteSpec(RouteFactoryManager routeManager, String id) {
         super(id);
+        this.routeManager = routeManager;
     }
 
     /**
@@ -117,7 +120,7 @@ public class RouteSpec extends Route {
      * 添加路径匹配检测器
      */
     public RouteSpec path(String path) {
-        ExPredicate predicate = RouteFactoryManager
+        ExPredicate predicate = routeManager
                 .getPredicate("Path", path);
 
         return predicate(predicate);

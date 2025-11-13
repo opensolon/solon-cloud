@@ -25,9 +25,9 @@ import java.util.concurrent.Semaphore;
  * @since 1.3
  */
 public class CloudBreakerEntryImpl extends BreakerEntrySim {
-    String breakerName;
-    int thresholdValue;
-    Semaphore limiter;
+    private String breakerName;
+    private int thresholdValue;
+    private Semaphore limiter;
 
     public CloudBreakerEntryImpl(String breakerName, int permits) {
         this.breakerName = breakerName;

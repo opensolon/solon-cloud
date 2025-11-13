@@ -43,7 +43,8 @@ public class CloudBreakerEntryImpl extends BreakerEntrySim {
         RateLimiterConfig config = RateLimiterConfig.custom()
                 .limitRefreshPeriod(Duration.ofSeconds(1))
                 .limitForPeriod(thresholdValue)
-                .timeoutDuration(Duration.ofSeconds(1))
+                .timeoutDuration(Duration.ZERO)
+                .writableStackTraceEnabled(false)
                 .build();
 
         RateLimiterRegistry registry = RateLimiterRegistry.of(config);

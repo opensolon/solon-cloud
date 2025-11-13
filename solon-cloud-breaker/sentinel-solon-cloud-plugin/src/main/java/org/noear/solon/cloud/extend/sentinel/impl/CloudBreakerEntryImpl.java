@@ -31,8 +31,8 @@ import java.util.List;
  * @since 1.3
  */
 public class CloudBreakerEntryImpl extends BreakerEntrySim {
-    String breakerName;
-    int thresholdValue;
+    private String breakerName;
+    private int thresholdValue;
 
     public CloudBreakerEntryImpl(String breakerName, int permits) {
         this.breakerName = breakerName;

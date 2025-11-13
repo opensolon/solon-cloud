@@ -24,8 +24,8 @@ import org.noear.solon.cloud.model.BreakerException;
  * @since 1.3
  */
 public class CloudBreakerEntryImpl extends BreakerEntrySim {
-    RateLimiter limiter;
-    int thresholdValue;
+    private RateLimiter limiter;
+    private int thresholdValue;
 
     public CloudBreakerEntryImpl(int permitsPerSecond) {
         this.thresholdValue = permitsPerSecond;

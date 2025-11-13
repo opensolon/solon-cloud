@@ -56,6 +56,11 @@ public class CloudGatewayHandler implements VxHandler {
         webHandler.setExecutor(executor);
     }
 
+    @Override
+    public void enableWebSocket(boolean enable) {
+        webHandler.enableWebSocket(enable);
+    }
+
     /**
      * 处理
      */

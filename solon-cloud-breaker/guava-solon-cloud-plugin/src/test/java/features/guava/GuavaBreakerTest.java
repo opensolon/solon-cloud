@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author noear 2025/9/11 created
  */
 @SolonTest
-public class BreakerTest implements Fallback<Void> {
+public class GuavaBreakerTest implements Fallback<Void> {
     @Inject
     DemoService1 demoService1;
 
@@ -97,7 +97,7 @@ public class BreakerTest implements Fallback<Void> {
             return count;
         }
 
-        @CloudBreaker(name = "demo1", fallback = BreakerTest.class)
+        @CloudBreaker(name = "demo1", fallback = GuavaBreakerTest.class)
         public void test() {
             count.incrementAndGet();
             System.out.println("test");

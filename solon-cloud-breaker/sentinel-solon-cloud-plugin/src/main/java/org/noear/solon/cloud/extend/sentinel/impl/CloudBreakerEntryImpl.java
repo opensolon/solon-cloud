@@ -15,6 +15,7 @@
  */
 package org.noear.solon.cloud.extend.sentinel.impl;
 
+import com.alibaba.csp.sentinel.EntryType;
 import com.alibaba.csp.sentinel.SphU;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.RuleConstant;
@@ -63,7 +64,7 @@ public class CloudBreakerEntryImpl extends BreakerEntrySim {
     @Override
     public AutoCloseable enter() throws BreakerException {
         try {
-            return SphU.entry(breakerName);
+            return SphU.entry(breakerName, EntryType.IN);
         } catch (BlockException ex) {
             throw new BreakerException(ex);
         }

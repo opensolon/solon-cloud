@@ -20,18 +20,27 @@ public class DemoWebSocket implements WebSocketListener {
 
     @Override
     public void onOpen(WebSocket socket) {
-        log.warn("onOpen: {}", "it's ok");
+        log.warn("onOpen: {}", socket.url());
+        log.warn("onOpen: {}", socket.paramMap());
+        log.warn("onOpen: {}", socket.remoteAddress());
+
+        if ("1".equals(socket.param("t")) == false) {
+            socket.close();
+        }
     }
 
     @Override
     public void onMessage(WebSocket socket, String text) throws IOException {
         log.warn("onMessage: {}", text);
-        socket.send(text+"--pong");
+        socket.send(text + "--pong");
     }
 
     @Override
     public void onMessage(WebSocket socket, ByteBuffer binary) throws IOException {
+        String text = new String(binary.array());
 
+        log.warn("onMessage: {}", text);
+        socket.send(ByteBuffer.wrap((text + "--pong").getBytes()));
     }
 
     @Override

@@ -32,11 +32,17 @@ import java.util.List;
  */
 public class ExNewResponse {
     private int status = 200;
+    private String reason = null;
     private MultiMap<String> headers = new MultiMap<>();
     private ExBody body;
 
     public void status(int code) {
         this.status = code;
+    }
+
+    public void status(int code, String reason) {
+        this.status = code;
+        this.reason = reason;
     }
 
     /**
@@ -107,6 +113,13 @@ public class ExNewResponse {
      */
     public int getStatus() {
         return status;
+    }
+
+    /**
+     * 获取状态原因
+     */
+    public String getReason() {
+        return reason;
     }
 
     /**

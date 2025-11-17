@@ -11,7 +11,7 @@ import org.noear.solon.rx.Completable;
 public class ErrorThrow implements CloudGatewayFilter {
     @Override
     public Completable doFilter(ExContext ctx, ExFilterChain chain) {
-        if (ctx.newRequest().getPath().equals("/demo/error")) {
+        if (ctx.rawPath().equals("/demo/error")) {
             //模拟异常并转换
             return Completable.error(new RuntimeException("xxx"))
                     .doOnErrorResume(err -> {

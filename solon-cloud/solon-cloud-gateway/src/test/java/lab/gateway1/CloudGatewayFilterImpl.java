@@ -31,23 +31,17 @@ public class CloudGatewayFilterImpl implements CloudGatewayFilter {
             return Completable.complete();
         }
 
-        return Completable.create(emitter -> {
-            chain.doFilter(ctx)
-                    .doOnError(err -> {
-                        if (err instanceof StatusException) {
-                            StatusException se = (StatusException) err;
+        return chain.doFilter(ctx)
+                .doOnErrorResume(err -> {
+                    if (err instanceof StatusException) {
+                        StatusException se = (StatusException) err;
 
-                            ctx.newResponse().status(se.getCode());
-                            emitter.onComplete();
-                        } else {
-                            ctx.newResponse().status(500);
-                            emitter.onComplete();
-                        }
-                    })
-                    .doOnComplete(() -> {
-                        emitter.onComplete();
-                    })
-                    .subscribe();
-        });
+                        ctx.newResponse().status(se.getCode());
+                    } else {
+                        ctx.newResponse().status(500);
+                    }
+
+                    return Completable.complete();
+                });
     }
 }

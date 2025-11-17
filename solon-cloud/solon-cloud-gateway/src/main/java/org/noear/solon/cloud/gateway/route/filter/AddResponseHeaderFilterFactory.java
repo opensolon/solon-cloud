@@ -67,18 +67,13 @@ public class AddResponseHeaderFilterFactory implements RouteFilterFactory {
 
         @Override
         public Completable doFilter(ExContext ctx, ExFilterChain chain) {
-            return Completable.create(emitter -> {
-                chain.doFilter(ctx)
-                        .doOnComplete(() -> {
-                            ctx.newResponse().headerAdd(name, value);
-                            emitter.onComplete();
-                        })
-                        .doOnError(err -> {
-                            ctx.newResponse().headerAdd(name, value);
-                            emitter.onError(err);
-                        })
-                        .subscribe();
-            });
+            return chain.doFilter(ctx)
+                    .doOnComplete(() -> {
+                        ctx.newResponse().headerAdd(name, value);
+                    })
+                    .doOnError(err -> {
+                        ctx.newResponse().headerAdd(name, value);
+                    });
         }
     }
 }

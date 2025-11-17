@@ -59,18 +59,13 @@ public class RemoveResponseHeaderFilterFactory implements RouteFilterFactory {
 
         @Override
         public Completable doFilter(ExContext ctx, ExFilterChain chain) {
-            return Completable.create(emitter -> {
-                chain.doFilter(ctx)
-                        .doOnError(err -> {
-                            ctx.newResponse().headerRemove(names);
-                            emitter.onError(err);
-                        })
-                        .doOnComplete(() -> {
-                            ctx.newResponse().headerRemove(names);
-                            emitter.onComplete();
-                        })
-                        .subscribe();
-            });
+            return chain.doFilter(ctx)
+                    .doOnError(err -> {
+                        ctx.newResponse().headerRemove(names);
+                    })
+                    .doOnComplete(() -> {
+                        ctx.newResponse().headerRemove(names);
+                    });
         }
     }
 }

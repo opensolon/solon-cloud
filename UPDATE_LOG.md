@@ -7,6 +7,7 @@
 
 * 新增 resilience4j-solon-cloud-plugin 插件
 * 新增 solon-cloud-gateway websocket 代理支持
+* 修复 solon-cloud-gateway Completable:doOnError 会中断传递的问题
 * sentinel 升为 1.8.9
 
 ### 3.7.0

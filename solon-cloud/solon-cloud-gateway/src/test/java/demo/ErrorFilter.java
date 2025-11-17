@@ -14,8 +14,6 @@ import org.noear.solon.rx.Completable;
 public class ErrorFilter implements CloudGatewayFilter {
     @Override
     public Completable doFilter(ExContext ctx, ExFilterChain chain) {
-        //ctx.pause();
-
         return chain.doFilter(ctx).doOnErrorResume(e -> {
             if (e instanceof StatusException) {
                 StatusException se = (StatusException) e;

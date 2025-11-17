@@ -16,9 +16,9 @@
 package org.noear.solon.cloud.gateway.integration;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
+import io.vertx.solon.VertxHolder;
+import org.noear.solon.Solon;
 import org.noear.solon.Utils;
-import org.noear.solon.core.event.EventBus;
 import org.noear.solon.server.vertx.http.VxHandlerSupplier;
 import org.noear.solon.server.vertx.http.VxHandlerSupplierDefault;
 import org.noear.solon.cloud.gateway.*;
@@ -31,18 +31,9 @@ import org.noear.solon.core.*;
  * @since 2.9
  */
 public class CloudGatewayPlugin implements Plugin {
-    private Vertx vertx;
-
     @Override
     public void start(AppContext context) throws Throwable {
-        //vertxOptions.setWorkerPoolSize(20);
-        //vertxOptions.setEventLoopPoolSize(2 * Runtime.getRuntime().availableProcessors());
-        //vertxOptions.setInternalBlockingPoolSize(20);
-        //vertx
-        VertxOptions vertxOptions = new VertxOptions();
-        EventBus.publish(vertxOptions); //添加总线扩展
-        vertx = Vertx.vertx(vertxOptions);
-        context.wrapAndPut(Vertx.class, vertx);
+        Vertx _vertx = VertxHolder.getVertx(Solon.context());
 
         //gatewayProperties
         final Props gatewayProps = context.cfg().getProp(GatewayProperties.SOLON_CLOUD_GATEWAY);
@@ -54,7 +45,7 @@ public class CloudGatewayPlugin implements Plugin {
         }
 
         //routeManager
-        RouteFactoryManager routeManager = new RouteFactoryManager(vertx);
+        RouteFactoryManager routeManager = new RouteFactoryManager(_vertx);
         context.wrapAndPut(RouteFactoryManager.class, routeManager);
 
         //cloudGateway
@@ -99,12 +90,5 @@ public class CloudGatewayPlugin implements Plugin {
         //加载配置（同步服务发现）
         CloudGatewayLocator gatewayLocator = new CloudGatewayLocator(gatewayProperties, cloudGateway.getConfiguration());
         context.lifecycle(-1, gatewayLocator);
-    }
-
-    @Override
-    public void stop() throws Throwable {
-        if (vertx != null) {
-            vertx.close();
-        }
     }
 }

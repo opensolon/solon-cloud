@@ -92,6 +92,13 @@ public class Gateway1Test extends HttpTester {
     }
 
     @Test
+    public void GatewayPostErrorTest() throws Exception {
+        HttpResponse resp = path("/demo/error").bodyOfJson("{}").exec("POST");
+        assert resp.code() == 413;
+        assert "hello".equals(resp.bodyAsString());
+    }
+
+    @Test
     public void GatewayUploadFileTest() throws Exception {
         StringBuilder fileBuf = new StringBuilder();
         while (fileBuf.length() < 1024 * 1024 * 1) { //8m

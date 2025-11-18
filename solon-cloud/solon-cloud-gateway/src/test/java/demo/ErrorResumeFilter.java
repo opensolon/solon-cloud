@@ -11,7 +11,7 @@ import org.noear.solon.rx.Completable;
  * @author noear 2025/11/17 created
  *
  */
-public class ErrorFilter implements CloudGatewayFilter {
+public class ErrorResumeFilter implements CloudGatewayFilter {
     @Override
     public Completable doFilter(ExContext ctx, ExFilterChain chain) {
         return chain.doFilter(ctx).doOnErrorResume(e -> {

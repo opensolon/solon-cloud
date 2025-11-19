@@ -17,6 +17,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>../../solon-cloud-parent</module>
         <module>../../solon-cloud-config-and-discovery/local-solon-cloud-plugin</module>
         <module>../../solon-cloud-config-and-discovery/water-solon-cloud-plugin</module>
         <module>../../solon-cloud-config-and-discovery/consul-solon-cloud-plugin</module>

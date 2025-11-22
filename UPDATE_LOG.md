@@ -2,6 +2,9 @@
 
 * solon-cloud-gateway 增加 websocket 的转发支持（协议头：ws）
 
+### 3.6.5
+
+* 修复 solon-cloud-gateway Completable:doOnError 会中断传递的问题
 
 ### 3.5.2
 

@@ -1,7 +1,7 @@
 <h1 align="center" style="text-align:center;">
 <img src="solon_icon.png" width="128" />
 <br />
-Solon
+Solon Cloud
 </h1>
 <p align="center">
 	<strong>面向全场景的 Java 企业级“分布式”应用开发套件</strong>

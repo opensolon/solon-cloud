@@ -15,6 +15,7 @@
  */
 package lab.app1;
 
+import org.noear.solon.annotation.Body;
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Mapping;
 import org.noear.solon.core.handle.UploadedFile;
@@ -24,6 +25,11 @@ public class DemoController {
     @Mapping("test")
     public String test(String name) {
         return name;
+    }
+
+    @Mapping("body")
+    public String body(@Body String body) {
+        return body;
     }
 
     @Mapping("upload")

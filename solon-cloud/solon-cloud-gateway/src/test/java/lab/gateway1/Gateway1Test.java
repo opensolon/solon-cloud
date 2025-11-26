@@ -16,6 +16,7 @@
 package lab.gateway1;
 
 import org.junit.jupiter.api.Test;
+import org.noear.solon.core.util.MimeType;
 import org.noear.solon.net.http.HttpResponse;
 import org.noear.solon.test.HttpTester;
 import org.noear.solon.test.SolonTest;
@@ -55,6 +56,7 @@ public class Gateway1Test extends HttpTester {
         assert rst.equals("noear");
     }
 
+
     @Test
     public void GatewayPostTest() throws Exception {
         StringBuilder buf = new StringBuilder();
@@ -78,6 +80,16 @@ public class Gateway1Test extends HttpTester {
         String rst = path("/demo/test").bodyOfJson("{\"name\":\"" + buf + "\"}").post();
         assert rst != null;
         assert rst.contains("noear");
+    }
+
+    @Test
+    public void GatewayPostBodyReplace() throws Exception {
+        String rst = path("/demo/body?r=1")
+                .body("noear", MimeType.TEXT_PLAIN_VALUE)
+                .post();
+
+        assert rst != null;
+        assert rst.contains("hello");
     }
 
     @Test

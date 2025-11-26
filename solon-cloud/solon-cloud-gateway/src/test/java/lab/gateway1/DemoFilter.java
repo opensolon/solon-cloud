@@ -8,17 +8,22 @@ import org.noear.solon.cloud.gateway.exchange.ExFilterChain;
 import org.noear.solon.rx.Completable;
 
 @Component
-public class ErrorThrow implements CloudGatewayFilter {
+public class DemoFilter implements CloudGatewayFilter {
     @Override
     public Completable doFilter(ExContext ctx, ExFilterChain chain) {
         if (ctx.rawPath().equals("/demo/error")) {
-            //模拟异常并转换
+            //模拟异常并转换（直接返回）
             return Completable.error(new RuntimeException("xxx"))
                     .doOnErrorResume(err -> {
                         ctx.newResponse().status(413);
                         ctx.newResponse().body(Buffer.buffer("hello"));
                         return Completable.complete();
                     });
+        }
+
+        if (ctx.rawPath().equals("/demo/body") && "1".equals(ctx.rawQueryParam("r"))) {
+            //模拟 body 修改
+            ctx.newRequest().body(Buffer.buffer("hello"));
         }
 
         return chain.doFilter(ctx);

@@ -89,7 +89,7 @@ public class Gateway1Test extends HttpTester {
                 .post();
 
         assert rst != null;
-        assert rst.contains("hello");
+        assert rst.contains("hello-测试");
     }
 
     @Test

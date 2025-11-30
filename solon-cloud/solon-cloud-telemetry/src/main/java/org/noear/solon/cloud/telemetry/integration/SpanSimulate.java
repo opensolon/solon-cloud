@@ -28,7 +28,7 @@ import java.util.concurrent.TimeUnit;
  * Span 伪装类
  *
  * @author noear
- * @since 3.0
+ * @since 3.7
  */
 public class SpanSimulate implements Span {
     private static final Span instance = new SpanSimulate();

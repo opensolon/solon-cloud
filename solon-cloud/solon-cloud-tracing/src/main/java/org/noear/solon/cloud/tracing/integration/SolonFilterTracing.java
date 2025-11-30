@@ -43,11 +43,6 @@ public class SolonFilterTracing implements Filter {
     private Set<String> excludePaths = new HashSet<>();
 
     public SolonFilterTracing(String excluded) {
-        //跟踪器注入
-        Solon.context().getBeanAsync(Tracer.class, bean -> {
-            tracer = bean;
-        });
-
         //排除支持
         if (Utils.isNotEmpty(excluded)) {
             for (String path : excluded.split(",")) {
@@ -62,6 +57,11 @@ public class SolonFilterTracing implements Filter {
                 }
             }
         }
+
+        //跟踪器注入
+        Solon.context().getBeanAsync(Tracer.class, bean -> {
+            tracer = bean;
+        });
     }
 
     @Override

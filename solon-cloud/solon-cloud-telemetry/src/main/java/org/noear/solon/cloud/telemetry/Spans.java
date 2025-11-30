@@ -25,7 +25,7 @@ import java.util.function.Consumer;
  * 跟踪工具
  *
  * @author noear
- * @since 3.0
+ * @since 3.7
  */
 public class Spans {
     /**

@@ -17,6 +17,8 @@ package org.noear.solon.cloud.telemetry.integration;
 
 import io.opentelemetry.api.trace.*;
 import io.opentelemetry.context.Scope;
+import io.opentelemetry.context.propagation.TextMapGetter;
+import io.opentelemetry.context.propagation.TextMapPropagator;
 import org.noear.nami.Context;
 import org.noear.nami.Filter;
 import org.noear.nami.Invocation;
@@ -29,30 +31,36 @@ import org.noear.solon.cloud.telemetry.slf4j.TracingMDC;
  * Nami Tracing 过滤器适配
  *
  * @author noear
- * @since 3.0
+ * @since 3.7
  */
 public class NamiFilterTracing implements Filter {
     private Tracer tracer;
+    private TextMapPropagator propagator;
 
     public NamiFilterTracing() {
+        // 获取 Tracer 和 Propagator
         Solon.context().getBeanAsync(Tracer.class, bean -> {
             tracer = bean;
+        });
+
+        Solon.context().getBeanAsync(TextMapPropagator.class, bean -> {
+            propagator = bean;
         });
     }
 
     @Override
     public Result doFilter(Invocation inv) throws Throwable {
-        if (tracer == null) {
+        if (tracer == null || propagator == null) {
             return inv.invoke();
         } else {
             Span span = buildSpan(inv);
 
-            try (Scope scope = span.makeCurrent()){
+            try (Scope scope = span.makeCurrent()) {
                 TracingMDC.inject(span);
 
                 return inv.invoke();
             } catch (Throwable e) {
-                //span.log(Utils.throwableToString(e));
+                span.recordException(e);
                 throw e;
             } finally {
                 TracingMDC.removeSpanId();
@@ -62,6 +70,9 @@ public class NamiFilterTracing implements Filter {
     }
 
     public Span buildSpan(Context ctx) {
+        //获取上下文
+        io.opentelemetry.context.Context parentContext = propagator.extract(io.opentelemetry.context.Context.current(), ctx, new NamiHeaderGetter());
+
         //构建 Span Name
         StringBuilder operationName = new StringBuilder();
 
@@ -78,15 +89,25 @@ public class NamiFilterTracing implements Filter {
         SpanBuilder spanBuilder = tracer.spanBuilder(operationName.toString());
 
         //添加种类标志
+        spanBuilder.setParent(parentContext);
         spanBuilder.setSpanKind(SpanKind.CLIENT);
 
 
         Span span = spanBuilder.startSpan();
 
-        //尝试注入
-        //tracer.inject(span.context(), HTTP_HEADERS, new TextMapAdapter(ctx.headers));
-
         //开始
         return span;
+    }
+
+    public static class NamiHeaderGetter implements TextMapGetter<Context> {
+        @Override
+        public Iterable<String> keys(Context ctx) {
+            return ctx.headers.keySet();
+        }
+
+        @Override
+        public String get(Context ctx, String key) {
+            return ctx.headers.get(key);
+        }
     }
 }

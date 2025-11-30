@@ -28,7 +28,7 @@ import org.noear.solon.core.util.SnelUtil;
 
 /**
  * @author noear
- * @since 3.0
+ * @since 3.7
  */
 public class TracingInterceptor implements MethodInterceptor {
     private Tracer tracer;

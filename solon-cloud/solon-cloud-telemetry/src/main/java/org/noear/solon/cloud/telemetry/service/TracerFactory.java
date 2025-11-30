@@ -22,7 +22,7 @@ import io.opentelemetry.api.trace.Tracer;
  * 跟踪器工厂服务
  *
  * @author noear
- * @since 3.0
+ * @since 3.7
  */
 public interface TracerFactory {
     Tracer create() throws Exception;

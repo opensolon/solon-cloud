@@ -23,7 +23,7 @@ import java.lang.annotation.*;
  * 跟踪埋点（支持可继承，适合给非控制器用）
  *
  * @author noear
- * @since 3.0
+ * @since 3.7
  */
 @Inherited
 @Target({ElementType.METHOD, ElementType.TYPE})

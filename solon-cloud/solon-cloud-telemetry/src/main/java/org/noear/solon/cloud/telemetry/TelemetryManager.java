@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * 跟踪管理器
  *
  * @author noear
- * @since 3.0
+ * @since 3.7
  */
 public class TelemetryManager {
     static final Logger log = LoggerFactory.getLogger(TelemetryManager.class);

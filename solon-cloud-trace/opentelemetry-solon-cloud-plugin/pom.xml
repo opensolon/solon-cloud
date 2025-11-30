@@ -11,44 +11,29 @@
         <relativePath/>
     </parent>
 
-    <artifactId>solon-cloud-telemetry</artifactId>
+    <artifactId>opentelemetry-solon-cloud-plugin</artifactId>
     <name>${project.artifactId}</name>
     <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.noear</groupId>
-            <artifactId>solon-data</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.noear</groupId>
-            <artifactId>solon-cloud</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.noear</groupId>
-            <artifactId>nami</artifactId>
+            <artifactId>solon-cloud-telemetry</artifactId>
         </dependency>
 
         <dependency>
             <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-api</artifactId>
+            <artifactId>opentelemetry-sdk</artifactId>
             <version>${opentelemetry.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>io.opentelemetry</groupId>
-            <artifactId>opentelemetry-context</artifactId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
             <version>${opentelemetry.version}</version>
+            <scope>test</scope>
         </dependency>
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency>
-
     </dependencies>
 
 </project>

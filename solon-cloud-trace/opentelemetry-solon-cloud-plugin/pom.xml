@@ -34,6 +34,13 @@
             <version>${opentelemetry.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>io.opentelemetry.semconv</groupId>
+            <artifactId>opentelemetry-semconv</artifactId>
+            <version>1.37.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

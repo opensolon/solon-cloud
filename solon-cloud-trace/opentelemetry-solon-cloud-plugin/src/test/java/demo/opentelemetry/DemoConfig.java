@@ -8,6 +8,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.samplers.Sampler;
+import io.opentelemetry.semconv.ServiceAttributes;
 import org.noear.solon.Solon;
 import org.noear.solon.annotation.Bean;
 import org.noear.solon.annotation.Configuration;
@@ -35,7 +36,8 @@ public class DemoConfig {
         // 1. 定义资源 (Resource)，包含服务名称
         Resource serviceResource = Resource.getDefault()
                 .toBuilder()
-                .put("app.name", Solon.cfg().appName())
+                .put(ServiceAttributes.SERVICE_NAME, Solon.cfg().appName())
+                .put(ServiceAttributes.SERVICE_VERSION,"1.0.0")
                 .build();
 
         // 2. 配置 Span Exporter (例如 OTLP/gRPC)
@@ -54,8 +56,7 @@ public class DemoConfig {
         SdkTracerProvider tracerProvider = SdkTracerProvider.builder()
                 .setResource(serviceResource)
                 .addSpanProcessor(spanProcessor)
-                // 设置采样器 (Sampler.alwaysOn() 表示 100% 采样)
-                .setSampler(Sampler.alwaysOn())
+                .setSampler(Sampler.alwaysOn()) // 设置采样器 (Sampler.alwaysOn() 表示 100% 采样)
                 .build();
 
         // 5. 构建 OpenTelemetry SDK 并注册为全局单例

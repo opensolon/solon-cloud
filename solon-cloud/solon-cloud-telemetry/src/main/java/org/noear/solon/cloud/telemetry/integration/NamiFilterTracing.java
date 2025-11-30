@@ -15,6 +15,7 @@
  */
 package org.noear.solon.cloud.telemetry.integration;
 
+import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.*;
 import io.opentelemetry.context.Scope;
 import io.opentelemetry.context.propagation.TextMapGetter;
@@ -43,8 +44,8 @@ public class NamiFilterTracing implements Filter {
             tracer = bean;
         });
 
-        Solon.context().getBeanAsync(TextMapPropagator.class, bean -> {
-            propagator = bean;
+        Solon.context().getBeanAsync(OpenTelemetry.class, bean -> {
+            propagator = bean.getPropagators().getTextMapPropagator();
         });
     }
 

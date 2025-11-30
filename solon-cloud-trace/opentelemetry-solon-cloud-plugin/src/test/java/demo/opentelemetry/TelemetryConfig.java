@@ -28,11 +28,6 @@ public class TelemetryConfig {
     }
 
     @Bean
-    public TextMapPropagator textMapPropagator(OpenTelemetry openTelemetry) {
-        return openTelemetry.getPropagators().getTextMapPropagator();
-    }
-
-    @Bean
     public OpenTelemetry openTelemetry() {
         // 1. 定义资源 (Resource)，包含服务名称
         Resource serviceResource = Resource.getDefault()

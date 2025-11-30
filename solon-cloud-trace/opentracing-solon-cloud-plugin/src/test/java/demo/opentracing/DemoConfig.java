@@ -1,6 +1,16 @@
 package demo.opentracing;
 
+import io.jaegertracing.internal.JaegerTracer;
+import io.jaegertracing.internal.metrics.Metrics;
+import io.jaegertracing.internal.metrics.NoopMetricsFactory;
+import io.jaegertracing.internal.reporters.CompositeReporter;
+import io.jaegertracing.internal.reporters.LoggingReporter;
+import io.jaegertracing.internal.reporters.RemoteReporter;
+import io.jaegertracing.internal.samplers.ConstSampler;
+import io.jaegertracing.spi.Sender;
+import io.jaegertracing.thrift.internal.senders.UdpSender;
 import io.opentracing.Tracer;
+import org.apache.thrift.transport.TTransportException;
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.annotation.Bean;

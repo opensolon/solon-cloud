@@ -3,6 +3,12 @@
 * solon-cloud-gateway 增加 websocket 的转发支持（协议头：ws）
 
 
+### 3.7.3
+
+* 新增 solon-cloud-telemetry 插件
+* 新增 opentelemetry-solon-cloud-plugin 插件
+
+
 ### 3.7.2
 
 * 新增 resilience4j-solon-cloud-plugin 插件

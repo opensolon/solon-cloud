@@ -2,7 +2,6 @@ package demo.opentelemetry;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
@@ -12,6 +11,8 @@ import io.opentelemetry.sdk.trace.samplers.Sampler;
 import org.noear.solon.Solon;
 import org.noear.solon.annotation.Bean;
 import org.noear.solon.annotation.Configuration;
+import org.noear.solon.cloud.CloudProps;
+import org.noear.solon.core.AppContext;
 
 import java.util.concurrent.TimeUnit;
 
@@ -21,14 +22,16 @@ import java.util.concurrent.TimeUnit;
  *
  */
 @Configuration
-public class TelemetryConfig {
+public class DemoConfig {
     @Bean
     public Tracer tracer(OpenTelemetry openTelemetry) {
         return openTelemetry.getTracer(Solon.cfg().appName(), "1.0.0");
     }
 
     @Bean
-    public OpenTelemetry openTelemetry() {
+    public OpenTelemetry openTelemetry(AppContext context) {
+        CloudProps cloudProps = new CloudProps(context, "opentelemetry");
+
         // 1. 定义资源 (Resource)，包含服务名称
         Resource serviceResource = Resource.getDefault()
                 .toBuilder()
@@ -38,7 +41,7 @@ public class TelemetryConfig {
         // 2. 配置 Span Exporter (例如 OTLP/gRPC)
         OtlpGrpcSpanExporter otlpExporter = OtlpGrpcSpanExporter.builder()
                 // 默认连接到 http://localhost:4317 (OTLP Collector)
-                // .setEndpoint("http://your-otel-collector:4317")
+                .setEndpoint(cloudProps.getServer())
                 .setTimeout(30, TimeUnit.SECONDS)
                 .build();
 

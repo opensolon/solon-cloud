@@ -13,9 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package demo;
+package demo.opentracing;
 
-import org.noear.nami.annotation.NamiMapping;
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Mapping;
 import org.noear.solon.cloud.tracing.Spans;

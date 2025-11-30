@@ -59,11 +59,8 @@ public class SolonFilterTracing implements Filter {
         }
 
         // 获取 Tracer 和 Propagator
-        Solon.context().getBeanAsync(Tracer.class, bean -> {
-            tracer = bean;
-        });
-
         Solon.context().getBeanAsync(OpenTelemetry.class, bean -> {
+            tracer = bean.getTracer(SolonFilterTracing.class.getName());
             propagator = bean.getPropagators().getTextMapPropagator();
         });
     }

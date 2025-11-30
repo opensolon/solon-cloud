@@ -40,11 +40,8 @@ public class NamiFilterTracing implements Filter {
 
     public NamiFilterTracing() {
         // 获取 Tracer 和 Propagator
-        Solon.context().getBeanAsync(Tracer.class, bean -> {
-            tracer = bean;
-        });
-
         Solon.context().getBeanAsync(OpenTelemetry.class, bean -> {
+            tracer = bean.getTracer(NamiFilterTracing.class.getName());
             propagator = bean.getPropagators().getTextMapPropagator();
         });
     }

@@ -25,11 +25,6 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class DemoConfig {
     @Bean
-    public Tracer tracer(OpenTelemetry openTelemetry) {
-        return openTelemetry.getTracer(Solon.cfg().appName(), "1.0.0");
-    }
-
-    @Bean
     public OpenTelemetry openTelemetry(AppContext context) {
         CloudProps cloudProps = new CloudProps(context, "opentelemetry");
 

@@ -91,6 +91,7 @@ public class SolonFilterTracing implements Filter {
         //添加种类标志
         spanBuilder.setSpanKind(SpanKind.SERVER);
         spanBuilder.setAttribute("req.url", ctx.url());
+        spanBuilder.setAttribute("req.method", ctx.method());
 
         //获取上下文
 //        TextMapAdapter headerMapAdapter = new TextMapAdapter(ctx.headerMap().toValueMap());

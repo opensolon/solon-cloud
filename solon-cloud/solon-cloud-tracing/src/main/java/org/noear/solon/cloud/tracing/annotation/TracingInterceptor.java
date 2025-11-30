@@ -21,15 +21,15 @@ import io.opentracing.Tracer;
 import org.noear.solon.Solon;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.tracing.slf4j.TracingMDC;
-import org.noear.solon.core.aspect.Interceptor;
 import org.noear.solon.core.aspect.Invocation;
+import org.noear.solon.core.aspect.MethodInterceptor;
 import org.noear.solon.core.util.SnelUtil;
 
 /**
  * @author noear
  * @since 1.7
  */
-public class TracingInterceptor implements Interceptor {
+public class TracingInterceptor implements MethodInterceptor {
     private Tracer tracer;
 
     public TracingInterceptor() {

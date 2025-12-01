@@ -30,6 +30,7 @@
         <module>../../solon-cloud-event/folkmq-solon-cloud-plugin</module>
 
         <module>../../solon-cloud-job/xxl-job-solon-cloud-plugin</module>
+        <module>../../solon-cloud-job/xxljob3-solon-cloud-plugin</module>
         <module>../../solon-cloud-job/quartz-solon-cloud-plugin</module>
         <module>../../solon-cloud-job/powerjob-solon-cloud-plugin</module>
 

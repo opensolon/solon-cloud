@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.noear.solon.cloud.extend.xxljob.integration;
+package org.noear.solon.cloud.extend.xxljob3.integration;
 
 import com.xxl.job.core.executor.XxlJobExecutor;
 import com.xxl.job.core.handler.annotation.XxlJob;
@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
  * @author noear
  * @since 1.4
  */
-class XxlJobExtractor implements BeanExtractor<XxlJob> {
+class XxlJob3Extractor implements BeanExtractor<XxlJob> {
     @Override
     public void doExtract(BeanWrap bw, Method method, XxlJob anno) {
         String name = anno.value();
@@ -64,6 +64,6 @@ class XxlJobExtractor implements BeanExtractor<XxlJob> {
         }
 
         //提示：不支持CloudJob拦截器
-        XxlJobExecutor.registJobHandler(name, new MethodJobHandler(bw.raw(), method, initMethod, destroyMethod));
+        XxlJobExecutor.registryJobHandler(name, new MethodJobHandler(bw.raw(), method, initMethod, destroyMethod));
     }
 }

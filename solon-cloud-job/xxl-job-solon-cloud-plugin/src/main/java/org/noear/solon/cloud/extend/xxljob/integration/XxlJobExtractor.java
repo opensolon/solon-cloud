@@ -42,7 +42,7 @@ class XxlJobExtractor implements BeanExtractor<XxlJob> {
 
         method.setAccessible(true);
 
-        // init and destory
+        // init and destroy
         Method initMethod = null;
         Method destroyMethod = null;
 

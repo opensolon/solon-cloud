@@ -7,7 +7,7 @@
 
 * 新增 solon-cloud-telemetry 插件
 * 新增 opentelemetry-solon-cloud-plugin 插件
-* 新增 xxljob3-solon-cloud-plugin 插件
+* 新增 xxljob3-solon-cloud-plugin 插件（在 solon-jakarta 仓库）
 
 
 ### 3.7.2

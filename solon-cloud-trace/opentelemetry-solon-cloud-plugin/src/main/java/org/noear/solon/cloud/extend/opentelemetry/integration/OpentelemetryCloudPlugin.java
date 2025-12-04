@@ -16,7 +16,8 @@
 package org.noear.solon.cloud.extend.opentelemetry.integration;
 
 import org.noear.solon.Utils;
-import org.noear.solon.cloud.CloudProps;
+import org.noear.solon.cloud.extend.opentelemetry.OpenTelemetryProps;
+import org.noear.solon.cloud.extend.opentelemetry.impl.OpenTelemetryConfig;
 import org.noear.solon.cloud.telemetry.TelemetryManager;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
@@ -29,7 +30,8 @@ public class OpentelemetryCloudPlugin implements Plugin {
 
     @Override
     public void start(AppContext context) {
-        CloudProps cloudProps = new CloudProps(context, "opentelemetry");
+        OpenTelemetryProps cloudProps = new OpenTelemetryProps(context);
+        context.wrapAndPut(OpenTelemetryProps.class, cloudProps);
 
         if (cloudProps.getTraceEnable() == false) {
             return;
@@ -38,6 +40,8 @@ public class OpentelemetryCloudPlugin implements Plugin {
         if (Utils.isEmpty(cloudProps.getServer())) {
             return;
         }
+
+        context.beanMake(OpenTelemetryConfig.class);
 
         TelemetryManager.enable(cloudProps.getTraceExclude());
     }

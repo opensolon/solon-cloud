@@ -1,7 +1,3 @@
-### 待定
-
-* solon-cloud-gateway 增加 websocket 的转发支持（协议头：ws）
-
 
 ### 3.7.3
 

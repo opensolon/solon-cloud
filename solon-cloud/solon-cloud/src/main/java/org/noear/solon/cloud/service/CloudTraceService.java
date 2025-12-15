@@ -15,6 +15,9 @@
  */
 package org.noear.solon.cloud.service;
 
+import org.noear.solon.core.util.CallableTx;
+import org.noear.solon.core.util.RunnableTx;
+
 /**
  * 云端链路跟踪服务
  *
@@ -29,12 +32,39 @@ public interface CloudTraceService {
 
     /**
      * FromId 头名称
-     * */
+     *
+     */
     String HEADER_FROM_ID_NAME();
 
     /**
+     * @since 3.7.4
+     */
+    <X extends Throwable> void with(String traceId, RunnableTx<X> runnable) throws X;
+
+    /**
+     * @since 3.7.4
+     */
+    <R, X extends Throwable> R with(String traceId, CallableTx<R, X> callable) throws X;
+
+
+    /**
+     * @since 3.7.4
+     */
+    <X extends Throwable> void with(RunnableTx<X> runnable) throws X;
+
+    /**
+     * @since 3.7.4
+     */
+    <R, X extends Throwable> R with(CallableTx<R, X> callable) throws X;
+
+    //----------------------------
+
+    /**
      * 设置当前线程的跟踪标识
-     * */
+     *
+     * @deprecated 3.7.4 {@link #with(String, RunnableTx)} {@link #with(String, CallableTx)}
+     */
+    @Deprecated
     void setLocalTraceId(String traceId);
 
     /**
@@ -44,7 +74,7 @@ public interface CloudTraceService {
 
     /**
      * 获取来源标识（service@address:port）
-     * */
+     *
+     */
     String getFromId();
-
 }

@@ -37,8 +37,10 @@ public class HttpTraceExtension implements HttpExtension {
     @Override
     public void onInit(HttpUtils httpUtils, String url) {
         if (CloudClient.trace() != null) {
-            httpUtils.header(CloudClient.trace().HEADER_TRACE_ID_NAME(), CloudClient.trace().getTraceId());
-            httpUtils.header(CloudClient.trace().HEADER_FROM_ID_NAME(), CloudClient.trace().getFromId());
+            CloudClient.trace().with(() -> {
+                httpUtils.header(CloudClient.trace().HEADER_TRACE_ID_NAME(), CloudClient.trace().getTraceId());
+                httpUtils.header(CloudClient.trace().HEADER_FROM_ID_NAME(), CloudClient.trace().getFromId());
+            });
         }
     }
 }

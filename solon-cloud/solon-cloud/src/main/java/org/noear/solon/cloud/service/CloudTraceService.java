@@ -15,8 +15,8 @@
  */
 package org.noear.solon.cloud.service;
 
-import org.noear.solon.core.util.CallableTx;
-import org.noear.solon.core.util.RunnableTx;
+import org.noear.solon.util.CallableTx;
+import org.noear.solon.util.RunnableTx;
 
 /**
  * 云端链路跟踪服务

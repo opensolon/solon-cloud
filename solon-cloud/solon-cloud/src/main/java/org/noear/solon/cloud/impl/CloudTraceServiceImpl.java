@@ -18,9 +18,9 @@ package org.noear.solon.cloud.impl;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.service.CloudTraceService;
 import org.noear.solon.core.handle.Context;
-import org.noear.solon.core.util.CallableTx;
-import org.noear.solon.core.util.RunnableTx;
-import org.noear.solon.core.util.ScopeLocal;
+import org.noear.solon.util.CallableTx;
+import org.noear.solon.util.RunnableTx;
+import org.noear.solon.util.ScopeLocal;
 
 /**
  * @author noear
@@ -41,32 +41,26 @@ public class CloudTraceServiceImpl implements CloudTraceService {
 
     @Override
     public <X extends Throwable> void with(String traceId, RunnableTx<X> runnable) throws X {
-        traceIdLocal.with(traceId, () -> {
-            runnable.run();
-            return null;
-        });
+        traceIdLocal.withOrThrow(traceId, runnable);
     }
 
     @Override
     public <R, X extends Throwable> R with(String traceId, CallableTx<R, X> callable) throws X {
-        return traceIdLocal.with(traceId, callable);
+        return traceIdLocal.withOrThrow(traceId, callable);
     }
 
     @Override
     public <X extends Throwable> void with(RunnableTx<X> runnable) throws X {
         String traceId = getTraceId0(false);
 
-        traceIdLocal.with(traceId, () -> {
-            runnable.run();
-            return null;
-        });
+        traceIdLocal.withOrThrow(traceId, runnable);
     }
 
     @Override
     public <R, X extends Throwable> R with(CallableTx<R, X> callable) throws X {
         String traceId = getTraceId0(false);
 
-        return traceIdLocal.with(traceId, callable);
+        return traceIdLocal.withOrThrow(traceId, callable);
     }
 
 

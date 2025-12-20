@@ -36,9 +36,9 @@ import java.util.concurrent.locks.ReentrantLock;
  * @since 1.11
  */
 public class CloudConfigServiceLocalImpl implements CloudConfigService {
-    static final String DEFAULT_GROUP = "DEFAULT_GROUP";
-    static final String CONFIG_KEY_FORMAT = "config/%s_%s"; // 有分组读取的文件名
-    static final String CONFIG_KEY_DEFAULT = "config/%s"; // 无分组,默认读取的文件名
+    static final String CONFIG_KEY_FORMAT = "config/%s_%s";
+    static final String CONFIG_KEY_NO_GROUP = "config/%s";
+
     private final Map<String, Config> configMap = new HashMap<>();
 
     private final String server;
@@ -53,13 +53,9 @@ public class CloudConfigServiceLocalImpl implements CloudConfigService {
     public Config pull(String group, String name) {
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
-
-            if (Utils.isEmpty(group)) {
-                group = DEFAULT_GROUP;
-            }
         }
 
-        String configKey = String.format(CONFIG_KEY_FORMAT, group, name);
+        String configKey = getConfigKey(group, name);
         Config configVal = configMap.get(configKey);
 
         SYNC_LOCK.lock();
@@ -69,7 +65,7 @@ public class CloudConfigServiceLocalImpl implements CloudConfigService {
 
                 if (configVal == null) {
                     try {
-                        String value2 = CloudLocalUtils.getValue(server, defaultConfigKey(configKey, name));
+                        String value2 = CloudLocalUtils.getValue(server, configKey);
 
                         configVal = new Config(group, name, value2, 0);
                         configMap.put(configKey, configVal);
@@ -89,13 +85,9 @@ public class CloudConfigServiceLocalImpl implements CloudConfigService {
     public boolean push(String group, String name, String value) {
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
-
-            if (Utils.isEmpty(group)) {
-                group = DEFAULT_GROUP;
-            }
         }
 
-        String configKey = String.format(CONFIG_KEY_FORMAT, group, name);
+        String configKey = getConfigKey(group, name);
         Config configVal = pull(group, name);
 
         SYNC_LOCK.lock();
@@ -119,13 +111,9 @@ public class CloudConfigServiceLocalImpl implements CloudConfigService {
     public boolean remove(String group, String name) {
         if (Utils.isEmpty(group)) {
             group = Solon.cfg().appGroup();
-
-            if (Utils.isEmpty(group)) {
-                group = DEFAULT_GROUP;
-            }
         }
 
-        String configKey = String.format(CONFIG_KEY_FORMAT, group, name);
+        String configKey = getConfigKey(group, name);
         configMap.remove(configKey);
         return true;
     }
@@ -134,16 +122,12 @@ public class CloudConfigServiceLocalImpl implements CloudConfigService {
     public void attention(String group, String name, CloudConfigHandler observer) {
 
     }
-    /**
-     * 读取文件时,如果设置的是默认组,则读取的文件名不应该包含组名称
-     * @param configKey 带分组的文件名
-     * @param name 文件名
-     * @return
-     */    
-    private String defaultConfigKey(String configKey,String name) {
-    	if(configKey.contains("/"+DEFAULT_GROUP+"_")) {    		
-    		return String.format(CONFIG_KEY_DEFAULT, name);
-    	}
-    	return configKey;
+
+    public String getConfigKey(String group, String name) {
+        if (Utils.isEmpty(group)) {
+            return String.format(CONFIG_KEY_NO_GROUP, name);
+        } else {
+            return String.format(CONFIG_KEY_FORMAT, group, name);
+        }
     }
 }

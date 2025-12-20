@@ -37,8 +37,8 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class CloudConfigServiceLocalImpl implements CloudConfigService {
     static final String DEFAULT_GROUP = "DEFAULT_GROUP";
-    static final String CONFIG_KEY_FORMAT = "config/%s_%s";
-
+    static final String CONFIG_KEY_FORMAT = "config/%s_%s"; // 有分组读取的文件名
+    static final String CONFIG_KEY_DEFAULT = "config/%s"; // 无分组,默认读取的文件名
     private final Map<String, Config> configMap = new HashMap<>();
 
     private final String server;
@@ -69,7 +69,7 @@ public class CloudConfigServiceLocalImpl implements CloudConfigService {
 
                 if (configVal == null) {
                     try {
-                        String value2 = CloudLocalUtils.getValue(server, configKey);
+                        String value2 = CloudLocalUtils.getValue(server, defaultConfigKey(configKey, name));
 
                         configVal = new Config(group, name, value2, 0);
                         configMap.put(configKey, configVal);
@@ -133,5 +133,17 @@ public class CloudConfigServiceLocalImpl implements CloudConfigService {
     @Override
     public void attention(String group, String name, CloudConfigHandler observer) {
 
+    }
+    /**
+     * 读取文件时,如果设置的是默认组,则读取的文件名不应该包含组名称
+     * @param configKey 带分组的文件名
+     * @param name 文件名
+     * @return
+     */    
+    private String defaultConfigKey(String configKey,String name) {
+    	if(configKey.contains("/"+DEFAULT_GROUP+"_")) {    		
+    		return String.format(CONFIG_KEY_DEFAULT, name);
+    	}
+    	return configKey;
     }
 }

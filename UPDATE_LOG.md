@@ -2,7 +2,9 @@
 ### 3.8.0
 
 * 调整 local-solon-cloud-plugin 的 config 和 i18n 服务，如果没有 group 配置，则文件不带 group 前缀（之前默认给了 DEFAULT_GROUP 组名，显得复杂）
-* 调整 rocketmq 的适配，事件属性不再加 '!' （兼容旧消息）
+* 调整 rocketmq-solon-clouud-plugin 的适配，事件属性不再加 '!' （并兼容旧格式）
+* 调整 aliyun-ons-solon-clouud-plugin 的适配，事件属性不再加 '!' （并兼容旧格式）
+* 调整 rocketmq5-solon-clouud-plugin 的适配，事件属性不再加 '!' （并兼容旧格式）。添加 sql92 过滤支持
 
 ### 3.7.3
 

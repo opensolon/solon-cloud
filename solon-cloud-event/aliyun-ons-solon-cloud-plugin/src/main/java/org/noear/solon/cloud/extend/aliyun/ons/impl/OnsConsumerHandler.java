@@ -80,7 +80,10 @@ public class OnsConsumerHandler implements MessageListener {
                     if (kv.getKey() instanceof String && kv.getValue() instanceof String) {
                         String k = (String) kv.getKey();
                         if (k.startsWith("!")) {
+                            //兼容旧风格
                             event.meta().put(k.substring(1), (String) kv.getValue());
+                        } else {
+                            event.meta().put(k, (String) kv.getValue());
                         }
                     }
                 }

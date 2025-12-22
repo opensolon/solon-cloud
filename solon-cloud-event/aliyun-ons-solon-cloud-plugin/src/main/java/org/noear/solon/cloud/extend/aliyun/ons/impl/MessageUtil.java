@@ -49,7 +49,7 @@ class MessageUtil {
 
         //@since 3.0
         for (Map.Entry<String, String> kv : event.meta().entrySet()) {
-            message.putUserProperties("!" + kv.getKey(), kv.getValue());
+            message.putUserProperties(kv.getKey(), kv.getValue());
         }
 
         if (event.scheduled() != null) {

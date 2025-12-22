@@ -77,7 +77,10 @@ public class RocketmqConsumerHandler implements MessageListenerConcurrently {
                 if (Utils.isNotEmpty(message.getProperties())) {
                     for (Map.Entry<String, String> kv : message.getProperties().entrySet()) {
                         if (kv.getKey().startsWith("!")) {
+                            //兼容旧风格
                             event.meta().put(kv.getKey().substring(1), kv.getValue());
+                        } else {
+                            event.meta().put(kv.getKey(), kv.getValue());
                         }
                     }
 

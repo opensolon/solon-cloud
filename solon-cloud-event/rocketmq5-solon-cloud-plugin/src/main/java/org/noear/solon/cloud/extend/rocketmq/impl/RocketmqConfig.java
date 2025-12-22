@@ -57,9 +57,10 @@ public class RocketmqConfig {
 
     private final CloudProps cloudProps;
     // 消费者的消息过滤类型, TAG /  SQL92
-    private final String consumeFilterType;
+    private String consumeFilterType;
     // 消费者的消息过滤表达式 SQL92
     private final String consumeFilterExpression;
+
     public RocketmqConfig(CloudProps cloudProps) {
         this.cloudProps = cloudProps;
 
@@ -88,10 +89,10 @@ public class RocketmqConfig {
             consumerGroup = Solon.cfg().appGroup() + "_" + Solon.cfg().appName();
         }
         if (Utils.isEmpty(consumeFilterType)) {
-            consumerGroup = "TAG";
+            consumeFilterType = "TAG";
         }
 
-        if (Utils.isEmpty(consumeFilterExpression)  && "SQL92".equals(consumeFilterType)) {
+        if (Utils.isEmpty(consumeFilterExpression) && "SQL92".equals(consumeFilterType)) {
             throw new IllegalArgumentException("SQL92 filter expression is empty(event.consumerFilterExpression)");
         }
 
@@ -128,18 +129,19 @@ public class RocketmqConfig {
 
     /**
      * 实例的消费线程数，0表示默认
-     * */
+     *
+     */
     public int getConsumeThreadNums() {
         return consumeThreadNums;
     }
 
     /**
      * 设置消息消费失败的最大重试次数，0表示默认
-     * */
+     *
+     */
     public int getMaxReconsumeTimes() {
         return maxReconsumeTimes;
     }
-
 
 
     public String getChannelName() {

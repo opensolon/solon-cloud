@@ -34,7 +34,10 @@ public class RocketmqConfig {
 
     private static final String PROP_EVENT_consumeThreadNums = "event.consumeThreadNums";
     private static final String PROP_EVENT_maxReconsumeTimes = "event.maxReconsumeTimes";
-
+    // 消费者的消息过滤类型, TAG /  SQL92
+    private static final String PROP_EVENT_consumerFilterType = "event.consumerFilterType";
+    // 消费者的消息过滤表达式 SQL92
+    private static final String PROP_EVENT_consumerFilterExpression = "event.consumerFilterExpression";
     private String producerGroup;
     private String consumerGroup;
 
@@ -53,7 +56,10 @@ public class RocketmqConfig {
     private final int maxReconsumeTimes;
 
     private final CloudProps cloudProps;
-
+    // 消费者的消息过滤类型, TAG /  SQL92
+    private final String consumeFilterType;
+    // 消费者的消息过滤表达式 SQL92
+    private final String consumeFilterExpression;
     public RocketmqConfig(CloudProps cloudProps) {
         this.cloudProps = cloudProps;
 
@@ -72,13 +78,21 @@ public class RocketmqConfig {
         producerGroup = cloudProps.getValue(PROP_EVENT_producerGroup);
         consumerGroup = cloudProps.getValue(PROP_EVENT_consumerGroup);
 
-
+        consumeFilterType = cloudProps.getValue(PROP_EVENT_consumerFilterType);
+        consumeFilterExpression = cloudProps.getValue(PROP_EVENT_consumerFilterExpression);
         if (Utils.isEmpty(producerGroup)) {
             producerGroup = "DEFAULT";
         }
 
         if (Utils.isEmpty(consumerGroup)) {
             consumerGroup = Solon.cfg().appGroup() + "_" + Solon.cfg().appName();
+        }
+        if (Utils.isEmpty(consumeFilterType)) {
+            consumerGroup = "TAG";
+        }
+
+        if (Utils.isEmpty(consumeFilterExpression)  && "SQL92".equals(consumeFilterType)) {
+            throw new IllegalArgumentException("SQL92 filter expression is empty(event.consumerFilterExpression)");
         }
 
 
@@ -95,6 +109,14 @@ public class RocketmqConfig {
      */
     public String getConsumerGroup() {
         return consumerGroup;
+    }
+
+    public String getConsumeFilterType() {
+        return consumeFilterType;
+    }
+
+    public String getConsumeFilterExpression() {
+        return consumeFilterExpression;
     }
 
     /**

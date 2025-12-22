@@ -17,6 +17,7 @@ package org.noear.solon.cloud.extend.rocketmq.impl;
 
 import org.apache.rocketmq.client.apis.*;
 import org.apache.rocketmq.client.apis.consumer.FilterExpression;
+import org.apache.rocketmq.client.apis.consumer.FilterExpressionType;
 import org.apache.rocketmq.client.apis.consumer.PushConsumer;
 import org.apache.rocketmq.client.apis.consumer.PushConsumerBuilder;
 import org.noear.solon.Utils;
@@ -66,9 +67,9 @@ public class RocketmqConsumer implements Closeable {
             }
 
             String instanceName = Instance.local().serviceAndAddress()
-                    .replace("@","-")
-                    .replace(".","_")
-                    .replace(":","_");
+                    .replace("@", "-")
+                    .replace(".", "_")
+                    .replace(":", "_");
 
             consumerOfCluster = buildConsumer(observerManger, config.getConsumerGroup(), EventLevel.cluster);
             consumerOfInstance = buildConsumer(observerManger, instanceName, EventLevel.instance);
@@ -81,7 +82,8 @@ public class RocketmqConsumer implements Closeable {
 
     /**
      * @since 2.8
-     * */
+     *
+     */
     private PushConsumer buildConsumer(CloudEventObserverManger observerManger, String consumerGroup, EventLevel eventLevel) throws ClientException {
         ClientConfigurationBuilder builder = ClientConfiguration.newBuilder();
 
@@ -90,6 +92,8 @@ public class RocketmqConsumer implements Closeable {
         //账号密码
         if (Utils.isNotEmpty(config.getAccessKey())) {
             builder.setCredentialProvider(new StaticSessionCredentialsProvider(config.getAccessKey(), config.getSecretKey()));
+        }else {
+            builder.enableSsl(false);
         }
         //发送超时时间，默认3000 单位ms
         if (config.getTimeout() > 0) {
@@ -106,16 +110,23 @@ public class RocketmqConsumer implements Closeable {
             Collection<String> tags = tagsObserverMap.getTagsByLevel(eventLevel);
 
             if (tags.size() > 0) {
-                String tagsExpr = String.join("||", tags);
 
-                //支持 tag 过滤
-                if (tags.contains("*")) {
-                    subscriptionExpressions.put(topic, FilterExpression.SUB_ALL);
+
+                if ("SQL92".equals(config.getConsumeFilterType())) {
+                    subscriptionExpressions.put(topic, new FilterExpression(config.getConsumeFilterExpression(), FilterExpressionType.SQL92));
+                    log.trace("Rocketmq consumer subscribe [" + topic + "(" + config.getConsumeFilterExpression() + ")] ok!");
                 } else {
-                    subscriptionExpressions.put(topic, new FilterExpression(tagsExpr));
+                    String tagsExpr = String.join("||", tags);
+
+                    //支持 tag 过滤
+                    if (tags.contains("*")) {
+                        subscriptionExpressions.put(topic, FilterExpression.SUB_ALL);
+                    } else {
+                        subscriptionExpressions.put(topic, new FilterExpression(tagsExpr));
+                    }
+                    log.trace("Rocketmq5 consumer will subscribe [" + topic + "(" + tagsExpr + ")] ok!");
                 }
 
-                log.trace("Rocketmq5 consumer will subscribe [" + topic + "(" + tagsExpr + ")] ok!");
             }
         }
 

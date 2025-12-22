@@ -69,7 +69,6 @@ public class RocketmqConsumerHandler implements MessageListener {
             event.key(String.join(",", message.getKeys()));
             event.times(message.getDeliveryAttempt() - 1); //它是从1开始的
             event.channel(config.getChannelName());
-
             if (Utils.isNotEmpty(group)) {
                 event.group(group);
             }
@@ -77,9 +76,7 @@ public class RocketmqConsumerHandler implements MessageListener {
             //@since 3.0
             if (Utils.isNotEmpty(message.getProperties())) {
                 for (Map.Entry<String, String> kv : message.getProperties().entrySet()) {
-                    if (kv.getKey().startsWith("!")) {
-                        event.meta().put(kv.getKey().substring(1), kv.getValue());
-                    }
+                    event.meta().put(kv.getKey(), kv.getValue());
                 }
 
                 //@since 3.1

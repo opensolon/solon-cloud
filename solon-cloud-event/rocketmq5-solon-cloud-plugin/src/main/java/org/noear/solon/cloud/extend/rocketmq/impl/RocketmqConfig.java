@@ -34,7 +34,10 @@ public class RocketmqConfig {
 
     private static final String PROP_EVENT_consumeThreadNums = "event.consumeThreadNums";
     private static final String PROP_EVENT_maxReconsumeTimes = "event.maxReconsumeTimes";
-
+    // 消费者的消息过滤类型, TAG /  SQL92
+    private static final String PROP_EVENT_consumerFilterType = "event.consumerFilterType";
+    // 消费者的消息过滤表达式 SQL92
+    private static final String PROP_EVENT_consumerFilterExpression = "event.consumerFilterExpression";
     private String producerGroup;
     private String consumerGroup;
 
@@ -53,6 +56,10 @@ public class RocketmqConfig {
     private final int maxReconsumeTimes;
 
     private final CloudProps cloudProps;
+    // 消费者的消息过滤类型, TAG /  SQL92
+    private String consumeFilterType;
+    // 消费者的消息过滤表达式 SQL92
+    private final String consumeFilterExpression;
 
     public RocketmqConfig(CloudProps cloudProps) {
         this.cloudProps = cloudProps;
@@ -72,13 +79,21 @@ public class RocketmqConfig {
         producerGroup = cloudProps.getValue(PROP_EVENT_producerGroup);
         consumerGroup = cloudProps.getValue(PROP_EVENT_consumerGroup);
 
-
+        consumeFilterType = cloudProps.getValue(PROP_EVENT_consumerFilterType);
+        consumeFilterExpression = cloudProps.getValue(PROP_EVENT_consumerFilterExpression);
         if (Utils.isEmpty(producerGroup)) {
             producerGroup = "DEFAULT";
         }
 
         if (Utils.isEmpty(consumerGroup)) {
             consumerGroup = Solon.cfg().appGroup() + "_" + Solon.cfg().appName();
+        }
+        if (Utils.isEmpty(consumeFilterType)) {
+            consumeFilterType = "TAG";
+        }
+
+        if (Utils.isEmpty(consumeFilterExpression) && "SQL92".equals(consumeFilterType)) {
+            throw new IllegalArgumentException("SQL92 filter expression is empty(event.consumerFilterExpression)");
         }
 
 
@@ -97,6 +112,14 @@ public class RocketmqConfig {
         return consumerGroup;
     }
 
+    public String getConsumeFilterType() {
+        return consumeFilterType;
+    }
+
+    public String getConsumeFilterExpression() {
+        return consumeFilterExpression;
+    }
+
     /**
      * 产品组
      */
@@ -106,18 +129,19 @@ public class RocketmqConfig {
 
     /**
      * 实例的消费线程数，0表示默认
-     * */
+     *
+     */
     public int getConsumeThreadNums() {
         return consumeThreadNums;
     }
 
     /**
      * 设置消息消费失败的最大重试次数，0表示默认
-     * */
+     *
+     */
     public int getMaxReconsumeTimes() {
         return maxReconsumeTimes;
     }
-
 
 
     public String getChannelName() {

@@ -3,8 +3,12 @@ package features.gateway.sys;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.noear.solon.Solon;
+import org.noear.solon.core.util.MimeType;
 import org.noear.solon.test.HttpTester;
 import org.noear.solon.test.SolonTest;
+
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author noear 2024/10/1 created
@@ -17,8 +21,26 @@ public class GatewayTest extends HttpTester {
     }
 
     @Test
+    public void file() throws Exception {
+        assert "hello.txt".equals(path("/file").data(
+                "file",
+                "hello.txt",
+                new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)),
+                MimeType.TEXT_PLAIN_VALUE).post());
+    }
+
+    @Test
     public void gateway_hello() throws Exception {
         assert "hello".equals(path("/test/hello").get());
+    }
+
+    @Test
+    public void gateway_file() throws Exception {
+        assert "hello.txt".equals(path("/test/file").data(
+                "file",
+                "hello.txt",
+                new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)),
+                MimeType.TEXT_PLAIN_VALUE).post());
     }
 
     @Test

@@ -41,26 +41,26 @@ public class CloudTraceServiceImpl implements CloudTraceService {
 
     @Override
     public <X extends Throwable> void with(String traceId, RunnableTx<X> runnable) throws X {
-        traceIdLocal.withOrThrow(traceId, runnable);
+        traceIdLocal.with(traceId, runnable);
     }
 
     @Override
     public <R, X extends Throwable> R with(String traceId, CallableTx<R, X> callable) throws X {
-        return traceIdLocal.withOrThrow(traceId, callable);
+        return traceIdLocal.with(traceId, callable);
     }
 
     @Override
     public <X extends Throwable> void with(RunnableTx<X> runnable) throws X {
         String traceId = getTraceId0(false);
 
-        traceIdLocal.withOrThrow(traceId, runnable);
+        traceIdLocal.with(traceId, runnable);
     }
 
     @Override
     public <R, X extends Throwable> R with(CallableTx<R, X> callable) throws X {
         String traceId = getTraceId0(false);
 
-        return traceIdLocal.withOrThrow(traceId, callable);
+        return traceIdLocal.with(traceId, callable);
     }
 
 

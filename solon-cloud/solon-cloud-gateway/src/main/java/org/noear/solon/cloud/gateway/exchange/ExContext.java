@@ -17,6 +17,7 @@ package org.noear.solon.cloud.gateway.exchange;
 
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.net.SocketAddress;
@@ -34,6 +35,8 @@ import java.util.Set;
  * @since 2.9
  */
 public interface ExContext {
+    Vertx vertx();
+
     /**
      * 属性获取
      */

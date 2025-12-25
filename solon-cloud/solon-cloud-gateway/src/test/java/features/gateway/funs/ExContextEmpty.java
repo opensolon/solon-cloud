@@ -2,6 +2,7 @@ package features.gateway.funs;
 
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.net.SocketAddress;
@@ -23,6 +24,11 @@ import java.util.Set;
  * @since 2.9
  */
 public class ExContextEmpty implements ExContext {
+    @Override
+    public Vertx vertx() {
+        return null;
+    }
+
     @Override
     public <T> T attr(String key) {
         return null;

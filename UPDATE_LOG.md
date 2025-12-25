@@ -1,4 +1,8 @@
 
+### 3.8.1
+
+* 添加 `solon-cloud-gateway` ExContext:vertx 方法
+
 ### 3.8.0
 
 * 调整 `local-solon-cloud-plugin` 的 config 和 i18n 服务，如果没有 group 配置，则文件不带 group 前缀（之前默认给了 DEFAULT_GROUP 组名，显得复杂）

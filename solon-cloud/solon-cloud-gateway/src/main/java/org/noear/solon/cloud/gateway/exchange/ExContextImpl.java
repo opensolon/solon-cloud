@@ -17,6 +17,7 @@ package org.noear.solon.cloud.gateway.exchange;
 
 import io.vertx.core.Future;
 import io.vertx.core.MultiMap;
+import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.Cookie;
 import io.vertx.core.http.HttpServerRequest;
@@ -40,6 +41,7 @@ import java.util.Set;
  * @since 2.9
  */
 public class ExContextImpl implements ExContext {
+    private final Vertx vertx;
     private final Map<String, Object> attrMap;
     private final HttpServerRequest rawRequest;
     private final Route route;
@@ -49,7 +51,8 @@ public class ExContextImpl implements ExContext {
 
     private URI targetNew;
 
-    public ExContextImpl(HttpServerRequest rawRequest, CloudGatewayConfiguration configuration) {
+    public ExContextImpl(Vertx vertx, HttpServerRequest rawRequest, CloudGatewayConfiguration configuration) {
+        this.vertx = vertx;
         this.rawRequest = rawRequest;
         this.attrMap = new HashMap<>();
 
@@ -62,6 +65,11 @@ public class ExContextImpl implements ExContext {
         return rawRequest;
     }
 
+
+    @Override
+    public Vertx vertx() {
+        return vertx;
+    }
 
     /**
      * 属性获取

@@ -37,6 +37,7 @@ import java.util.Map;
  * @since 2.9
  */
 public class RouteFactoryManager {
+    private final Vertx vertx;
     private Map<String, RouteFilterFactory> filterFactoryMap = new HashMap<>();
     private Map<String, RoutePredicateFactory> predicateFactoryMap = new HashMap<>();
     private Map<String, RouteHandler> handlerMap = new HashMap<>();
@@ -47,6 +48,8 @@ public class RouteFactoryManager {
     }
 
     public RouteFactoryManager(Vertx vertx) {
+        this.vertx = vertx;
+
         addFactory(new AfterPredicateFactory());
         addFactory(new BeforePredicateFactory());
 
@@ -75,6 +78,9 @@ public class RouteFactoryManager {
         addHandler(new WebSocketRouteHandler(vertx));
     }
 
+    public Vertx getVertx() {
+        return vertx;
+    }
 
     public void addFactory(RouteFilterFactory factory) {
         filterFactoryMap.put(factory.prefix(), factory);

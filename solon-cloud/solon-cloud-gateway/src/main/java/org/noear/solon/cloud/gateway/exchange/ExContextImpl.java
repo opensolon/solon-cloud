@@ -306,7 +306,7 @@ public class ExContextImpl implements ExContext {
     @Override
     public Context toContext() {
         if (context == null) {
-            context = new VxWebContext(rawRequest, null);
+            context = new VxWebContext(vertx, rawRequest, null);
         }
 
         return context;

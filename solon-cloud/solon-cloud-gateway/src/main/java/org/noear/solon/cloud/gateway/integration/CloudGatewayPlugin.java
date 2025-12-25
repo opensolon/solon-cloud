@@ -49,7 +49,7 @@ public class CloudGatewayPlugin implements Plugin {
         context.wrapAndPut(RouteFactoryManager.class, routeManager);
 
         //cloudGateway
-        VxHandlerSupplierDefault webHandlerSupplier = new VxHandlerSupplierDefault();
+        VxHandlerSupplierDefault webHandlerSupplier = new VxHandlerSupplierDefault(_vertx);
         CloudGatewayHandler cloudGateway = new CloudGatewayHandler(routeManager, webHandlerSupplier.get());
 
         //替代 solon.server.vertx 的默认处理

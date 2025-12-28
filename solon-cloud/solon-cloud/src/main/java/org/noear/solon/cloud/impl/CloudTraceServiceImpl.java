@@ -64,6 +64,7 @@ public class CloudTraceServiceImpl implements CloudTraceService {
     }
 
 
+    @Deprecated
     @Override
     public void setLocalTraceId(String traceId) {
         traceIdLocal.set(traceId);

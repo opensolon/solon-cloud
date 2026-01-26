@@ -266,6 +266,22 @@ public class CloudProps {
         return namespace;
     }
 
+    public String getUsernameRaw(){
+        return appContext.cfg().get(USERNAME);
+    }
+
+    public String getPasswordRaw(){
+        return appContext.cfg().get(PASSWORD);
+    }
+
+    public String getAccessKeyRaw() {
+        return appContext.cfg().get(ACCESS_KEY);
+    }
+
+    public String getSecretKeyRaw() {
+        return appContext.cfg().get(SECRET_KEY);
+    }
+
     private String username;
 
     public String getUsername() {

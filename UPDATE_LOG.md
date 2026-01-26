@@ -1,4 +1,11 @@
 
+
+### 3.9.1
+
+* 添加 `nacos-solon-cloud-plugin` ak/sk 配置支持
+* 添加 `nacos2-solon-cloud-plugin` ak/sk 配置支持
+* 添加 `nacos3-solon-cloud-plugin` ak/sk 配置支持
+
 ### 3.8.1
 
 * 添加 `solon-cloud-gateway` ExContext:vertx 方法

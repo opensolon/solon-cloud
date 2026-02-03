@@ -87,8 +87,8 @@ public class CloudPlugin implements Plugin {
         LocalDiscoveryResolver.register("");
 
         if (CloudClient.discovery() != null) {
-            //服务注册
-            if (NativeDetector.isNotAotRuntime()) {
+            //服务注册（非 aot 且已 enable）
+            if (NativeDetector.isNotAotRuntime() && CloudClient.enableRegister()) {
                 CloudClient.discoveryPush();
             }
 

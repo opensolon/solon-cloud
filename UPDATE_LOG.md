@@ -1,4 +1,7 @@
 
+### 3.9.2
+
+* 优化 quartz-solon-cloud-plugin，支持 quartz.Scheduler 定制支持
 
 ### 3.9.1
 

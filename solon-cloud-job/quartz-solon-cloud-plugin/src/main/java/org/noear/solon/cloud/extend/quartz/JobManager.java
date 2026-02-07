@@ -17,6 +17,7 @@ package org.noear.solon.cloud.extend.quartz;
 
 import org.noear.solon.cloud.model.JobHolder;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +34,10 @@ public class JobManager {
 
     public static void addJob(String name, JobHolder handler) {
         jobMap.put(name, handler);
+    }
+
+    public static Collection<JobHolder> getJobs() {
+        return jobMap.values();
     }
 
     public static JobHolder getJob(String name) {

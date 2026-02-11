@@ -1,7 +1,9 @@
 
 ### 3.9.2
 
-* 优化 quartz-solon-cloud-plugin，支持 quartz.Scheduler 定制支持
+* 修复 quartz-solon-cloud-plugin quartz.Scheduler 定制无效的问题
+* 修复 minio7-solon-cloud-plugin bucketDef 无效的问题
+* 修复 minio-solon-cloud-plugin bucketDef 无效的问题
 
 ### 3.9.1
 

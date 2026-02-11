@@ -96,6 +96,9 @@ public class CloudFileServiceMinioImpl implements CloudFileService {
 
     @Override
     public String getTempUrl(String bucket, String key, Duration duration) throws CloudFileException, UnsupportedOperationException {
+        if (Utils.isEmpty(bucket)) {
+            bucket = this.bucketDef;
+        }
 
         long seconds = duration.getSeconds();
 

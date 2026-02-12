@@ -1,4 +1,28 @@
 
+
+### 3.9.2
+
+* 修复 quartz-solon-cloud-plugin quartz.Scheduler 定制无效的问题
+* 修复 minio7-solon-cloud-plugin bucketDef 无效的问题
+* 修复 minio-solon-cloud-plugin bucketDef 无效的问题
+
+### 3.9.1
+
+* 添加 `nacos-solon-cloud-plugin` ak/sk 配置支持
+* 添加 `nacos2-solon-cloud-plugin` ak/sk 配置支持
+* 添加 `nacos3-solon-cloud-plugin` ak/sk 配置支持
+
+
+### 3.8.5
+
+* 修复 `quartz-solon-cloud-plugin` quartz.Scheduler 定制无效的问题
+* 修复 `minio7-solon-cloud-plugin` bucketDef 无效的问题
+* 修复 `minio-solon-cloud-plugin` bucketDef 无效的问题
+* 添加 `nacos-solon-cloud-plugin` ak/sk 配置支持
+* 添加 `nacos2-solon-cloud-plugin` ak/sk 配置支持
+* 添加 `nacos3-solon-cloud-plugin` ak/sk 配置支持
+
+
 ### 3.8.1
 
 * 添加 `solon-cloud-gateway` ExContext:vertx 方法

@@ -22,6 +22,7 @@ import org.noear.solon.cloud.extend.quartz.service.CloudJobServiceImpl;
 import org.noear.solon.core.AppContext;
 import org.noear.solon.core.Plugin;
 import org.noear.solon.core.event.AppLoadEndEvent;
+import org.quartz.Scheduler;
 
 /**
  * @author noear
@@ -36,16 +37,17 @@ public class QuartzCloudPlugin implements Plugin {
             return;
         }
 
-        //注册Job服务
-        CloudManager.register(CloudJobServiceImpl.instance);
+        CloudJobServiceImpl jobService = new CloudJobServiceImpl();
 
-//        CloudJobBeanBuilder.getInstance().addBuilder(Job.class, (clz, bw, anno) -> {
-//            String name = Utils.annoAlias(anno.value(), anno.name());
-//            CloudJobServiceImpl.instance.registerDo(name, anno.cron7x(), anno.description(), ((Job) bw.raw()).getClass());
-//        });
+        //注册Job服务
+        CloudManager.register(jobService);
+
+        context.getBeanAsync(Scheduler.class, bean -> {
+            jobService.setScheduler(bean);
+        });
 
         Solon.app().onEvent(AppLoadEndEvent.class, e -> {
-            CloudJobServiceImpl.instance.start();
+            jobService.start();
         });
     }
 }

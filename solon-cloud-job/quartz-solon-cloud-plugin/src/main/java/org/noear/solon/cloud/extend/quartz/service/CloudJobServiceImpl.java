@@ -33,8 +33,6 @@ import java.util.TimeZone;
  * @since 1.11
  */
 public class CloudJobServiceImpl implements CloudJobService {
-    public static final CloudJobServiceImpl instance = new CloudJobServiceImpl();
-
     private Scheduler _scheduler = null;
 
     public void setScheduler(Scheduler scheduler) {
@@ -63,30 +61,29 @@ public class CloudJobServiceImpl implements CloudJobService {
     @Override
     public boolean register(String name, String cron7x, String description, CloudJobHandler handler) {
         JobManager.addJob(name, new JobHolder(name, cron7x, description, handler));
-        return registerDo(name, cron7x, description, JobQuartzProxy.class);
+        return true;
     }
 
-    public boolean registerDo(String name, String cron7xStr, String description, Class<? extends Job> jobClz) {
+    protected void registerDo(JobHolder jobHolder) {
+        Class<? extends Job> jobClz = JobQuartzProxy.class;
         String jobGroup = Utils.annoAlias(Solon.cfg().appName(), "solon");
-        JobKey jobKey = JobKey.jobKey(name, jobGroup);
+        JobKey jobKey = JobKey.jobKey(jobHolder.getName(), jobGroup);
 
         try {
             tryInitScheduler();
 
             if (_scheduler.checkExists(jobKey) == false) {
-                Cron7X cron7X = Cron7X.parse(cron7xStr);
+                Cron7X cron7X = Cron7X.parse(jobHolder.getCron7x());
 
                 if (Utils.isEmpty(cron7X.getCron())) {
-                    regJobByPeriod(jobKey, name, description, cron7X, jobGroup, jobClz);
+                    regJobByPeriod(jobKey, jobHolder.getName(), jobHolder.getDescription(), cron7X, jobGroup, jobClz);
                 } else {
-                    regJobByCron(jobKey, name, description, cron7X, jobGroup, jobClz);
+                    regJobByCron(jobKey, jobHolder.getName(), jobHolder.getDescription(), cron7X, jobGroup, jobClz);
                 }
             }
         } catch (SchedulerException e) {
             throw new CloudJobException(e);
         }
-
-        return true;
     }
 
     @Override
@@ -99,6 +96,10 @@ public class CloudJobServiceImpl implements CloudJobService {
      */
     public void start() throws SchedulerException {
         tryInitScheduler();
+
+        for (JobHolder job : JobManager.getJobs()) {
+            registerDo(job);
+        }
 
         if (_scheduler != null) {
             _scheduler.start();

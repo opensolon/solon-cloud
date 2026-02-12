@@ -1,4 +1,14 @@
 
+### 3.7.5
+
+* 修复 `quartz-solon-cloud-plugin` quartz.Scheduler 定制无效的问题
+* 修复 `minio7-solon-cloud-plugin` bucketDef 无效的问题
+* 修复 `minio-solon-cloud-plugin` bucketDef 无效的问题
+* 添加 `nacos-solon-cloud-plugin` ak/sk 配置支持
+* 添加 `nacos2-solon-cloud-plugin` ak/sk 配置支持
+* 添加 `nacos3-solon-cloud-plugin` ak/sk 配置支持
+
+
 ### 3.7.3
 
 * 新增 solon-cloud-telemetry 插件

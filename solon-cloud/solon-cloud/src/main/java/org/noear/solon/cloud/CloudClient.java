@@ -42,6 +42,7 @@ public class CloudClient {
     private static boolean enableEvent = true;
     private static boolean enableBreaker = true;
     private static boolean enableJob = true;
+    private static boolean enableRegister = true;
 
     /**
      * 是否启用 @CloudConfig 注解
@@ -72,6 +73,13 @@ public class CloudClient {
     }
 
     /**
+     * 是否启用服务注册
+     */
+    public static boolean enableRegister() {
+        return enableRegister;
+    }
+
+    /**
      * 配置：是否启用 @CloudConfig 注解
      */
     public static void enableConfig(boolean enable) {
@@ -97,6 +105,13 @@ public class CloudClient {
      */
     public static void enableJob(boolean enable) {
         enableJob = enable;
+    }
+
+    /**
+     * 配置：是否启用服务注册
+     */
+    public static void enableRegister(boolean enable) {
+        enableRegister = enable;
     }
 
 

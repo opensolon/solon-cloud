@@ -28,8 +28,10 @@ import java.util.Properties;
  */
 public class NacosConfig {
     public static Properties getServiceProperties(CloudProps cloudProps, Properties properties, String server) {
-        String username = cloudProps.getUsername();
-        String password = cloudProps.getPassword();
+        String username = cloudProps.getUsernameRaw();
+        String password = cloudProps.getPasswordRaw();
+        String accessKey = cloudProps.getAccessKeyRaw();
+        String secretKey = cloudProps.getSecretKeyRaw();
 
         Props parentProps = cloudProps.getProp();
         parentProps.forEach((k, v) -> {
@@ -54,6 +56,14 @@ public class NacosConfig {
 
         if (Utils.isNotEmpty(password)) {
             properties.putIfAbsent(PropertyKeyConst.PASSWORD, password);
+        }
+
+        if (Utils.isNotEmpty(accessKey)) {
+            properties.putIfAbsent(PropertyKeyConst.ACCESS_KEY, username);
+        }
+
+        if (Utils.isNotEmpty(secretKey)) {
+            properties.putIfAbsent(PropertyKeyConst.SECRET_KEY, password);
         }
 
         if (Utils.isNotEmpty(cloudProps.getNamespace())) {

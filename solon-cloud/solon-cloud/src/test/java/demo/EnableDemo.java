@@ -10,6 +10,7 @@ public class EnableDemo {
     public static void main(String[] args) {
         Solon.start(EnableDemo.class, args, app -> {
             CloudClient.enableEvent(false);
+            CloudClient.enableRegister(false);
         });
     }
 }

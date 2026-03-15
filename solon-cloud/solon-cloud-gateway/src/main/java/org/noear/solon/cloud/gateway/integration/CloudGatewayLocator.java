@@ -64,10 +64,12 @@ public class CloudGatewayLocator implements LifecycleBean {
         }
 
         //条件档一下，避免与网关重复加载
-        Collection<String> serviceNames = CloudClient.discovery().findServices("");
-        if (Utils.isNotEmpty(serviceNames)) {
-            for (String name : serviceNames) {
-                register(name);
+        if (CloudClient.discovery() != null) {
+            Collection<String> serviceNames = CloudClient.discovery().findServices("");
+            if (Utils.isNotEmpty(serviceNames)) {
+                for (String name : serviceNames) {
+                    register(name);
+                }
             }
         }
     }

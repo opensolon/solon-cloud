@@ -1,4 +1,8 @@
 
+### 3.9.6
+
+* 修复 solon-cloud-gateway CloudGatewayLocator.loadDiscoverConfig 可能出现 null 异常
+
 ### 3.9.2
 
 * 修复 quartz-solon-cloud-plugin quartz.Scheduler 定制无效的问题

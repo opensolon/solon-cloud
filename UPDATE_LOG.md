@@ -1,7 +1,7 @@
 
 ### 3.9.6
 
-* 修复 solon-cloud-gateway CloudGatewayLocator.loadDiscoverConfig 可能出现 null 异常
+* 修复 solon-cloud-gateway CloudGatewayLocator.loadDiscoverConfig 可能出现 null 异常（允许没有发现服务）
 
 ### 3.9.2
 

@@ -13,6 +13,10 @@
 * 添加 `nacos3-solon-cloud-plugin` ak/sk 配置支持
 
 
+### 3.8.6
+
+* 修复 solon-cloud-gateway CloudGatewayLocator.loadDiscoverConfig 可能出现 null 异常（允许没有发现服务）
+
 ### 3.8.5
 
 * 修复 `quartz-solon-cloud-plugin` quartz.Scheduler 定制无效的问题

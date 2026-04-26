@@ -1,4 +1,9 @@
 
+
+### 3.10.4
+
+* 调整 quartz-solon-cloud-plugin 排除掉 quartz 内置的线程池
+
 ### 3.9.6
 
 * 修复 solon-cloud-gateway CloudGatewayLocator.loadDiscoverConfig 可能出现 null 异常（允许没有发现服务）

@@ -1,5 +1,9 @@
 
 
+### 3.10.5
+
+* 优化 solon-cloud-gateway `lb` 路由，支持二级路由（例：`lb:ws://`、`lb:tcp://`）
+
 ### 3.10.4
 
 * 调整 quartz-solon-cloud-plugin 排除掉 quartz 内置的线程池

@@ -45,15 +45,30 @@ public class LbRouteHandler implements RouteHandler {
     @Override
     public Completable handle(ExContext ctx) {
         //构建新的目标
-        URI targetUri = ctx.targetNew();
+        URI lbUri = ctx.targetNew();
+        if (lbUri.getSchemeSpecificPart() != null && lbUri.getSchemeSpecificPart().contains("://")) {
+            // 'lb:ws://', 'lb:tcp://'
+            lbUri = URI.create(lbUri.getSchemeSpecificPart());
+        }
 
-        String tmp = LoadBalance.get(targetUri.getHost()).getServer(targetUri.getPort());
+        if (lbUri.getHost() == null) {
+            throw new StatusException("Invalid target service: host is null", 400);
+        }
+
+
+        String tmp = LoadBalance.get(lbUri.getHost()).getServer(lbUri.getPort());
         if (tmp == null) {
             throw new StatusException("The target service does not exist", 404);
         }
 
         //配置新目标
-        targetUri = URI.create(tmp);
+        final URI targetUri;
+        if ("lb".equals(lbUri.getScheme())) {
+            targetUri = URI.create(tmp);
+        } else {
+            targetUri = buildTargetUri(lbUri, tmp);
+        }
+
         ctx.targetNew(targetUri);
 
         //重新查找处理器
@@ -64,5 +79,26 @@ public class LbRouteHandler implements RouteHandler {
         }
 
         return handler.handle(ctx);
+    }
+
+    private URI buildTargetUri(URI lbUri, String tmp) {
+        String scheme = lbUri.getScheme();
+        if (scheme == null) {
+            scheme = "http";
+        }
+
+        String uriStr;
+        int idx = tmp.indexOf("://");
+        if (idx == -1) {
+            uriStr = scheme + "://" + tmp;
+        } else {
+            uriStr = scheme + tmp.substring(idx);
+        }
+
+        try {
+            return URI.create(uriStr);
+        } catch (IllegalArgumentException e) {
+            throw new StatusException("Invalid target URI: " + uriStr, 400);
+        }
     }
 }

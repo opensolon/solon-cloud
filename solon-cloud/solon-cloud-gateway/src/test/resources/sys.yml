@@ -4,21 +4,33 @@ solon.app:
   name: demo-app
   group: gateway
 
+solon.cloud.local:
+  discovery:
+    service:
+      demoapp:
+        - "http://localhost:8079"
+
 solon.cloud.gateway:
   routes:
     - id: "test"
-      target: "http://localhost:8079"
+      target: "lb://demoapp:8079"
       predicates:
         - "Path=/test/**"
       filters:
         - "StripPrefix=1"
-    - id: "w1"
+    - id: "test_ws"
+      target: "lb:ws://demoapp:8079"
+      predicates:
+        - "Path=/test_ws/ws"
+      filters:
+        - "StripPrefix=1"
+    - id: "h5"
       target: "https://h5.noear.org"
       predicates:
         - "Path=/www/h5/**"
       filters:
         - "StripPrefix=2"
-    - id: "w2"
+    - id: "solon"
       target: "https://solon.noear.org"
       predicates:
         - "Path=/www/**,/ZZZ/**"

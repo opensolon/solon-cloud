@@ -22,7 +22,6 @@ import org.noear.solon.cloud.gateway.exchange.ExContext;
 import org.noear.solon.core.util.RankEntity;
 import org.noear.solon.cloud.gateway.exchange.ExFilter;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +36,7 @@ public class Route implements Comparable<Route> {
     protected final String id;
     protected int index; //路由序位
     protected int depth; //路径深度
-    protected URI target;
+    protected org.noear.solon.cloud.utils.CloudURI target;
     protected List<ExPredicate> predicates = new ArrayList<>();
     protected List<RankEntity<ExFilter>> filters = new ArrayList<>();
     protected TimeoutProperties timeout;
@@ -84,7 +83,7 @@ public class Route implements Comparable<Route> {
     /**
      * 目标
      */
-    public URI getTarget() {
+    public org.noear.solon.cloud.utils.CloudURI getTarget() {
         return target;
     }
 

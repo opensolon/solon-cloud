@@ -26,6 +26,7 @@ import org.noear.solon.Utils;
 import org.noear.solon.cloud.gateway.CloudGatewayConfiguration;
 import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
 import org.noear.solon.cloud.gateway.route.Route;
+import org.noear.solon.cloud.utils.CloudURI;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.web.vertx.VxWebContext;
 
@@ -49,7 +50,7 @@ public class ExContextImpl implements ExContext {
     private ExNewRequest newRequest;
     private ExNewResponse newResponse;
 
-    private URI targetNew;
+    private CloudURI targetNew;
 
     public ExContextImpl(Vertx vertx, HttpServerRequest rawRequest, CloudGatewayConfiguration configuration) {
         this.vertx = vertx;
@@ -99,7 +100,7 @@ public class ExContextImpl implements ExContext {
      * 路由目标
      */
     @Override
-    public URI target() {
+    public CloudURI target() {
         if (route == null) {
             return null;
         } else {
@@ -111,7 +112,7 @@ public class ExContextImpl implements ExContext {
      * 配置路由新目标
      */
     @Override
-    public void targetNew(URI target) {
+    public void targetNew(CloudURI target) {
         this.targetNew = target;
     }
 
@@ -119,7 +120,7 @@ public class ExContextImpl implements ExContext {
      * 路由新目标
      */
     @Override
-    public URI targetNew() {
+    public CloudURI targetNew() {
         if (targetNew == null) {
             return target();
         } else {

@@ -22,11 +22,11 @@ import org.noear.solon.cloud.gateway.properties.RouteProperties;
 import org.noear.solon.cloud.gateway.route.Route;
 import org.noear.solon.cloud.gateway.route.RouteFactoryManager;
 import org.noear.solon.cloud.gateway.route.RouteSpec;
+import org.noear.solon.cloud.utils.CloudURI;
 import org.noear.solon.core.LoadBalance;
 import org.noear.solon.core.util.RankEntity;
 import org.noear.solon.cloud.gateway.exchange.ExFilter;
 
-import java.net.URI;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -118,9 +118,9 @@ public class CloudGatewayConfiguration implements CloudRouteRegister {
             RouteSpec route = new RouteSpec(routeManager, rm.getId());
 
             route.index(rm.getIndex());
-            route.target(URI.create(rm.getTarget()));
+            route.target(CloudURI.create(rm.getTarget()));
 
-            if (LoadBalance.URI_SCHEME.equals(route.getTarget().getScheme())) {
+            if (LoadBalance.URI_SCHEME.equals(route.getTarget().getRootScheme())) {
                 //起到预热加载作用
                 LoadBalance.get(route.getTarget().getHost());
             }

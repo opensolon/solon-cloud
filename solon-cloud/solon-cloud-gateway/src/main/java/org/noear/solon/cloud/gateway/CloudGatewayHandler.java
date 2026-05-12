@@ -109,7 +109,7 @@ public class CloudGatewayHandler implements VxHandler {
             return Completable.complete();
         } else {
             //根据架构查找路由处理器
-            ExHandler handler = routeManager.getHandler(ctx.targetNew().getScheme());
+            ExHandler handler = routeManager.getHandler(ctx.targetNew().getRootScheme());
 
             if (handler == null) {
                 throw new StatusException("The target handler does not exist", 404);

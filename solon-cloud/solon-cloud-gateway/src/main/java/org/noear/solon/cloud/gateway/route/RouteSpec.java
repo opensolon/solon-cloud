@@ -21,7 +21,6 @@ import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
 import org.noear.solon.cloud.gateway.route.predicate.PathPredicateFactory;
 import org.noear.solon.core.util.RankEntity;
 
-import java.net.URI;
 import java.util.Collection;
 import java.util.Comparator;
 
@@ -50,7 +49,7 @@ public class RouteSpec extends Route {
     /**
      * 配置目标
      */
-    public RouteSpec target(URI uri) {
+    public RouteSpec target(org.noear.solon.cloud.utils.CloudURI uri) {
         this.target = uri;
 
         return this;
@@ -60,7 +59,7 @@ public class RouteSpec extends Route {
      * 配置目标
      */
     public RouteSpec target(String uri) {
-        return target(URI.create(uri));
+        return target(org.noear.solon.cloud.utils.CloudURI.create(uri));
     }
 
     /**

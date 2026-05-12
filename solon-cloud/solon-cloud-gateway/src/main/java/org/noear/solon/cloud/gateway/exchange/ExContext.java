@@ -23,6 +23,7 @@ import io.vertx.core.http.Cookie;
 import io.vertx.core.net.SocketAddress;
 import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
 import org.noear.solon.cloud.gateway.route.Route;
+import org.noear.solon.cloud.utils.CloudURI;
 import org.noear.solon.core.handle.Context;
 
 import java.net.URI;
@@ -55,17 +56,17 @@ public interface ExContext {
     /**
      * 路由目标
      */
-    URI target();
+    CloudURI target();
 
     /**
      * 配置路由新目标
      */
-    void targetNew(URI target);
+    void targetNew(CloudURI target);
 
     /**
      * 路由新目标
      */
-    URI targetNew();
+    CloudURI targetNew();
 
     /**
      * 路由超时

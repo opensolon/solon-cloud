@@ -16,6 +16,7 @@
 package org.noear.solon.cloud.gateway.route.handler;
 
 import org.noear.solon.cloud.gateway.exchange.ExContext;
+import org.noear.solon.cloud.utils.CloudURI;
 import org.noear.solon.cloud.gateway.route.RouteFactoryManager;
 import org.noear.solon.cloud.gateway.route.RouteHandler;
 import org.noear.solon.core.LoadBalance;
@@ -45,16 +46,11 @@ public class LbRouteHandler implements RouteHandler {
     @Override
     public Completable handle(ExContext ctx) {
         //构建新的目标
-        URI lbUri = ctx.targetNew();
-        if (lbUri.getSchemeSpecificPart() != null && lbUri.getSchemeSpecificPart().contains("://")) {
-            // 'lb:ws://', 'lb:tcp://'
-            lbUri = URI.create(lbUri.getSchemeSpecificPart());
-        }
+        CloudURI lbUri = ctx.targetNew();
 
         if (lbUri.getHost() == null) {
             throw new StatusException("Invalid target service: host is null", 400);
         }
-
 
         String tmp = LoadBalance.get(lbUri.getHost()).getServer(lbUri.getPort());
         if (tmp == null) {
@@ -62,17 +58,17 @@ public class LbRouteHandler implements RouteHandler {
         }
 
         //配置新目标
-        final URI targetUri;
-        if ("lb".equals(lbUri.getScheme())) {
-            targetUri = URI.create(tmp);
+        final CloudURI targetUri;
+        if (lbUri.getSchemes().length == 1) {
+            targetUri = CloudURI.create(tmp);
         } else {
-            targetUri = buildTargetUri(lbUri, tmp);
+            targetUri = buildTargetUri(lbUri.getTargetUri(), tmp);
         }
 
         ctx.targetNew(targetUri);
 
         //重新查找处理器
-        RouteHandler handler = routeManager.getHandler(targetUri.getScheme());
+        RouteHandler handler = routeManager.getHandler(targetUri.getRootScheme());
 
         if (handler == null) {
             throw new StatusException("The target handler does not exist", 404);
@@ -81,7 +77,7 @@ public class LbRouteHandler implements RouteHandler {
         return handler.handle(ctx);
     }
 
-    private URI buildTargetUri(URI lbUri, String tmp) {
+    private CloudURI buildTargetUri(URI lbUri, String tmp) {
         String scheme = lbUri.getScheme();
         if (scheme == null) {
             scheme = "http";
@@ -96,7 +92,7 @@ public class LbRouteHandler implements RouteHandler {
         }
 
         try {
-            return URI.create(uriStr);
+            return CloudURI.create(uriStr);
         } catch (IllegalArgumentException e) {
             throw new StatusException("Invalid target URI: " + uriStr, 400);
         }

@@ -11,6 +11,7 @@ import org.noear.solon.cloud.gateway.exchange.ExNewRequest;
 import org.noear.solon.cloud.gateway.exchange.ExNewResponse;
 import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
 import org.noear.solon.cloud.gateway.route.Route;
+import org.noear.solon.cloud.utils.CloudURI;
 import org.noear.solon.core.handle.Context;
 
 import java.net.URI;
@@ -45,17 +46,17 @@ public class ExContextEmpty implements ExContext {
     }
 
     @Override
-    public URI target() {
+    public CloudURI target() {
         return null;
     }
 
     @Override
-    public void targetNew(URI target) {
+    public void targetNew(CloudURI target) {
 
     }
 
     @Override
-    public URI targetNew() {
+    public CloudURI targetNew() {
         return null;
     }
 

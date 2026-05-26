@@ -172,7 +172,7 @@ public class CloudFileServiceOfS3HttpImpl implements CloudFileService {
                     .header("Date", date)
                     .header("Authorization", authorization)
                     .header(acl_header, acl_header_val)
-                    .bodyRaw(media.body(), contentType)
+                    .body(media.body(), contentType)
                     .put();
 
             return Result.succeed(tmp);

@@ -93,12 +93,12 @@ public class CloudPlugin implements Plugin {
             }
 
             //设置负载工厂
-            context.app().factoryManager().loadBalanceFactory(CloudClient.loadBalance());
+            context.app().factories().loadBalanceFactory(CloudClient.loadBalance());
         } else {
             //@since 1.6
             if (CloudClient.loadBalance().count() > 0) {
                 //设置负载工厂
-                context.app().factoryManager().loadBalanceFactory(CloudClient.loadBalance());
+                context.app().factories().loadBalanceFactory(CloudClient.loadBalance());
             }
         }
 
@@ -196,7 +196,7 @@ public class CloudPlugin implements Plugin {
     }
 
     @Override
-    public void prestop() throws Throwable {
+    public void preStop() throws Throwable {
         if (Solon.cfg().stopSafe() == false) {
             return;
         }

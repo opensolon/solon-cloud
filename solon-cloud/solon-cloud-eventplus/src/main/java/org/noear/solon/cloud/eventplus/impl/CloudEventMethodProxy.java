@@ -15,6 +15,7 @@
  */
 package org.noear.solon.cloud.eventplus.impl;
 
+import org.noear.eggg.MethodEggg;
 import org.noear.snack4.ONode;
 import org.noear.solon.cloud.CloudEventHandler;
 import org.noear.solon.cloud.eventplus.CloudEventEntity;
@@ -38,7 +39,7 @@ public class CloudEventMethodProxy implements CloudEventHandler {
 
     public CloudEventMethodProxy(BeanWrap target, Method method, Class<?> entityClz) {
         this.target = target;
-        this.method = target.context().methodGet(target.rawClz(), method);
+        this.method = target.context().methodWrap(target.rawEggg(), method);
         this.entityClz = entityClz;
     }
 

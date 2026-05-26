@@ -18,7 +18,6 @@ package org.noear.solon.cloud.extend.quartz;
 import org.noear.solon.cloud.model.JobHolder;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ContextEmpty;
-import org.noear.solon.core.handle.ContextUtil;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -37,14 +36,10 @@ public class JobQuartzProxy implements Job {
         JobHolder jobHolder = JobManager.getJob(name);
 
         if (jobHolder != null) {
-            Context ctx = Context.current(); //可能是从上层代理已生成, v1.11
-            if (ctx == null) {
-                ctx = new ContextEmpty();
-                ContextUtil.currentSet(ctx);
-            }
+            Context ctx = Context.currentOr(ContextEmpty::new); //可能是从上层代理已生成, v1.11
 
             //设置请求对象（mvc 时，可以被注入）
-            if(ctx instanceof ContextEmpty) {
+            if (ctx instanceof ContextEmpty) {
                 ((ContextEmpty) ctx).request(jc);
             }
 
@@ -55,7 +50,9 @@ public class JobQuartzProxy implements Job {
             }
 
             try {
-                jobHolder.handle(ctx);
+                Context.currentWith(ctx, () -> {
+                    jobHolder.handle(ctx);
+                });
             } catch (Throwable e) {
                 throw new JobExecutionException("Job execution failed: " + name, e);
             }

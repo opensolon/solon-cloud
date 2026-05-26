@@ -47,7 +47,7 @@ public class RocketmqCloudPlugin implements Plugin {
     }
 
     @Override
-    public void prestop() throws Throwable {
+    public void preStop() throws Throwable {
         if (eventService != null) {
             eventService.close();
         }

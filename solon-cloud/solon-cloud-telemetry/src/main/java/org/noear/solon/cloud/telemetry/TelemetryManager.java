@@ -48,7 +48,7 @@ public class TelemetryManager {
             NamiManager.reg(new NamiFilterTracing());
 
             //添加 solon 适配
-            Solon.app().filter(new SolonFilterTracing(excluded));
+            Solon.app().router().filter(new SolonFilterTracing(excluded));
 
             //添加 @Tracing 适配
             Solon.context().beanInterceptorAdd(Tracing.class, new TracingInterceptor());

@@ -180,7 +180,7 @@ public class CloudFileServiceOssImpl implements CloudFileService {
             String tmp = HttpUtils.http(url)
                     .header("Date", date)
                     .header("Authorization", Authorization)
-                    .bodyRaw(media.body(), streamMime)
+                    .body(media.body(), streamMime)
                     .put();
 
             return Result.succeed(tmp);

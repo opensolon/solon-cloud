@@ -60,14 +60,6 @@ public interface CloudTraceService {
     //----------------------------
 
     /**
-     * 设置当前线程的跟踪标识
-     *
-     * @deprecated 3.7.4 {@link #with(String, RunnableTx)} {@link #with(String, CallableTx)}
-     */
-    @Deprecated
-    void setLocalTraceId(String traceId);
-
-    /**
      * 获取跟踪标识
      */
     String getTraceId();

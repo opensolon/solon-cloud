@@ -20,7 +20,6 @@ import com.xxl.job.core.handler.IJobHandler;
 import org.noear.solon.cloud.model.JobHolder;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ContextEmpty;
-import org.noear.solon.core.handle.ContextUtil;
 
 /**
  * @author noear
@@ -36,15 +35,10 @@ class IJobHandlerImpl extends IJobHandler {
 
     @Override
     public void execute() throws Exception {
-        Context ctx = Context.current(); //可能是从上层代理已生成, v1.11
-        if (ctx == null) {
-            ctx = new ContextEmpty();
-            ContextUtil.currentSet(ctx);
-        }
-
+        Context ctx = Context.currentOr(ContextEmpty::new); //可能是从上层代理已生成, v1.11
         XxlJobContext jobContext = XxlJobContext.getXxlJobContext();
 
-        if(jobContext != null) {
+        if (jobContext != null) {
             //设置请求对象（mvc 时，可以被注入）
             if (ctx instanceof ContextEmpty) {
                 ((ContextEmpty) ctx).request(jobContext);
@@ -60,7 +54,9 @@ class IJobHandlerImpl extends IJobHandler {
 
 
         try {
-            jobHolder.handle(ctx);
+            Context.currentWith(ctx, () -> {
+                jobHolder.handle(ctx);
+            });
         } catch (Throwable e) {
             if (e instanceof Exception) {
                 throw (Exception) e;

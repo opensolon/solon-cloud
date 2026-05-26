@@ -73,7 +73,7 @@ public class ConsulCloudPlugin implements Plugin {
     }
 
     @Override
-    public void prestop() throws Throwable {
+    public void preStop() throws Throwable {
         if (clientTimer != null) {
             clientTimer.cancel();
         }

@@ -19,7 +19,6 @@ import org.noear.solon.cloud.exception.CloudJobException;
 import org.noear.solon.cloud.model.JobHolder;
 import org.noear.solon.core.handle.Context;
 import org.noear.solon.core.handle.ContextEmpty;
-import org.noear.solon.core.handle.ContextUtil;
 import tech.powerjob.worker.core.processor.ProcessResult;
 import tech.powerjob.worker.core.processor.TaskContext;
 import tech.powerjob.worker.core.processor.sdk.BasicProcessor;
@@ -40,11 +39,7 @@ public class PowerJobProxy implements BasicProcessor {
     @Override
     public ProcessResult process(TaskContext tc) throws Exception {
         if (jobHolder != null) {
-            Context ctx = Context.current(); //可能是从上层代理已生成, v1.11
-            if (ctx == null) {
-                ctx = new ContextEmpty();
-                ContextUtil.currentSet(ctx);
-            }
+            Context ctx = Context.currentOr(ContextEmpty::new); //可能是从上层代理已生成, v1.11
 
             //设置请求对象（mvc 时，可以被注入）
             if (ctx instanceof ContextEmpty) {
@@ -65,7 +60,9 @@ public class PowerJobProxy implements BasicProcessor {
             ctx.paramMap().put("currentRetryTimes", String.valueOf(tc.getCurrentRetryTimes()));
 
             try {
-                jobHolder.handle(ctx);
+                Context.currentWith(ctx, () -> {
+                    jobHolder.handle(ctx);
+                });
 
                 if (ctx.result instanceof ProcessResult) {
                     return (ProcessResult) ctx.result;

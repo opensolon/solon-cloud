@@ -69,7 +69,7 @@ public class CloudMetricsPlugin implements Plugin {
 
 
         //添加基础接口
-        context.app().add("/", CloudMetricsController.class);
+        context.app().router().add("/", CloudMetricsController.class);
 
         //初始化公共标签
         forCommonTagsInit(context);
@@ -96,7 +96,7 @@ public class CloudMetricsPlugin implements Plugin {
         EventBus.subscribe(AppBeanLoadEndEvent.class, e -> {
             for (MeterOpener adapter : meterOpeners) {
                 if (adapter.isSupported(context)) {
-                    context.app().get(adapter.path(), adapter);
+                    context.app().router().get(adapter.path(), adapter);
                 }
             }
         });

@@ -64,12 +64,6 @@ public class CloudTraceServiceImpl implements CloudTraceService {
     }
 
 
-    @Deprecated
-    @Override
-    public void setLocalTraceId(String traceId) {
-        traceIdLocal.set(traceId);
-    }
-
     @Override
     public String getTraceId() {
         return getTraceId0(true);
@@ -100,9 +94,6 @@ public class CloudTraceServiceImpl implements CloudTraceService {
             String traceId = traceIdLocal.get();
             if (Utils.isEmpty(traceId)) {
                 traceId = Utils.guid();
-                if (allowSet) {
-                    traceIdLocal.set(traceId);
-                }
             }
 
             return traceId;

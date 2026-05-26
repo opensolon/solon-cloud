@@ -367,21 +367,9 @@ public class CloudProps {
         }
     }
 
-
-    @Deprecated
-    public String getDiscoveryTags() {
-        return "";
-    }
-
     public String getDiscoveryClusterName() {
         return appContext.cfg().get(DISCOVERY_CLUSTER_NAME);
     }
-
-
-    //    @Deprecated
-//    public boolean getDiscoveryUnstable() {
-//        return Solon.cfg().isDriftMode(); //appContext.cfg().getBool(DISCOVERY_UNSTABLE, false);
-//    }
 
     public String getDiscoveryHealthCheckInterval(String def) {
         return appContext.cfg().get(DISCOVERY_HEALTH_CHECK_INTERVAL, def); //def:5s

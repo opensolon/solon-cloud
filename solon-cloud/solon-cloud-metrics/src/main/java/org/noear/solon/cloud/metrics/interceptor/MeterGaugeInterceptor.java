@@ -44,7 +44,7 @@ public class MeterGaugeInterceptor extends BaseMeterInterceptor<MeterGauge, Atom
 
     @Override
     protected String getAnnoName(MeterGauge anno) {
-        return Utils.annoAlias(anno.value(), anno.name());
+        return Utils.valueOr(anno.value(), anno.name());
     }
 
     @Override

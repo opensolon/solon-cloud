@@ -58,7 +58,7 @@ public class XxlJobCloudPlugin implements Plugin {
         //添加 @CloudJob 对 IJobHandler 类的支持 //@since 2.0 //@since 2.9
         context.beanBuilderAdd(CloudJob.class, IJobHandler.class, (clz, bw, anno) -> {
             //支持${xxx}配置
-            String name = Solon.cfg().getByTmpl(Utils.annoAlias(anno.value(), anno.name()));
+            String name = Solon.cfg().getByTmpl(Utils.valueOr(anno.value(), anno.name()));
             //提示：不支持CloudJob拦截器
             XxlJobExecutor.registJobHandler(name, bw.raw());
         });

@@ -42,7 +42,7 @@ public class CloudEventBeanBuilder implements BeanBuilder<CloudEvent> {
             CloudManager.register(anno, handler);//原型代理
 
             //支持${xxx}配置
-            String topic = Solon.cfg().getByTmpl(Utils.annoAlias(anno.value(), anno.topic()));
+            String topic = Solon.cfg().getByTmpl(Utils.valueOr(anno.value(), anno.topic()));
             //支持${xxx}配置
             String group = Solon.cfg().getByTmpl(anno.group());
 

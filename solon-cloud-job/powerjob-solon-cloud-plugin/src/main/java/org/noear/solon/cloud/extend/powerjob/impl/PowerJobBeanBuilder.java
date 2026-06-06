@@ -30,7 +30,7 @@ public class PowerJobBeanBuilder implements BeanBuilder<CloudJob> {
     public void doBuild(Class<?> clz, BeanWrap bw, CloudJob anno) throws Throwable {
         JobBeanManager.addJob(clz.getName(), bw);
 
-        String name = Utils.annoAlias(anno.value(), anno.name());
+        String name = Utils.valueOr(anno.value(), anno.name());
 
         if (Utils.isNotEmpty(name)) {
             JobBeanManager.addJob(name, bw);

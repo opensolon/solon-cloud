@@ -74,7 +74,7 @@ public class TracingInterceptor implements MethodInterceptor {
     }
 
     public Span buildSpan(Invocation inv, Tracing anno) {
-        String spanName = Utils.annoAlias(anno.value(), anno.name());
+        String spanName = Utils.valueOr(anno.value(), anno.name());
         if (Utils.isEmpty(spanName)) {
             spanName = inv.getTargetClz().getSimpleName()
                     + "::"

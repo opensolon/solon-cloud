@@ -66,7 +66,7 @@ public class CloudJobServiceImpl implements CloudJobService {
 
     protected void registerDo(JobHolder jobHolder) {
         Class<? extends Job> jobClz = JobQuartzProxy.class;
-        String jobGroup = Utils.annoAlias(Solon.cfg().appName(), "solon");
+        String jobGroup = Utils.valueOr(Solon.cfg().appName(), "solon");
         JobKey jobKey = JobKey.jobKey(jobHolder.getName(), jobGroup);
 
         try {

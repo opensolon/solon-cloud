@@ -42,7 +42,7 @@ public class MeterCounterInterceptor extends BaseMeterInterceptor<MeterCounter,C
 
     @Override
     protected String getAnnoName(MeterCounter anno) {
-        return Utils.annoAlias(anno.value(), anno.name());
+        return Utils.valueOr(anno.value(), anno.name());
     }
 
     @Override

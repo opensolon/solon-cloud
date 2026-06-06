@@ -40,7 +40,7 @@ public class MeterLongTimerInterceptor  extends BaseMeterInterceptor<MeterLongTi
 
     @Override
     protected String getAnnoName(MeterLongTimer anno) {
-        return Utils.annoAlias(anno.value(), anno.name());
+        return Utils.valueOr(anno.value(), anno.name());
     }
 
     @Override

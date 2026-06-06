@@ -50,7 +50,7 @@ public class ThriftClientProxy implements InvocationHandler {
         this.clientAnno = clientAnno;
         this.clientType = clientType;
 
-        String name = Utils.annoAlias(clientAnno.value(), clientAnno.name());
+        String name = Utils.valueOr(clientAnno.value(), clientAnno.name());
 
         if (Utils.isEmpty(clientAnno.group())) {
             upstream = LoadBalance.get(name);

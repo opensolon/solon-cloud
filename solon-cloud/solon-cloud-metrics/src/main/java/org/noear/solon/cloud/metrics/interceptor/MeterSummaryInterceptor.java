@@ -42,7 +42,7 @@ public class MeterSummaryInterceptor extends BaseMeterInterceptor<MeterSummary, 
 
     @Override
     protected String getAnnoName(MeterSummary anno) {
-        return Utils.annoAlias(anno.value(), anno.name());
+        return Utils.valueOr(anno.value(), anno.name());
     }
 
     @Override

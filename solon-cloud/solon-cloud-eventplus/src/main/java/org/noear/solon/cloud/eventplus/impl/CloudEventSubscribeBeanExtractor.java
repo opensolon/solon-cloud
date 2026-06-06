@@ -54,7 +54,7 @@ public class CloudEventSubscribeBeanExtractor implements BeanExtractor<CloudEven
         }
 
         //支持${xxx}配置
-        String topic2 = Solon.cfg().getByTmpl(Utils.annoAlias(anno2.value(), anno2.topic()));
+        String topic2 = Solon.cfg().getByTmpl(Utils.valueOr(anno2.value(), anno2.topic()));
         //支持${xxx}配置
         String group2 = Solon.cfg().getByTmpl(anno2.group());
 

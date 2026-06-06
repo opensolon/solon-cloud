@@ -38,7 +38,7 @@ public class GrpcChannelProxy extends Channel {
 
     public GrpcChannelProxy(GrpcClient anno) {
         this.anno = anno;
-        String name = Utils.annoAlias(anno.value(), anno.name());
+        String name = Utils.valueOr(anno.value(), anno.name());
 
         if (Utils.isEmpty(anno.group())) {
             upstream = LoadBalance.get(name);

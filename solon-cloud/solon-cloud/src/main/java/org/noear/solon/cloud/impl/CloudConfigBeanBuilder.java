@@ -43,7 +43,7 @@ public class CloudConfigBeanBuilder implements BeanBuilder<CloudConfig> {
             CloudManager.register(anno, handler);
 
             //支持${xxx}配置
-            String name = Solon.cfg().getByTmpl(Utils.annoAlias(anno.value(), anno.name()));
+            String name = Solon.cfg().getByTmpl(Utils.valueOr(anno.value(), anno.name()));
             //支持${xxx}配置
             String group = Solon.cfg().getByTmpl(anno.group());
 

@@ -38,8 +38,9 @@ public abstract class CloudGatewayFilterMix implements CloudGatewayFilter {
     private RouteFactoryManager routeManager;
 
     public CloudGatewayFilterMix() {
-        this.register();
+        //routeManager 需在 register() 之前就绪：子类 register() 可能调用 filter()
         this.routeManager = Solon.context().getBean(RouteFactoryManager.class);
+        this.register();
     }
 
     /**
@@ -50,7 +51,7 @@ public abstract class CloudGatewayFilterMix implements CloudGatewayFilter {
     public void filter(String filterConfig) {
         ExFilter filter = routeManager.buildFilter(filterConfig);
 
-        if (filter != null) {
+        if (filter == null) {
             throw new IllegalArgumentException("ExFilter config wrong: " + filterConfig);
         }
 

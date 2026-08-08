@@ -15,16 +15,25 @@
  */
 package org.noear.solon.cloud.gateway.properties;
 
+import java.io.Serializable;
+
 /**
  * 超时属性（单位：秒）
+ *
+ * <p>三个超时分工与取值参考：
+ * <ul>
+ *   <li>connectTimeout：连接建立超时。内部网络建议 3~10s</li>
+ *   <li>requestTimeout：等待上游响应头超时。内部 API 响应头 P99&lt;1s 时 10s 足够宽松；含慢接口(&gt;10s)请调大</li>
+ *   <li>responseTimeout：网关级整体完成兜底（覆盖 filter 链与响应流）。普通 API 60s 足够；SSE/大文件流式请调大或设 0 禁用</li>
+ * </ul>
  *
  * @author noear
  * @since 2.9
  */
-public class TimeoutProperties {
-    private int connectTimeout = 10;
-    private int requestTimeout = 10;
-    private int responseTimeout = 60 * 30;
+public class TimeoutProperties implements Serializable {
+    private int connectTimeout = 10;    //连接建立超时（秒）
+    private int requestTimeout = 10;    //等待上游响应头超时（秒）
+    private int responseTimeout = 60;   //整体完成兜底超时（秒），0=禁用（原默认 1800s 过长，收敛为 60s）
 
     public TimeoutProperties() {
 
@@ -54,10 +63,22 @@ public class TimeoutProperties {
         return requestTimeout;
     }
 
+    public void setRequestTimeout(int requestTimeout) {
+        this.requestTimeout = requestTimeout;
+    }
+
     /**
      * 响应超时
      */
     public int getResponseTimeout() {
         return responseTimeout;
+    }
+
+    public void setResponseTimeout(int responseTimeout) {
+        this.responseTimeout = responseTimeout;
+    }
+
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
     }
 }

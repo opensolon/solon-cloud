@@ -22,46 +22,45 @@ import org.noear.solon.cloud.gateway.exchange.ExPredicate;
 import org.noear.solon.cloud.gateway.route.RoutePredicateFactory;
 
 /**
- * 路由 RemoteAddr 匹配检测器（纯直连对端）
+ * 路由 XForwardedRemoteAddr 匹配检测器（信任客户端转发头）
  *
- * <p>信任客户端头请用 {@link XForwardedRemoteAddrPredicateFactory}。</p>
+ * <p>不信任客户端头、匹配纯 TCP 对端地址请用 {@link RemoteAddrPredicateFactory}。</p>
  *
- * @author noear
+ * @author wfm
+ * @since 2.9
  * @since 4.0.5
  */
-public class RemoteAddrPredicateFactory implements RoutePredicateFactory {
+public class XForwardedRemoteAddrPredicateFactory implements RoutePredicateFactory {
     @Override
     public String prefix() {
-        return "RemoteAddr";
+        return "XForwardedRemoteAddr";
     }
 
     @Override
     public ExPredicate create(String config) {
-        return new RemoteAddrPredicate(config);
+        return new XForwardedRemoteAddrPredicate(config);
     }
 
-    public static class RemoteAddrPredicate implements ExPredicate {
+    public static class XForwardedRemoteAddrPredicate implements ExPredicate {
         private final IpSubnetFilterRule rule;
 
         /**
-         * @param config (RemoteAddr=192.168.1.1/24)
+         * @param config (XForwardedRemoteAddr=192.168.1.1/24)
          */
-        public RemoteAddrPredicate(String config) {
+        public XForwardedRemoteAddrPredicate(String config) {
             if (Utils.isBlank(config)) {
-                throw new IllegalArgumentException("RemoteAddr config cannot be blank");
+                throw new IllegalArgumentException("XForwardedRemoteAddr config cannot be blank");
             }
 
-            rule = IpMatcher.buildRule(config, "RemoteAddr");
+            rule = IpMatcher.buildRule(config, "XForwardedRemoteAddr");
         }
 
         @Override
         public boolean test(ExContext ctx) {
-            if (ctx.remoteAddress() == null) {
-                return false;
-            }
+            String ip = ctx.realIp();
 
-            //纯 TCP 对端地址（字面量），不信任任何客户端头
-            return IpMatcher.matches(rule, ctx.remoteAddress().host());
+            //非 IP 字面量（如主机名）直接不匹配，避免在事件循环上触发同步 DNS 解析
+            return IpMatcher.matches(rule, ip);
         }
     }
 }

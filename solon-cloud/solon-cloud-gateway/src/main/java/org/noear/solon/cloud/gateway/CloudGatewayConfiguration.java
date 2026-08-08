@@ -40,6 +40,8 @@ import java.util.function.Consumer;
 public class CloudGatewayConfiguration implements CloudRouteRegister {
     //路由记录
     protected final Map<String, RouteSpec> routes = new ConcurrentHashMap<>();
+    //路由有序快照（路由变更时重建，避免每请求全量排序）
+    protected volatile List<Route> sortedRoutes = new ArrayList<>();
     //路由默认过滤器
     protected final List<ExFilter> routeDefaultFilters = new ArrayList<>();
     //过滤器
@@ -91,6 +93,7 @@ public class CloudGatewayConfiguration implements CloudRouteRegister {
     public CloudRouteRegister route(String id, Consumer<RouteSpec> builder) {
         RouteSpec route = routes.computeIfAbsent(id, k -> new RouteSpec(this.routeManager, id).filters(routeDefaultFilters));
         builder.accept(route);
+        refreshSorted();
         return this;
     }
 
@@ -102,6 +105,7 @@ public class CloudGatewayConfiguration implements CloudRouteRegister {
     public CloudRouteRegister route(RouteSpec route) {
         if (route != null) {
             routes.put(route.getId(), route.filters(routeDefaultFilters));
+            refreshSorted();
         }
 
         return this;
@@ -145,8 +149,11 @@ public class CloudGatewayConfiguration implements CloudRouteRegister {
                 route.timeout(gatewayProperties.getHttpClient());
             }
 
-            this.route(route);
+            routes.put(route.getId(), route.filters(routeDefaultFilters));
         }
+
+        //批量注册后统一重建快照（单条 route() 各自排序，批量场景 O(N² log N)）
+        refreshSorted();
 
         return this;
     }
@@ -154,19 +161,26 @@ public class CloudGatewayConfiguration implements CloudRouteRegister {
     @Override
     public CloudRouteRegister routeRemove(String id) {
         routes.remove(id);
+        refreshSorted();
         return this;
     }
 
     /**
-     * 查找路由记录
+     * 重建路由有序快照
+     */
+    private void refreshSorted() {
+        List<Route> list = new ArrayList<>(routes.values());
+        Collections.sort(list);
+        sortedRoutes = list;
+    }
+
+    /**
+     * 查找路由记录（遍历有序快照，无每请求排序开销）
      *
      * @param ctx 上下文
      */
     public Route routeFind(ExContext ctx) {
-        List<Route> routeList = new ArrayList<>(routes.values());
-        Collections.sort(routeList);
-
-        for (Route route : routeList) {
+        for (Route route : sortedRoutes) {
             if (route.matched(ctx)) {
                 return route;
             }

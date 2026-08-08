@@ -19,18 +19,30 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.*;
+import org.noear.solon.Utils;
 import org.noear.solon.cloud.gateway.exchange.ExBody;
 import org.noear.solon.cloud.gateway.exchange.ExConstants;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
+import org.noear.solon.cloud.gateway.exchange.XForwardedHeaders;
 import org.noear.solon.cloud.gateway.exchange.impl.ExBodyOfBuffer;
 import org.noear.solon.cloud.gateway.exchange.impl.ExBodyOfStream;
+import org.noear.solon.cloud.gateway.properties.HttpClientProperties;
+import org.noear.solon.cloud.gateway.properties.HttpProxyProperties;
+import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
+import org.noear.solon.cloud.gateway.properties.XForwardedProperties;
 import org.noear.solon.cloud.gateway.route.RouteHandler;
+import org.noear.solon.cloud.utils.CloudURI;
 import org.noear.solon.rx.Completable;
 import org.noear.solon.rx.CompletableEmitter;
 import org.noear.solon.core.exception.StatusException;
 import org.noear.solon.core.util.KeyValues;
 
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 /**
  * Http 路由处理器
@@ -39,17 +51,43 @@ import java.util.Map;
  * @since 2.9
  */
 public class HttpRouteHandler implements RouteHandler {
-    private HttpClient httpClient;
+    /**
+     * 逐跳头（不应转发给上游，防 HTTP 请求走私）
+     */
+    private static final Set<String> HOP_BY_HOP_HEADERS = new HashSet<>(Arrays.asList(
+            "connection",
+            "keep-alive",
+            "proxy-authenticate",
+            "proxy-authorization",
+            "te",
+            "trailer",
+            "transfer-encoding",
+            "upgrade",
+            "proxy-connection"));
+
+    private final Vertx vertx;
+    private final HttpClientProperties httpClientProps;
+    private final XForwardedProperties xForwardedProps;
+    private final Pattern nonProxyPattern; //proxy.nonProxyHostsPattern 预编译（非法正则/超长启动期 fail-fast）
+
+    /**
+     * 按上游 host 拆分的连接池（防单上游故障拖垮全局；路由目标集合稳定，无需回收）
+     */
+    private final ConcurrentHashMap<String, HttpClient> poolMap = new ConcurrentHashMap<>();
 
     public HttpRouteHandler(Vertx vertx) {
-        HttpClientOptions options = new HttpClientOptions()
-                .setMaxPoolSize(250)
-                .setConnectTimeout(1000 * 3) // milliseconds: 3s
-                .setIdleTimeout(60) // seconds: 60s
-                .setKeepAlive(true)
-                .setKeepAliveTimeout(60); // seconds: 60s
+        this(vertx, new HttpClientProperties(), new XForwardedProperties());
+    }
 
-        this.httpClient = vertx.createHttpClient(options);
+    public HttpRouteHandler(Vertx vertx, HttpClientProperties httpClientProps) {
+        this(vertx, httpClientProps, new XForwardedProperties());
+    }
+
+    public HttpRouteHandler(Vertx vertx, HttpClientProperties httpClientProps, XForwardedProperties xForwardedProps) {
+        this.vertx = vertx;
+        this.httpClientProps = httpClientProps;
+        this.xForwardedProps = xForwardedProps;
+        this.nonProxyPattern = compileNonProxyPattern(httpClientProps);
     }
 
     @Override
@@ -89,19 +127,38 @@ public class HttpRouteHandler implements RouteHandler {
 
     public void handleDo(ExContext ctx, HttpClientRequest req1, CompletableEmitter emitter) {
         try {
-            //同步 header
-            for (KeyValues<String> kv : ctx.newRequest().getHeaders()) {
-                if (ExConstants.Host.equals(kv.getKey())) {
-                    req1.putHeader(ExConstants.X_Forwarded_Host, kv.getValues());
-                } else {
-                    req1.putHeader(kv.getKey(), kv.getValues());
+            //逐跳头剥离集合（含 Connection 头显式声明的 token）
+            Set<String> skipHeaders = new HashSet<>(HOP_BY_HOP_HEADERS);
+            String connectionHeader = ctx.rawHeader(ExConstants.Connection);
+            if (Utils.isNotEmpty(connectionHeader)) {
+                for (String token : connectionHeader.split(",")) {
+                    String t = token.trim().toLowerCase();
+                    if (Utils.isNotEmpty(t)) {
+                        skipHeaders.add(t);
+                    }
                 }
             }
 
-            if (ctx.rawHeader(ExConstants.X_Real_IP) == null) {
-                //如果上层代理没有构建 real-ip ？
-                req1.putHeader(ExConstants.X_Real_IP, ctx.realIp());
+            //同步 header（剥离逐跳头；Host 不显式转发，由 Vert.x 按目标 URI 自动生成，原始值经 X-Forwarded-Host 传递）
+            for (KeyValues<String> kv : ctx.newRequest().getHeaders()) {
+                String key = kv.getKey();
+
+                if (skipHeaders.contains(key.toLowerCase())) {
+                    continue;
+                }
+
+                if (ExConstants.Host.equals(key)) {
+                    continue;
+                }
+
+                req1.putHeader(key, kv.getValues());
             }
+
+            //X-Forwarded-* 出站头统一生成（For/Host/Port/Proto）
+            XForwardedHeaders.apply(xForwardedProps, ctx, req1.headers());
+
+            //X-Real-IP 统一以信任策略计算后的 realIp 为准（无条件覆盖客户端值，防伪造头绕过 ACL/审计）
+            req1.putHeader(ExConstants.X_Real_IP, ctx.realIp());
 
             ExBody exBody = ctx.newRequest().getBody();
 
@@ -134,17 +191,97 @@ public class HttpRouteHandler implements RouteHandler {
     private Future<HttpClientRequest> buildHttpRequest(ExContext ctx) {
         RequestOptions requestOptions = new RequestOptions();
 
-        //配置超时
-        if (ctx.timeout() != null) {
-            requestOptions.setConnectTimeout(ctx.timeout().getConnectTimeout() * 1000);
-            requestOptions.setTimeout(ctx.timeout().getResponseTimeout() * 1000);
+        //配置超时（无显式配置时使用全局默认；requestTimeout 为等待响应超时）
+        TimeoutProperties timeout = ctx.timeout();
+        if (timeout == null) {
+            timeout = httpClientProps;
         }
+
+        requestOptions.setConnectTimeout(timeout.getConnectTimeout() * 1000);
+        requestOptions.setTimeout(timeout.getRequestTimeout() * 1000);
 
         //配置绝对地址
         requestOptions.setAbsoluteURI(ctx.targetNew() + ctx.newRequest().getPathAndQueryString());
         requestOptions.setMethod(HttpMethod.valueOf(ctx.newRequest().getMethod()));
 
-        return httpClient.request(requestOptions);
+        return getHttpClient(ctx).request(requestOptions);
+    }
+
+    /**
+     * 按上游 host 获取独立连接池（走代理与直连的上游分池，防单上游故障拖垮全局）
+     */
+    private HttpClient getHttpClient(ExContext ctx) {
+        CloudURI target = ctx.targetNew();
+        String scheme = target.getRootScheme();
+        String host = target.getHost();
+        int port = target.getPort();
+        if (port <= 0) {
+            port = "https".equals(scheme) ? 443 : 80;
+        }
+
+        //代理/直连分池：命中 nonProxyHostsPattern 的上游 host 走直连（与走代理的 host 使用独立连接池）
+        boolean useProxy = isProxyEnabledFor(host);
+        String key = (useProxy ? "proxy|" : "direct|") + scheme + "://" + host + ":" + port;
+
+        final boolean proxyFlag = useProxy;
+        return poolMap.computeIfAbsent(key, k -> vertx.createHttpClient(buildClientOptions(proxyFlag)));
+    }
+
+    /**
+     * 构建 http 客户端选项（连接池 + 压缩 + 代理 + SSL）
+     */
+    private HttpClientOptions buildClientOptions(boolean useProxy) {
+        HttpClientOptions options = new HttpClientOptions()
+                .setMaxPoolSize(httpClientProps.getPool().getMaxConnections())
+                .setMaxWaitQueueSize(httpClientProps.getPool().getMaxWaitQueueSize()) //池等待队列上限，耗尽后快速失败（防无限排队悬挂）
+                .setIdleTimeout(httpClientProps.getPool().getMaxIdleTime())
+                .setKeepAlive(true)
+                .setKeepAliveTimeout(httpClientProps.getPool().getKeepAliveTimeout())
+                .setTryUseCompression(httpClientProps.isCompression()); //compression：出站 GZip
+
+        //代理（nonProxyHostsPattern 命中的上游 host 走直连：useProxy=false 不装配）
+        if (useProxy) {
+            ClientOptionsUtil.applyProxy(httpClientProps, options);
+        }
+
+        //SSL（mTLS 客户端证书 / 自定义信任库）
+        ClientOptionsUtil.applySsl(httpClientProps, options);
+
+        return options;
+    }
+
+    /**
+     * 预编译 nonProxyHostsPattern（非法正则/超长启动期 fail-fast，防运行时 ReDoS）
+     */
+    private static Pattern compileNonProxyPattern(HttpClientProperties props) {
+        HttpProxyProperties proxy = props == null ? null : props.getProxy();
+        if (proxy == null || Utils.isEmpty(proxy.getNonProxyHostsPattern())) {
+            return null;
+        }
+
+        String pattern = proxy.getNonProxyHostsPattern();
+        if (pattern.length() > 512) {
+            throw new IllegalArgumentException("httpClient.proxy.nonProxyHostsPattern too long (max 512)");
+        }
+
+        return Pattern.compile(pattern);
+    }
+
+    /**
+     * 目标 host 是否走代理（proxy.enabled + host 非空，且未命中 nonProxyHostsPattern）
+     */
+    private boolean isProxyEnabledFor(String host) {
+        HttpProxyProperties proxy = httpClientProps.getProxy();
+        if (proxy == null || !proxy.isEnabled() || Utils.isEmpty(proxy.getHost())) {
+            return false;
+        }
+
+        if (nonProxyPattern == null) {
+            return true;
+        }
+
+        //命中 nonProxyHostsPattern → 直连
+        return !nonProxyPattern.matcher(host).matches();
     }
 
     /**

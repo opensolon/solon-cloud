@@ -70,6 +70,10 @@ public class QueryPredicateFactory implements RoutePredicateFactory {
                 if (Utils.isEmpty(regex)) {
                     throw new IllegalArgumentException("Query regex cannot be empty.");
                 } else {
+                    if (regex.length() > 512) {
+                        //正则长度上限（仅防超长正则；无法根治灾难性回溯，配置请避免嵌套量词如 (a+)+）
+                        throw new IllegalArgumentException("Query regex too long (max 512): " + config);
+                    }
                     pattern = Pattern.compile(regex);
                 }
             }
@@ -88,6 +92,11 @@ public class QueryPredicateFactory implements RoutePredicateFactory {
                 //不需要匹配（找到就行）
                 return true;
             } else {
+                //输入长度预检（缓解灾难性回溯放大；正则来自运维配置，请避免嵌套量词等灾难性模式）
+                if (value.length() > 1024) {
+                    return false;
+                }
+
                 //需要匹配检测
                 return pattern.matcher(value).find();
             }

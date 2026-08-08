@@ -17,9 +17,15 @@ package org.noear.solon.cloud.gateway.route.handler;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
+import io.vertx.core.http.impl.headers.HeadersMultiMap;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
 import org.noear.solon.cloud.gateway.exchange.ExContextImpl;
+import org.noear.solon.cloud.gateway.exchange.XForwardedHeaders;
+import org.noear.solon.cloud.gateway.properties.HttpClientProperties;
+import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
+import org.noear.solon.cloud.gateway.properties.XForwardedProperties;
 import org.noear.solon.cloud.gateway.route.RouteHandler;
 import org.noear.solon.rx.Completable;
 import org.noear.solon.rx.CompletableEmitter;
@@ -36,14 +42,33 @@ import org.slf4j.LoggerFactory;
 public class WebSocketRouteHandler implements RouteHandler {
     static final Logger log = LoggerFactory.getLogger(WebSocketRouteHandler.class);
 
+    private final Vertx vertx;
+    private final HttpClientProperties httpClientProps;
+    private final XForwardedProperties xForwardedProps;
+    private final int pingInterval;
+
     private WebSocketClient webSocketClient;
 
     public WebSocketRouteHandler(Vertx vertx) {
+        this(vertx, new HttpClientProperties(), new XForwardedProperties());
+    }
+
+    public WebSocketRouteHandler(Vertx vertx, HttpClientProperties httpClientProps) {
+        this(vertx, httpClientProps, new XForwardedProperties());
+    }
+
+    public WebSocketRouteHandler(Vertx vertx, HttpClientProperties httpClientProps, XForwardedProperties xForwardedProps) {
+        this.vertx = vertx;
+        this.httpClientProps = httpClientProps;
+        this.xForwardedProps = xForwardedProps;
+        this.pingInterval = httpClientProps.getWebsocket().getPingInterval();
+
         WebSocketClientOptions options = new WebSocketClientOptions()
-                .setConnectTimeout(1000 * 3) // milliseconds: 3s
-                .setIdleTimeout(60) // seconds: 60s
-                .setClosingTimeout(10) // seconds: 10s
-                .setMaxConnections(200);
+                .setIdleTimeout(httpClientProps.getWebsocket().getIdleTimeout()) // seconds
+                .setClosingTimeout(httpClientProps.getWebsocket().getClosingTimeout()) // seconds
+                .setMaxConnections(httpClientProps.getWebsocket().getMaxConnections());
+        //代理 + SSL（compression 为 HTTP GZip 不适用 WS；WS 客户端为全局单例，nonProxyHostsPattern 不生效）
+        ClientOptionsUtil.applyWebSocket(httpClientProps, options);
 
         this.webSocketClient = vertx.createWebSocketClient(options);
     }
@@ -94,11 +119,18 @@ public class WebSocketRouteHandler implements RouteHandler {
                 .setAbsoluteURI(targetUri)
                 .setMethod(HttpMethod.GET);
 
-        // 配置超时
-        if (ctx.timeout() != null) {
-            options.setConnectTimeout(ctx.timeout().getConnectTimeout() * 1000);
-            options.setTimeout(ctx.timeout().getResponseTimeout() * 1000);
+        // 配置超时（无显式配置时使用全局默认；requestTimeout 为握手等待超时）
+        TimeoutProperties timeout = ctx.timeout();
+        if (timeout == null) {
+            timeout = httpClientProps;
         }
+
+        options.setHeaders(new HeadersMultiMap()); //? options.setHeaders(ctx.rawHeaders());
+        options.setConnectTimeout(timeout.getConnectTimeout() * 1000);
+        options.setTimeout(timeout.getRequestTimeout() * 1000);
+
+        //X-Forwarded-* 出站头统一生成（For/Host/Port/Proto）
+        XForwardedHeaders.apply(xForwardedProps, ctx, options.getHeaders());
 
         return webSocketClient.connect(options);
     }
@@ -120,7 +152,7 @@ public class WebSocketRouteHandler implements RouteHandler {
                     ServerWebSocket sourceWebSocket = sourceAr.result();
 
                     // 双向转发消息
-                    setupWebSocketForwarding(sourceWebSocket, targetWebSocket);
+                    setupWebSocketForwarding(ctx, sourceWebSocket, targetWebSocket);
 
                     emitter.onComplete();
                 } else {
@@ -136,7 +168,10 @@ public class WebSocketRouteHandler implements RouteHandler {
     /**
      * 设置 WebSocket 消息双向转发和关闭/错误处理
      */
-    private void setupWebSocketForwarding(ServerWebSocket clientWS, WebSocket targetWS) {
+    private void setupWebSocketForwarding(ExContext ctx, ServerWebSocket clientWS, WebSocket targetWS) {
+        // 心跳定时器引用（先声明，closeHandler 中统一取消；Vert.x closeHandler 为覆盖语义，只能注册一次）
+        long[] timerRef = {-1L};
+
         // 使用 frameHandler 处理，以确保转发所有类型的帧（文本、二进制、Ping/Pong等）
         clientWS.frameHandler(frame -> {
             if (!targetWS.isClosed()) {
@@ -144,8 +179,12 @@ public class WebSocketRouteHandler implements RouteHandler {
             }
         });
 
-        // 客户端连接关闭时，关闭目标连接
+        // 客户端连接关闭时：取消心跳 + 关闭目标连接（合并进同一个 closeHandler，避免重复注册覆盖）
         clientWS.closeHandler(v -> {
+            if (timerRef[0] != -1L) {
+                ctx.vertx().cancelTimer(timerRef[0]);
+            }
+
             if (!targetWS.isClosed()) {
                 // 可以发送一个 close frame 到目标服务器
                 targetWS.close();
@@ -172,8 +211,12 @@ public class WebSocketRouteHandler implements RouteHandler {
             }
         });
 
-        // 目标连接关闭时，关闭客户端连接
+        // 目标连接关闭时：取消心跳 + 关闭客户端连接（合并进同一个 closeHandler，避免重复注册覆盖）
         targetWS.closeHandler(v -> {
+            if (timerRef[0] != -1L) {
+                ctx.vertx().cancelTimer(timerRef[0]);
+            }
+
             if (!clientWS.isClosed()) {
                 // 可以发送一个 close frame 到客户端
                 clientWS.close();
@@ -188,5 +231,22 @@ public class WebSocketRouteHandler implements RouteHandler {
                 clientWS.close();
             }
         });
+
+        // ----------------------------------------------------
+        // 3. 心跳保活（双向 ping），防半开连接悬挂；关闭时经 closeHandler 统一取消定时器
+        // ----------------------------------------------------
+        if (pingInterval > 0) {
+            timerRef[0] = ctx.vertx().setPeriodic(pingInterval * 1000L, id -> {
+                if (!clientWS.isClosed()) {
+                    clientWS.writePing(Buffer.buffer("gateway-ping"), ar -> {
+                    });
+                }
+
+                if (!targetWS.isClosed()) {
+                    targetWS.writePing(Buffer.buffer("gateway-ping"), ar -> {
+                    });
+                }
+            });
+        }
     }
 }

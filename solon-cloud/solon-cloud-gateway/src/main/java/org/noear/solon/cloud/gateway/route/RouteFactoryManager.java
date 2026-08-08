@@ -19,6 +19,7 @@ import io.vertx.core.Vertx;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.gateway.exchange.ExFilter;
 import org.noear.solon.cloud.gateway.exchange.ExPredicate;
+import org.noear.solon.cloud.gateway.properties.GatewayProperties;
 import org.noear.solon.cloud.gateway.route.filter.*;
 import org.noear.solon.cloud.gateway.route.handler.*;
 import org.noear.solon.cloud.gateway.route.predicate.*;
@@ -38,6 +39,7 @@ import java.util.Map;
  */
 public class RouteFactoryManager {
     private final Vertx vertx;
+    private final GatewayProperties gatewayProperties;
     private Map<String, RouteFilterFactory> filterFactoryMap = new HashMap<>();
     private Map<String, RoutePredicateFactory> predicateFactoryMap = new HashMap<>();
     private Map<String, RouteHandler> handlerMap = new HashMap<>();
@@ -48,7 +50,12 @@ public class RouteFactoryManager {
     }
 
     public RouteFactoryManager(Vertx vertx) {
+        this(vertx, new GatewayProperties());
+    }
+
+    public RouteFactoryManager(Vertx vertx, GatewayProperties gatewayProperties) {
         this.vertx = vertx;
+        this.gatewayProperties = gatewayProperties;
 
         addFactory(new AfterPredicateFactory());
         addFactory(new BeforePredicateFactory());
@@ -60,6 +67,7 @@ public class RouteFactoryManager {
         addFactory(new PathPredicateFactory());
         addFactory(new QueryPredicateFactory());
         addFactory(new RemoteAddrPredicateFactory());
+        addFactory(new XForwardedRemoteAddrPredicateFactory());
 
         //----------
         addFactory(new AddRequestHeaderFilterFactory());
@@ -73,9 +81,9 @@ public class RouteFactoryManager {
         addFactory(new StripPrefixFilterFactory());
 
         //----------
-        addHandler(new HttpRouteHandler(vertx));
+        addHandler(new HttpRouteHandler(vertx, gatewayProperties.getHttpClient(), gatewayProperties.getXForwarded()));
         addHandler(new LbRouteHandler(this));
-        addHandler(new WebSocketRouteHandler(vertx));
+        addHandler(new WebSocketRouteHandler(vertx, gatewayProperties.getHttpClient(), gatewayProperties.getXForwarded()));
     }
 
     public Vertx getVertx() {
@@ -113,9 +121,14 @@ public class RouteFactoryManager {
         RouteFilterFactory factory = filterFactoryMap.get(prefix);
         if (factory == null) {
             return null;
-        } else {
-            return factory.create(config);
         }
+
+        if (!isFilterFactoryEnabled(prefix)) {
+            //工厂被 solon.cloud.gateway.filter.* 开关关闭：视为未注册，不构建
+            return null;
+        }
+
+        return factory.create(config);
     }
 
     /**
@@ -128,9 +141,63 @@ public class RouteFactoryManager {
         RoutePredicateFactory factory = predicateFactoryMap.get(prefix);
         if (factory == null) {
             return null;
-        } else {
-            return factory.create(config);
         }
+
+        if (!isPredicateFactoryEnabled(prefix)) {
+            //工厂被 solon.cloud.gateway.predicate.* 开关关闭：视为未注册，不构建
+            return null;
+        }
+
+        return factory.create(config);
+    }
+
+    /**
+     * 谓词工厂是否启用（solon.cloud.gateway.predicate.{Name}=false 可关闭，缺省 true）
+     *
+     * <p>键规范化：配置键支持小写连字符（如 remote-addr），工厂 prefix 为驼峰（RemoteAddr），
+     * 统一转小写去分隔符后比较。</p>
+     */
+    private boolean isPredicateFactoryEnabled(String prefix) {
+        Map<String, Boolean> map = gatewayProperties.getPredicate();
+        if (map == null || map.isEmpty()) {
+            return true;
+        }
+
+        String key = normKey(prefix);
+        for (Map.Entry<String, Boolean> e : map.entrySet()) {
+            if (normKey(e.getKey()).equals(key)) {
+                return e.getValue() == null || e.getValue();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 过滤器工厂是否启用（solon.cloud.gateway.filter.{Name}=false 可关闭，缺省 true）
+     */
+    private boolean isFilterFactoryEnabled(String prefix) {
+        Map<String, Boolean> map = gatewayProperties.getFilter();
+        if (map == null || map.isEmpty()) {
+            return true;
+        }
+
+        String key = normKey(prefix);
+        for (Map.Entry<String, Boolean> e : map.entrySet()) {
+            if (normKey(e.getKey()).equals(key)) {
+                return e.getValue() == null || e.getValue();
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 配置键规范化：小写并去除连字符/下划线（remote-addr → remoteaddr，RemoteAddr → remoteaddr）
+     */
+    private static String normKey(String s) {
+        if (s == null) {
+            return "";
+        }
+        return s.toLowerCase().replace("-", "").replace("_", "");
     }
 
     /**

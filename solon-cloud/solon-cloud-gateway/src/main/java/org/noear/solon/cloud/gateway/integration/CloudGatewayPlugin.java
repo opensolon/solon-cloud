@@ -45,7 +45,7 @@ public class CloudGatewayPlugin implements Plugin {
         }
 
         //routeManager
-        RouteFactoryManager routeManager = new RouteFactoryManager(_vertx);
+        RouteFactoryManager routeManager = new RouteFactoryManager(_vertx, gatewayProperties);
         context.wrapAndPut(RouteFactoryManager.class, routeManager);
 
         //cloudGateway

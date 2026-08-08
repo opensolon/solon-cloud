@@ -1,4 +1,16 @@
 
+### 4.0.5
+
+* 添加 solon-cloud-gateway `solon.cloud.gateway.predicate.*: bool` 配置支持
+* 添加 solon-cloud-gateway `solon.cloud.gateway.filter.*: bool` 配置支持
+* 添加 solon-cloud-gateway `solon.cloud.gateway.xForwarded.*: {}` 配置支持
+* 添加 solon-cloud-gateway `solon.cloud.gateway.httpClient.pool.*: {}` 配置支持
+* 添加 solon-cloud-gateway `solon.cloud.gateway.httpClient.websocket.*: {}` 配置支持
+* 添加 solon-cloud-gateway `solon.cloud.gateway.httpClient.proxy.*: {}` 配置支持
+* 添加 solon-cloud-gateway `solon.cloud.gateway.httpClient.ssl.*: {}` 配置支持
+* 添加 solon-cloud-gateway XForwardedRemoteAddrPredicateFactory（替代之前的 RemoteAddrPredicateFactory）
+* 调整 solon-cloud-gateway RemoteAddrPredicateFactory 逻辑（之前检测 realIp，现在检测 socketIp）
+
 
 ### 3.10.5
 

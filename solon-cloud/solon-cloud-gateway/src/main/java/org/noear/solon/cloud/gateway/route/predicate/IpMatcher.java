@@ -17,6 +17,7 @@ package org.noear.solon.cloud.gateway.route.predicate;
 
 import io.netty.handler.ipfilter.IpFilterRuleType;
 import io.netty.handler.ipfilter.IpSubnetFilterRule;
+import io.netty.util.NetUtil;
 import org.noear.solon.Utils;
 
 import java.net.Inet4Address;
@@ -65,15 +66,19 @@ public class IpMatcher {
 
     /**
      * 是否为 IP 字面量（IPv4/IPv6），非主机名；非字面量不参与匹配，避免同步 DNS
+     *
+     * <p>使用 Netty {@link NetUtil} 严格校验：
+     * IPv4 逐段限制 0-255、IPv6 完整语法校验（含 "::" 压缩与尾部 IPv4 形式）。
+     * 拒绝所有非法字面量（如 "999.999.999.999"、":::::"），
+     * 防止其落入 {@link InetAddress#getByName(String)} 后回退为 DNS 解析，
+     * 阻塞事件循环（JDK 对超范围 IPv4 段/畸形 IPv6 会走 DNS 兜底）。</p>
      */
     public static boolean isIpLiteral(String ip) {
-        //IPv4 字面量（纯数字，JDK 内建解析）
-        if (ip.matches("^\\d{1,3}(\\.\\d{1,3}){3}$")) {
-            return true;
+        if (Utils.isEmpty(ip)) {
+            return false;
         }
 
-        //IPv6 字面量（含冒号；>=0 兼容 "::1" 等冒号开头的压缩写法）
-        return ip.indexOf(':') >= 0 && ip.matches("^[0-9a-fA-F:]+$");
+        return NetUtil.isValidIpV4Address(ip) || NetUtil.isValidIpV6Address(ip);
     }
 
     /**

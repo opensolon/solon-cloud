@@ -45,6 +45,19 @@ public class LbRouteHandler implements RouteHandler {
 
     @Override
     public Completable handle(ExContext ctx) {
+        //错误统一以 Completable.error 传播（与 HttpRouteHandler 一致，便于用户 filter 在响应式链上拦截）
+        try {
+            return handleDo(ctx);
+        } catch (Throwable ex) {
+            if (ex instanceof StatusException) {
+                return Completable.error(ex);
+            } else {
+                return Completable.error(new StatusException(ex, 500));
+            }
+        }
+    }
+
+    private Completable handleDo(ExContext ctx) {
         //构建新的目标
         CloudURI lbUri = ctx.targetNew();
 
@@ -52,7 +65,12 @@ public class LbRouteHandler implements RouteHandler {
             throw new StatusException("Invalid target service: host is null", 400);
         }
 
-        String tmp = LoadBalance.get(lbUri.getHost()).getServer(lbUri.getPort());
+        LoadBalance lb = LoadBalance.get(lbUri.getHost());
+        if (lb == null) {
+            throw new StatusException("The target service does not exist", 404);
+        }
+
+        String tmp = lb.getServer(lbUri.getPort());
         if (tmp == null) {
             throw new StatusException("The target service does not exist", 404);
         }

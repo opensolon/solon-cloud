@@ -27,6 +27,8 @@ import java.io.Serializable;
  *       超限快速失败(503)，防无限排队悬挂（-1=无限制）</li>
  *   <li>maxIdleTime（秒）：空闲回收，配合常见 LB 60s 空闲断开；过大占用连接，过小频繁建连</li>
  *   <li>keepAliveTimeout（秒）：HTTP keep-alive 保持时长</li>
+ *   <li>maxPools：按上游 host 拆分的连接池数量上限。超限时淘汰最久未使用的池并关闭其客户端，
+ *       防 lb 实例扩缩容/滚动发布/容器 IP 漂移导致 HttpClient 无界累积</li>
  * </ul>
  *
  * @author noear
@@ -37,6 +39,7 @@ public class HttpPoolProperties implements Serializable {
     private int maxWaitQueueSize = 1000;   //池等待队列上限：池满且排队超限→快速失败(503)，防无限排队悬挂（-1=无限制）
     private int maxIdleTime = 60;          //空闲超时（秒），配合常见 LB 60s 空闲断开
     private int keepAliveTimeout = 60;     //keep-alive 保持时长（秒）
+    private int maxPools = 256;            //连接池数量上限（按上游 host 分池）：超限 LRU 淘汰并关闭，防实例漂移泄漏
 
     public HttpPoolProperties() {
 
@@ -84,5 +87,16 @@ public class HttpPoolProperties implements Serializable {
 
     public void setKeepAliveTimeout(int keepAliveTimeout) {
         this.keepAliveTimeout = keepAliveTimeout;
+    }
+
+    /**
+     * 获取连接池数量上限（按上游 host 分池，超限 LRU 淘汰并关闭）
+     */
+    public int getMaxPools() {
+        return maxPools;
+    }
+
+    public void setMaxPools(int maxPools) {
+        this.maxPools = maxPools;
     }
 }

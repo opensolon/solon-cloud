@@ -36,6 +36,8 @@ import org.noear.solon.rx.Completable;
 import org.noear.solon.rx.CompletableEmitter;
 import org.noear.solon.core.exception.StatusException;
 import org.noear.solon.core.util.KeyValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -51,6 +53,8 @@ import java.util.regex.Pattern;
  * @since 2.9
  */
 public class HttpRouteHandler implements RouteHandler {
+    static final Logger log = LoggerFactory.getLogger(HttpRouteHandler.class);
+
     /**
      * 逐跳头（不应转发给上游，防 HTTP 请求走私）
      */
@@ -71,9 +75,13 @@ public class HttpRouteHandler implements RouteHandler {
     private final Pattern nonProxyPattern; //proxy.nonProxyHostsPattern 预编译（非法正则/超长启动期 fail-fast）
 
     /**
-     * 按上游 host 拆分的连接池（防单上游故障拖垮全局；路由目标集合稳定，无需回收）
+     * 按上游 host 拆分的连接池（防单上游故障拖垮全局）
+     *
+     * <p>lb 场景下目标为具体实例地址，扩缩容/滚动发布/容器 IP 漂移会不断产生新 key，
+     * 故以 pool.maxPools 为上限做 LRU 淘汰并关闭被淘汰客户端，防连接与本地内存累积泄漏。</p>
      */
-    private final ConcurrentHashMap<String, HttpClient> poolMap = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, PoolEntry> poolMap = new ConcurrentHashMap<>();
+    private final int maxPools;
 
     public HttpRouteHandler(Vertx vertx) {
         this(vertx, new HttpClientProperties(), new XForwardedProperties());
@@ -88,6 +96,20 @@ public class HttpRouteHandler implements RouteHandler {
         this.httpClientProps = httpClientProps;
         this.xForwardedProps = xForwardedProps;
         this.nonProxyPattern = compileNonProxyPattern(httpClientProps);
+        this.maxPools = Math.max(1, httpClientProps.getPool().getMaxPools());
+    }
+
+    /**
+     * 连接池条目（带最近使用时间，用于 LRU 淘汰）
+     */
+    private static class PoolEntry {
+        final HttpClient client;
+        volatile long lastAccess;
+
+        PoolEntry(HttpClient client) {
+            this.client = client;
+            this.lastAccess = System.currentTimeMillis();
+        }
     }
 
     @Override
@@ -128,16 +150,7 @@ public class HttpRouteHandler implements RouteHandler {
     public void handleDo(ExContext ctx, HttpClientRequest req1, CompletableEmitter emitter) {
         try {
             //逐跳头剥离集合（含 Connection 头显式声明的 token）
-            Set<String> skipHeaders = new HashSet<>(HOP_BY_HOP_HEADERS);
-            String connectionHeader = ctx.rawHeader(ExConstants.Connection);
-            if (Utils.isNotEmpty(connectionHeader)) {
-                for (String token : connectionHeader.split(",")) {
-                    String t = token.trim().toLowerCase();
-                    if (Utils.isNotEmpty(t)) {
-                        skipHeaders.add(t);
-                    }
-                }
-            }
+            Set<String> skipHeaders = buildSkipHeaders(ctx.rawHeader(ExConstants.Connection));
 
             //同步 header（剥离逐跳头；Host 不显式转发，由 Vert.x 按目标 URI 自动生成，原始值经 X-Forwarded-Host 传递）
             for (KeyValues<String> kv : ctx.newRequest().getHeaders()) {
@@ -151,26 +164,37 @@ public class HttpRouteHandler implements RouteHandler {
                     continue;
                 }
 
+                //Content-Length 不随头透传：由发送端按实际 body 重新生成（buffer 场景自动设置、stream 场景走 chunked），
+                //避免 filter 修改 body 后旧长度失配导致连接损坏
+                if (ExConstants.Content_Length.equals(key)) {
+                    continue;
+                }
+
                 req1.putHeader(key, kv.getValues());
             }
 
             //X-Forwarded-* 出站头统一生成（For/Host/Port/Proto）
             XForwardedHeaders.apply(xForwardedProps, ctx, req1.headers());
 
-            //X-Real-IP 统一以信任策略计算后的 realIp 为准（无条件覆盖客户端值，防伪造头绕过 ACL/审计）
+            //X-Real-IP 统一取 ctx.realIp()（其取值优先采信客户端 X-Real-IP / X-Forwarded-For，
+            //故该值可被客户端伪造，仅作链路透传用，不可作为鉴权或审计依据；
+            //需要不可伪造的对端地址时用 ctx.remoteAddress()）
             req1.putHeader(ExConstants.X_Real_IP, ctx.realIp());
 
             ExBody exBody = ctx.newRequest().getBody();
 
-
-            //同步 body（流复制）
+            //同步 body（流复制；未知 ExBody 实现按无体处理，防 ClassCastException 悬挂）
             if (exBody instanceof ExBodyOfBuffer) {
                 req1.send(((ExBodyOfBuffer) exBody).getBuffer(), ar1 -> {
                     callbackHandle(ctx, ar1, emitter);
                 });
-            } else {
+            } else if (exBody instanceof ExBodyOfStream) {
                 //使用 chunked
                 req1.send(((ExBodyOfStream) exBody).getStream(), ar1 -> {
+                    callbackHandle(ctx, ar1, emitter);
+                });
+            } else {
+                req1.send(ar1 -> {
                     callbackHandle(ctx, ar1, emitter);
                 });
             }
@@ -209,6 +233,9 @@ public class HttpRouteHandler implements RouteHandler {
 
     /**
      * 按上游 host 获取独立连接池（走代理与直连的上游分池，防单上游故障拖垮全局）
+     *
+     * <p>池数量以 pool.maxPools 为上限，超限时淘汰最久未使用的池并关闭其客户端，
+     * 防 lb 实例漂移导致 HttpClient 无界累积。</p>
      */
     private HttpClient getHttpClient(ExContext ctx) {
         CloudURI target = ctx.targetNew();
@@ -223,8 +250,72 @@ public class HttpRouteHandler implements RouteHandler {
         boolean useProxy = isProxyEnabledFor(host);
         String key = (useProxy ? "proxy|" : "direct|") + scheme + "://" + host + ":" + port;
 
-        final boolean proxyFlag = useProxy;
-        return poolMap.computeIfAbsent(key, k -> vertx.createHttpClient(buildClientOptions(proxyFlag)));
+        PoolEntry entry = poolMap.get(key);
+
+        if (entry == null) {
+            //仅创建路径加锁（读路径无锁）：保证淘汰与创建的原子性
+            synchronized (poolMap) {
+                entry = poolMap.get(key);
+
+                if (entry == null) {
+                    evictIfNeeded();
+                    entry = new PoolEntry(vertx.createHttpClient(buildClientOptions(useProxy)));
+                    poolMap.put(key, entry);
+                }
+            }
+        }
+
+        entry.lastAccess = System.currentTimeMillis();
+        return entry.client;
+    }
+
+    /**
+     * 池数量超限时淘汰最久未使用的池（调用方需持有 poolMap 锁）
+     */
+    private void evictIfNeeded() {
+        while (poolMap.size() >= maxPools) {
+            String oldestKey = null;
+            long oldestAccess = Long.MAX_VALUE;
+
+            for (Map.Entry<String, PoolEntry> kv : poolMap.entrySet()) {
+                if (kv.getValue().lastAccess < oldestAccess) {
+                    oldestAccess = kv.getValue().lastAccess;
+                    oldestKey = kv.getKey();
+                }
+            }
+
+            if (oldestKey == null) {
+                return;
+            }
+
+            PoolEntry removed = poolMap.remove(oldestKey);
+            if (removed != null) {
+                //关闭为异步：进行中的请求由 Vert.x 自行结束
+                try {
+                    removed.client.close();
+                } catch (Throwable ex) {
+                    log.warn("Gateway http pool close failed: {}", oldestKey, ex);
+                }
+            }
+        }
+    }
+
+    /**
+     * 构建逐跳头剥离集合（静态逐跳头 + Connection 头显式声明的 token）
+     */
+    private static Set<String> buildSkipHeaders(String connectionHeader) {
+        Set<String> skipHeaders = new HashSet<>(HOP_BY_HOP_HEADERS);
+
+        if (Utils.isNotEmpty(connectionHeader)) {
+            for (String token : connectionHeader.split(",")) {
+                String t = token.trim().toLowerCase();
+                if (Utils.isNotEmpty(t)) {
+                    skipHeaders.add(t);
+                }
+            }
+        }
+
+        return skipHeaders;
     }
 
     /**
@@ -294,8 +385,16 @@ public class HttpRouteHandler implements RouteHandler {
 
                 //code
                 ctx.newResponse().status(resp1.statusCode());
-                //header
+
+                //header（与请求侧对称剥离逐跳头，含上游 Connection 声明的 token）：
+                //防响应拆分/走私，并避免上游 Transfer-Encoding 与下游写出方式冲突
+                Set<String> skipHeaders = buildSkipHeaders(resp1.getHeader(ExConstants.Connection));
+
                 for (Map.Entry<String, String> kv : resp1.headers()) {
+                    if (skipHeaders.contains(kv.getKey().toLowerCase())) {
+                        continue;
+                    }
+
                     ctx.newResponse().headerAdd(kv.getKey(), kv.getValue());
                 }
 

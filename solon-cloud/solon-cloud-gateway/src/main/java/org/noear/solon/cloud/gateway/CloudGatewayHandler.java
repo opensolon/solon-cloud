@@ -76,10 +76,6 @@ public class CloudGatewayHandler implements VxHandler {
             //有路由，采服网关响应式接口处理（不使用二级线程池）
             CloudGatewayCompletion completion = new CloudGatewayCompletion(ctx, request, routeManager.getVertx());
 
-            //整体完成兜底超时（防“响应永不完成”悬挂；默认 60s）
-            TimeoutProperties timeout = ctx.timeout();
-            int totalTimeoutSeconds = timeout != null ? timeout.getResponseTimeout() : 60;
-            completion.scheduleTimeout(totalTimeoutSeconds);
 
             //开始执行
             try {

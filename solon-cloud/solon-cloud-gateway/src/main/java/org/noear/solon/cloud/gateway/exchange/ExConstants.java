@@ -24,6 +24,9 @@ package org.noear.solon.cloud.gateway.exchange;
 public interface ExConstants {
     String Host = "Host";
     String Connection = "Connection";
+    String Content_Length = "Content-Length";
+
+    String Sec_WebSocket_Protocol = "Sec-WebSocket-Protocol";
 
     String X_Real_IP = "X-Real-IP";
     String X_Forwarded_For = "X-Forwarded-For";

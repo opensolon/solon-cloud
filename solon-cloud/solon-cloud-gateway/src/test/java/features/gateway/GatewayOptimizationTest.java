@@ -11,6 +11,7 @@ import org.noear.solon.cloud.gateway.properties.HttpProxyProperties;
 import org.noear.solon.cloud.gateway.properties.HttpSslProperties;
 import org.noear.solon.cloud.gateway.properties.XForwardedProperties;
 import org.noear.solon.cloud.gateway.route.RouteFactoryManager;
+import org.noear.solon.cloud.gateway.route.predicate.CookiePredicateFactory;
 import org.noear.solon.cloud.gateway.route.predicate.HeaderPredicateFactory;
 import org.noear.solon.cloud.gateway.route.predicate.QueryPredicateFactory;
 import org.noear.solon.cloud.gateway.route.predicate.RemoteAddrPredicateFactory;
@@ -72,6 +73,32 @@ public class GatewayOptimizationTest {
     }
 
     /**
+     * Cookie 专用 mock（仅提供 rawCookie）
+     */
+    private ExContext ctxOfCookie(String cookieName, String cookieValue) {
+        return (ExContext) Proxy.newProxyInstance(
+                getClass().getClassLoader(),
+                new Class[]{ExContext.class},
+                (proxy, method, args) -> {
+                    if ("rawCookie".equals(method.getName()) && args != null && args.length == 1 && cookieName.equals(args[0])) {
+                        return cookieValue;
+                    }
+
+                    Class<?> rt = method.getReturnType();
+                    if (rt == boolean.class) {
+                        return false;
+                    }
+                    if (rt == int.class) {
+                        return 0;
+                    }
+                    if (rt == long.class) {
+                        return 0L;
+                    }
+                    return null;
+                });
+    }
+
+    /**
      * P0-3：XForwardedRemoteAddr 谓词拒绝主机名（此前会触发事件循环上的同步 DNS），IP 字面量正常匹配
      */
     @Test
@@ -96,6 +123,33 @@ public class GatewayOptimizationTest {
 
         //空 IP 不匹配
         assertFalse(predicate.test(ctxOf("", null, null, null, null)));
+    }
+
+    /**
+     * P0-3 补强：畸形 IP 字面量必须被严格拒绝（不匹配、不抛异常、不触发 DNS）
+     *
+     * <p>此前 isIpLiteral 仅按字符形态判断（\d{1,3} 分段 / 含冒号），
+     * 非法字面量（如 999.999.999.999）会落入 InetAddress.getByName 回退为 DNS 解析，
+     * 在事件循环上执行同步查询（DoS）。修复后 Netty NetUtil 严格校验，拒绝所有非法字面量。</p>
+     */
+    @Test
+    public void xForwardedRemoteAddrPredicate_rejectMalformedLiteral_withoutDns() {
+        ExPredicate predicate = new XForwardedRemoteAddrPredicateFactory().create("192.168.1.0/24");
+
+        //超范围 IPv4 段（JDK 会回退 DNS）：必须不匹配
+        assertFalse(predicate.test(ctxOf("999.999.999.999", null, null, null, null)));
+        assertFalse(predicate.test(ctxOf("256.1.1.1", null, null, null, null)));
+        assertFalse(predicate.test(ctxOf("192.168.1.999", null, null, null, null)));
+
+        //畸形 IPv6（JDK 会回退 DNS）：必须不匹配
+        assertFalse(predicate.test(ctxOf(":::::", null, null, null, null)));
+        assertFalse(predicate.test(ctxOf("gggg::1", null, null, null, null)));
+        assertFalse(predicate.test(ctxOf("2001:db8::zzzz", null, null, null, null)));
+
+        //合法字面量不受影响（IPv4 / IPv6 压缩写法）
+        assertTrue(predicate.test(ctxOf("192.168.1.100", null, null, null, null)));
+        ExPredicate v6Rule = new XForwardedRemoteAddrPredicateFactory().create("::1/128");
+        assertTrue(v6Rule.test(ctxOf("::1", null, null, null, null)));
     }
 
     /**
@@ -173,7 +227,7 @@ public class GatewayOptimizationTest {
         assertTrue(predicate.test(ctxOf(null, "X-Token", "user-1", null, null)));
         assertFalse(predicate.test(ctxOf(null, "X-Token", "admin", null, null)));
 
-        //超长输入（>4096）：直接不匹配，避免正则灾难性回溯
+        //超长输入（>1024）：直接不匹配，避免正则灾难性回溯
         StringBuilder big = new StringBuilder();
         for (int i = 0; i < 5000; i++) {
             big.append('a');
@@ -209,6 +263,39 @@ public class GatewayOptimizationTest {
             big.append('a');
         }
         assertFalse(predicate.test(ctxOf(null, null, null, "token", big.toString())));
+    }
+
+    /**
+     * P1-4 补强：Cookie 谓词具备与 Header/Query 一致的正则长度防护与输入预检
+     */
+    @Test
+    public void cookiePredicate_regexLengthGuard_andPrecheck() {
+        //超长正则：启动期 fail-fast
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 600; i++) {
+            sb.append('a');
+        }
+        assertThrows(IllegalArgumentException.class,
+                () -> new CookiePredicateFactory().create("token," + sb));
+
+        //正常匹配
+        ExPredicate predicate = new CookiePredicateFactory().create("token,^user");
+        assertTrue(predicate.test(ctxOfCookie("token", "user-abc")));
+        assertFalse(predicate.test(ctxOfCookie("token", "other")));
+
+        //超长输入（>1024）：直接不匹配，避免正则灾难性回溯放大
+        StringBuilder big = new StringBuilder();
+        for (int i = 0; i < 5000; i++) {
+            big.append('a');
+        }
+        assertFalse(predicate.test(ctxOfCookie("token", big.toString())));
+
+        //Cookie 不存在：不匹配
+        assertFalse(predicate.test(ctxOfCookie("other", "user-abc")));
+
+        //无正则：存在即匹配
+        ExPredicate existsOnly = new CookiePredicateFactory().create("token");
+        assertTrue(existsOnly.test(ctxOfCookie("token", "anything")));
     }
 
     /**

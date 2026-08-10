@@ -52,13 +52,18 @@ public class StripPrefixFilterFactory implements RouteFilterFactory {
             }
 
             this.parts = Integer.parseInt(config);
+
+            if (this.parts < 0) {
+                throw new IllegalArgumentException("StripPrefixFilter config cannot be negative: " + config);
+            }
         }
 
         @Override
         public Completable doFilter(ExContext ctx, ExFilterChain chain) {
-            //目标路径重组
+            //目标路径重组（parts 超过实际段数时收敛为根路径，防越界）
             List<String> pathFragments = Arrays.asList(ctx.newRequest().getPath().split("/", -1));
-            String newPath = "/" + String.join("/", pathFragments.subList(parts + 1, pathFragments.size()));
+            int fromIndex = Math.min(parts + 1, pathFragments.size());
+            String newPath = "/" + String.join("/", pathFragments.subList(fromIndex, pathFragments.size()));
             ctx.newRequest().path(newPath);
 
             return chain.doFilter(ctx);

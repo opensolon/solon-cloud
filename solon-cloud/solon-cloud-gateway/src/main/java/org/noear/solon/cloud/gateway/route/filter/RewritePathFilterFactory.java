@@ -66,6 +66,12 @@ public class RewritePathFilterFactory implements RouteFilterFactory {
             if (!regex.startsWith("/") || !rawReplacement.startsWith("/")) {
                 throw new IllegalArgumentException("RewritePathFilter config is wrong, path must be start with slash, config is : " + config);
             }
+
+            if (regex.length() > 512) {
+                //正则长度上限（防超长正则，与谓词工厂保持一致）
+                throw new IllegalArgumentException("RewritePathFilter regex too long (max 512): " + config);
+            }
+
             pattern = Pattern.compile(regex);
             replacement = rawReplacement.replace("$\\", "$");
         }

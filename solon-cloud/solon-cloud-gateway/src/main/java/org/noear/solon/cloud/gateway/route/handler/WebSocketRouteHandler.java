@@ -20,6 +20,8 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
 import io.vertx.core.http.impl.headers.HeadersMultiMap;
+import org.noear.solon.Utils;
+import org.noear.solon.cloud.gateway.exchange.ExConstants;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
 import org.noear.solon.cloud.gateway.exchange.ExContextImpl;
 import org.noear.solon.cloud.gateway.exchange.XForwardedHeaders;
@@ -30,8 +32,13 @@ import org.noear.solon.cloud.gateway.route.RouteHandler;
 import org.noear.solon.rx.Completable;
 import org.noear.solon.rx.CompletableEmitter;
 import org.noear.solon.core.exception.StatusException;
+import org.noear.solon.core.util.KeyValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * WebSocket 路由处理器
@@ -41,6 +48,31 @@ import org.slf4j.LoggerFactory;
  */
 public class WebSocketRouteHandler implements RouteHandler {
     static final Logger log = LoggerFactory.getLogger(WebSocketRouteHandler.class);
+
+    /**
+     * 握手请求不透传的头
+     *
+     * <p>逐跳头 + 由 Vert.x WebSocketClient 按目标重新生成的握手头（Host / Sec-WebSocket-*），
+     * 其余客户端头（Authorization、Cookie、自定义追踪/租户头等）原样透传；
+     * 子协议经 subProtocols 单独协商，不走 header。</p>
+     */
+    private static final Set<String> SKIP_HANDSHAKE_HEADERS = new HashSet<>(Arrays.asList(
+            "connection",
+            "keep-alive",
+            "proxy-authenticate",
+            "proxy-authorization",
+            "te",
+            "trailer",
+            "transfer-encoding",
+            "upgrade",
+            "proxy-connection",
+            "host",
+            "content-length",
+            "sec-websocket-key",
+            "sec-websocket-version",
+            "sec-websocket-extensions",
+            "sec-websocket-protocol",
+            "sec-websocket-accept"));
 
     private final Vertx vertx;
     private final HttpClientProperties httpClientProps;
@@ -125,7 +157,29 @@ public class WebSocketRouteHandler implements RouteHandler {
             timeout = httpClientProps;
         }
 
-        options.setHeaders(new HeadersMultiMap()); //? options.setHeaders(ctx.rawHeaders());
+        //透传客户端头（剥离逐跳头与由客户端重新生成的握手头），
+        //使 Authorization/Cookie/自定义头以及 filter 对 newRequest 的头改写在 WS 路径同样生效
+        HeadersMultiMap headers = new HeadersMultiMap();
+        for (KeyValues<String> kv : ctx.newRequest().getHeaders()) {
+            if (SKIP_HANDSHAKE_HEADERS.contains(kv.getKey().toLowerCase())) {
+                continue;
+            }
+
+            headers.add(kv.getKey(), Arrays.asList(kv.getValues()));
+        }
+        options.setHeaders(headers);
+
+        //子协议协商：经 subProtocols 表达（Vert.x 会据此重新生成 Sec-WebSocket-Protocol 头）
+        String subProtocols = ctx.rawHeader(ExConstants.Sec_WebSocket_Protocol);
+        if (Utils.isNotEmpty(subProtocols)) {
+            for (String sp : subProtocols.split(",")) {
+                String tmp = sp.trim();
+                if (Utils.isNotEmpty(tmp)) {
+                    options.addSubProtocol(tmp);
+                }
+            }
+        }
+
         options.setConnectTimeout(timeout.getConnectTimeout() * 1000);
         options.setTimeout(timeout.getRequestTimeout() * 1000);
 
@@ -156,12 +210,28 @@ public class WebSocketRouteHandler implements RouteHandler {
 
                     emitter.onComplete();
                 } else {
+                    //下游升级失败：立即关闭已建立的上游连接（否则只能等 idleTimeout 回收）
+                    closeQuietly(targetWebSocket);
                     emitter.onError(sourceAr.cause());
                 }
             });
 
         } catch (Throwable ex) {
+            closeQuietly(targetWebSocket);
             emitter.onError(ex);
+        }
+    }
+
+    /**
+     * 静默关闭 WebSocket（清理路径，异常不外抛）
+     */
+    private void closeQuietly(WebSocket ws) {
+        try {
+            if (ws != null && !ws.isClosed()) {
+                ws.close();
+            }
+        } catch (Throwable ex) {
+            log.debug("Gateway target WS close failed", ex);
         }
     }
 

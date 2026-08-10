@@ -157,7 +157,7 @@ public class RouteFactoryManager {
      * <p>键规范化：配置键支持小写连字符（如 remote-addr），工厂 prefix 为驼峰（RemoteAddr），
      * 统一转小写去分隔符后比较。</p>
      */
-    private boolean isPredicateFactoryEnabled(String prefix) {
+    public boolean isPredicateFactoryEnabled(String prefix) {
         Map<String, Boolean> map = gatewayProperties.getPredicate();
         if (map == null || map.isEmpty()) {
             return true;
@@ -175,7 +175,7 @@ public class RouteFactoryManager {
     /**
      * 过滤器工厂是否启用（solon.cloud.gateway.filter.{Name}=false 可关闭，缺省 true）
      */
-    private boolean isFilterFactoryEnabled(String prefix) {
+    public boolean isFilterFactoryEnabled(String prefix) {
         Map<String, Boolean> map = gatewayProperties.getFilter();
         if (map == null || map.isEmpty()) {
             return true;

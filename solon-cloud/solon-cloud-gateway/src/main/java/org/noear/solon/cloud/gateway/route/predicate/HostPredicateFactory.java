@@ -21,6 +21,8 @@ import org.noear.solon.cloud.gateway.exchange.ExPredicate;
 import org.noear.solon.cloud.gateway.route.RoutePredicateFactory;
 import org.noear.solon.core.util.PathMatcher;
 
+import java.net.URI;
+
 /**
  * 路由 Host 匹配检测器
  *
@@ -54,7 +56,13 @@ public class HostPredicateFactory implements RoutePredicateFactory {
 
         @Override
         public boolean test(ExContext ctx) {
-            return rule.matches(ctx.rawURI().getHost());
+            URI uri = ctx.rawURI();
+            //rawURI() 解析失败时返回 null（ExContextImpl 注释：调用方自行兜底），此处按"不匹配"处理
+            if (uri == null || uri.getHost() == null) {
+                return false;
+            }
+
+            return rule.matches(uri.getHost());
         }
     }
 }

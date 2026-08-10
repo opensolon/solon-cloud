@@ -28,12 +28,13 @@ import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
 import org.noear.solon.cloud.gateway.route.Route;
 import org.noear.solon.cloud.utils.CloudURI;
 import org.noear.solon.core.handle.Context;
+import org.noear.solon.lang.Nullable;
 import org.noear.solon.web.vertx.VxWebContext;
 
 import java.net.URI;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 交换上下文实现
@@ -55,7 +56,7 @@ public class ExContextImpl implements ExContext {
     public ExContextImpl(Vertx vertx, HttpServerRequest rawRequest, CloudGatewayConfiguration configuration) {
         this.vertx = vertx;
         this.rawRequest = rawRequest;
-        this.attrMap = new HashMap<>();
+        this.attrMap = new ConcurrentHashMap<>();
 
         /// ////////
 
@@ -132,7 +133,7 @@ public class ExContextImpl implements ExContext {
      * 路由超时
      */
     @Override
-    public TimeoutProperties timeout() {
+    public @Nullable TimeoutProperties timeout() {
         if (route == null) {
             return null;
         } else {
@@ -220,9 +221,13 @@ public class ExContextImpl implements ExContext {
     /**
      * 获取原始完整请求地址 uri
      */
-    public URI rawURI() {
+    public @Nullable URI rawURI() {
         if (rawURI == null) {
-            rawURI = URI.create(rawRequest.absoluteURI());
+            try {
+                rawURI = URI.create(rawRequest.absoluteURI());
+            } catch (Throwable ex) {
+                return null;
+            }
         }
 
         return rawURI;

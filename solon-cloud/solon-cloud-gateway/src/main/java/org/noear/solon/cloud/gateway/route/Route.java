@@ -88,14 +88,14 @@ public class Route implements Comparable<Route> {
     }
 
     /**
-     * 匹配检测器
+     * 匹配检测器（不可变快照）
      */
     public List<ExPredicate> getPredicates() {
         return Collections.unmodifiableList(predicates);
     }
 
     /**
-     * 过滤器
+     * 过滤器（不可变快照）
      */
     public List<RankEntity<ExFilter>> getFilters() {
         return Collections.unmodifiableList(filters);

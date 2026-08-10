@@ -24,6 +24,8 @@ import org.noear.solon.core.LoadBalance;
 import org.noear.solon.core.bean.LifecycleBean;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 服务发现事件监听器
@@ -57,9 +59,14 @@ public class CloudGatewayLocator implements LifecycleBean {
     private void loadDiscoverConfig() {
         DiscoverProperties discover = gatewayProperties.getDiscover();
 
+        //去重：includedServices 与 findServices 的结果常有重叠，重复 register 会白跑一遍注册
+        Set<String> registered = new HashSet<>();
+
         if (Utils.isNotEmpty(discover.getIncludedServices())) {
             for (String tmp : discover.getIncludedServices()) {
-                register(tmp);
+                if (registered.add(tmp)) {
+                    register(tmp);
+                }
             }
         }
 
@@ -68,7 +75,9 @@ public class CloudGatewayLocator implements LifecycleBean {
             Collection<String> serviceNames = CloudClient.discovery().findServices("");
             if (Utils.isNotEmpty(serviceNames)) {
                 for (String name : serviceNames) {
-                    register(name);
+                    if (registered.add(name)) {
+                        register(name);
+                    }
                 }
             }
         }

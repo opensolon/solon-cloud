@@ -30,6 +30,8 @@ import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * 响应式完成器
  *
@@ -44,8 +46,8 @@ public class CloudGatewayCompletion implements Subscriber<Void> {
     private final Vertx vertx;
     //整体完成兜底超时定时器 id
     private volatile long timerId = -1;
-    //是否已结束（幂等保护）
-    private volatile boolean completed = false;
+    //是否已结束（幂等保护：CAS 取代 check-then-set，防多线程双写响应）
+    private final AtomicBoolean completed = new AtomicBoolean(false);
 
     public CloudGatewayCompletion(ExContext ctx, HttpServerRequest rawRequest) {
         this(ctx, rawRequest, ctx.vertx());
@@ -66,7 +68,7 @@ public class CloudGatewayCompletion implements Subscriber<Void> {
         }
 
         timerId = vertx.setTimer(timeoutSeconds * 1000L, id -> {
-            if (completed) {
+            if (completed.get()) {
                 return;
             }
 
@@ -127,10 +129,9 @@ public class CloudGatewayCompletion implements Subscriber<Void> {
      * 提交异步完成
      */
     public void postComplete() {
-        if (completed) {
+        if (completed.compareAndSet(false, true) == false) {
             return;
         }
-        completed = true;
 
         if (timerId != -1) {
             vertx.cancelTimer(timerId);

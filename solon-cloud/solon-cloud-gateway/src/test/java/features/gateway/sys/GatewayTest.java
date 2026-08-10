@@ -18,6 +18,7 @@ import org.noear.solon.test.SolonTest;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author noear 2024/10/1 created
@@ -65,7 +66,7 @@ public class GatewayTest extends HttpTester {
     @Test
     public void gateway_ws() throws Exception {
         Vertx vertx = Vertx.vertx();
-        HttpClient client =vertx.createHttpClient();
+        HttpClient client = vertx.createHttpClient();
 
         WebSocketConnectOptions options = new WebSocketConnectOptions()
                 .setHost("localhost")
@@ -95,13 +96,16 @@ public class GatewayTest extends HttpTester {
                 });
             } else {
                 System.err.println("WebSocket 连接失败: " + result.cause().getMessage());
-                vertx.close();
+                countDownLatch.countDown();
             }
         });
 
-        countDownLatch.await();
-
+        //带超时等待，防止测试失败时无限挂起
+        assert countDownLatch.await(10, TimeUnit.SECONDS);
         assert countDownLatch.getCount() == 0;
+
+        //关闭 vertx，防测试进程资源泄漏（close 为异步，调用即发起）
+        vertx.close();
     }
 
     //----------------

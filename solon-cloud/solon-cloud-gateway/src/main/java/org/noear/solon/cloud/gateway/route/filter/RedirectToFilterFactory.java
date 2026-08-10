@@ -59,7 +59,17 @@ public class RedirectToFilterFactory implements RouteFilterFactory {
             }
 
             code = Integer.parseInt(parts[0]);
+
+            if (code < 300 || code > 399) {
+                throw new IllegalArgumentException("RedirectToFilter code must be 3xx: " + code);
+            }
+
             url = parts[1];
+
+            if (Utils.isBlank(url)) {
+                throw new IllegalArgumentException("RedirectToFilter url cannot be blank: " + config);
+            }
+
             if (parts.length > 2) {
                 addQuery = Boolean.parseBoolean(parts[2]);
             }
@@ -67,8 +77,16 @@ public class RedirectToFilterFactory implements RouteFilterFactory {
 
         @Override
         public Completable doFilter(ExContext ctx, ExFilterChain chain) {
-            if (addQuery) {
-                ctx.newResponse().redirect(code, url + ctx.rawQueryString());
+            //addQuery 时按 url 是否已带 ? 选择分隔符；query 兼容带/不带前导 ?；无查询串则不拼接（防拼出 "...null"）
+            String queryString = ctx.rawQueryString();
+
+            if (addQuery && Utils.isNotEmpty(queryString)) {
+                if (queryString.startsWith("?")) {
+                    queryString = queryString.substring(1);
+                }
+
+                String separator = url.indexOf('?') < 0 ? "?" : "&";
+                ctx.newResponse().redirect(code, url + separator + queryString);
             } else {
                 ctx.newResponse().redirect(code, url);
             }

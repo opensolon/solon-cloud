@@ -100,10 +100,10 @@ public class CloudGatewayCompletion implements Subscriber<Void> {
     }
 
     @Override
-    public void onError(Throwable error) {
+    public void onError(Throwable err) {
         try {
-            if (error instanceof StatusException) {
-                StatusException status = (StatusException) error;
+            if (err instanceof StatusException) {
+                StatusException status = (StatusException) err;
                 ctx.newResponse().status(status.getCode());
 
                 if (status.getCode() == 404) {
@@ -113,7 +113,7 @@ public class CloudGatewayCompletion implements Subscriber<Void> {
                 ctx.newResponse().status(500);
             }
 
-            log.error(error.getMessage(), error);
+            log.warn(err.getMessage(), err);
         } finally {
             postComplete();
         }
@@ -164,8 +164,8 @@ public class CloudGatewayCompletion implements Subscriber<Void> {
                     rawResponse.end();
                 }
             }
-        } catch (Throwable ex) {
-            log.error(ex.getMessage(), ex);
+        } catch (Throwable err) {
+            log.warn(err.getMessage(), err);
         }
     }
 }

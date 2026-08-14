@@ -24,6 +24,10 @@ solon.cloud.gateway:
         - "Path=/test_ws/ws"
       filters:
         - "StripPrefix=1"
+    - id: "fixed_len_backend"
+      target: "http://localhost:18091"
+      predicates:
+        - "Path=/fl/**"
     - id: "h5"
       target: "https://h5.noear.org"
       predicates:

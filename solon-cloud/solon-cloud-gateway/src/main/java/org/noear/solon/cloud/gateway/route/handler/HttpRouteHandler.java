@@ -164,10 +164,14 @@ public class HttpRouteHandler implements RouteHandler {
                     continue;
                 }
 
-                //Content-Length 不随头透传：由发送端按实际 body 重新生成（buffer 场景自动设置、stream 场景走 chunked），
-                //避免 filter 修改 body 后旧长度失配导致连接损坏
+                //Content-Length：仅当 body 被 filter 修改（原长度可能失效）时剥离，由发送端按实际 body 重新生成
+                //（buffer 场景自动设置、stream 场景走 chunked），避免旧长度失配导致连接损坏；
+                //未修改的请求（如文件上传流式转发）保留原始 Content-Length，使 send(stream) 按固定长度发送，
+                //兼容不支持 chunked 请求体的后端 http-server（4.0.5 回归修复）
                 if (ExConstants.Content_Length.equals(key)) {
-                    continue;
+                    if (ctx.newRequest().isBodyModified()) {
+                        continue;
+                    }
                 }
 
                 req1.putHeader(key, kv.getValues());

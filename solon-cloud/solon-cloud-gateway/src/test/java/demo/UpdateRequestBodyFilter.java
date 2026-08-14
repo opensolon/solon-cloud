@@ -28,9 +28,7 @@ public class UpdateRequestBodyFilter implements CloudGatewayFilter {
         }
 
         if (ctx.rawPath().equals("/demo/body")) {
-            //模拟 body 修改（一定要去掉 "Content-Length"）
-            ctx.newRequest().headerRemove("Content-Length");
-
+            //模拟 body 修改（body() 后网关会自动剥离旧 Content-Length，无需手动 headerRemove）
             ExBody exBody = ctx.newRequest().getBody();
             if (exBody instanceof ExBodyOfStream) {
                 //读取 body，转码后再转发（内存占用会大大提交）

@@ -22,8 +22,7 @@ public class DemoFilter implements CloudGatewayFilter {
         }
 
         if (ctx.rawPath().equals("/demo/body") && "1".equals(ctx.rawQueryParam("r"))) {
-            //模拟 body 修改（一定要去掉 "Content-Length"）
-            ctx.newRequest().headerRemove("Content-Length");
+            //模拟 body 修改（body() 后网关会自动剥离旧 Content-Length，无需手动 headerRemove）
             ctx.newRequest().body(Buffer.buffer("hello-测试"));
         }
 

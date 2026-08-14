@@ -2,6 +2,7 @@ package features.gateway.sys;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
+import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.WebSocket;
 import io.vertx.core.http.WebSocketClient;
 import io.vertx.core.http.WebSocketConnectOptions;
@@ -19,6 +20,9 @@ import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author noear 2024/10/1 created
@@ -61,6 +65,61 @@ public class GatewayTest extends HttpTester {
     @Test
     public void gateway_hello_form() throws Exception {
         assert "hello".equals(path("/test/hello").data("test","1").post());
+    }
+
+    /**
+     * 4.0.5 回归：网关转发文件上传到"不支持 chunked 请求体"的后端 http-server
+     *
+     * <p>极简后端：收到 Transfer-Encoding: chunked 请求体即回 411（模拟部分老式 http-server），
+     * 否则按固定长度读取 body 回 200 ok:len。修复前网关无条件剥离 Content-Length，
+     * 流式转发被 Vert.x 自动改为 chunked → 后端 411；修复后未修改的流式请求保留原始
+     * Content-Length 固定长度转发 → 200 ok。</p>
+     */
+    @Test
+    public void gateway_upload_fixedLengthBackend() throws Exception {
+        Vertx vertx = Vertx.vertx();
+        CountDownLatch ready = new CountDownLatch(1);
+        AtomicReference<Throwable> bindErr = new AtomicReference<>();
+
+        HttpServer backend = vertx.createHttpServer();
+        backend.requestHandler(req -> {
+            if (req.headers().contains("Transfer-Encoding")) {
+                //不支持 chunked 请求体：411
+                req.response().setStatusCode(411).end("chunked not supported");
+            } else {
+                req.body().onSuccess(buf -> {
+                    req.response().end("ok:" + buf.length());
+                }).onFailure(err -> {
+                    req.response().setStatusCode(500).end("body read fail");
+                });
+            }
+        });
+        backend.listen(18091, "127.0.0.1", ar -> {
+            if (ar.succeeded()) {
+                ready.countDown();
+            } else {
+                bindErr.set(ar.cause());
+                ready.countDown();
+            }
+        });
+
+        try {
+            assertTrue(ready.await(10, TimeUnit.SECONDS), "backend start timeout");
+            assertNull(bindErr.get(), "backend bind fail: " + bindErr.get());
+
+            String rst = path("/fl/upload")
+                    .data("file",
+                            "hello.txt",
+                            new ByteArrayInputStream("hello".getBytes(StandardCharsets.UTF_8)),
+                            MimeType.TEXT_PLAIN_VALUE)
+                    .post();
+
+            assertNotNull(rst, "no response body");
+            assertTrue(rst.startsWith("ok:"), "expected fixed-length forward, got: " + rst);
+        } finally {
+            backend.close();
+            vertx.close();
+        }
     }
 
     @Test

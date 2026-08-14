@@ -335,7 +335,7 @@ public class ExContextImpl implements ExContext {
                 newRequest.headerAdd(kv.getKey(), kv.getValue());
             }
 
-            newRequest.body(rawRequest);
+            newRequest.bodyInit(rawRequest);
         }
 
         return newRequest;

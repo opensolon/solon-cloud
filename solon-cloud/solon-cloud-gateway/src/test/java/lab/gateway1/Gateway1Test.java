@@ -129,8 +129,8 @@ public class Gateway1Test extends HttpTester {
 
         String rst = path("/demo/upload")
                 .data("file", "test.md", fileData, "text/md")
-                .data("ids","1")
-                .data("ids","2")
+                .data("attrIds","1")
+                .data("attrIds","2")
                 .post();
         assert rst != null;
         assert "test.md".equals(rst);

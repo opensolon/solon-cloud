@@ -36,8 +36,8 @@ public class DemoController {
     }
 
     @Mapping("upload")
-    public String upload(@Param(required = false) List<Integer> ids, UploadedFile file) {
-        System.out.println(ids);
+    public String upload(@Param(required = false) List<Integer> attrIds, UploadedFile file) {
+        System.out.println(attrIds);
         return file.getName();
     }
 }

@@ -15,11 +15,12 @@
  */
 package org.noear.solon.cloud.gateway;
 
-import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.gateway.exchange.ExBody;
+import org.noear.solon.cloud.gateway.exchange.ExConstants;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
 import org.noear.solon.cloud.gateway.exchange.impl.ExBodyOfBuffer;
 import org.noear.solon.cloud.gateway.exchange.impl.ExBodyOfStream;
@@ -43,49 +44,11 @@ public class CloudGatewayCompletion implements Subscriber<Void> {
 
     private final ExContext ctx;
     private final HttpServerRequest rawRequest;
-    private final Vertx vertx;
-    //整体完成兜底超时定时器 id
-    private volatile long timerId = -1;
-    //是否已结束（幂等保护：CAS 取代 check-then-set，防多线程双写响应）
     private final AtomicBoolean completed = new AtomicBoolean(false);
 
     public CloudGatewayCompletion(ExContext ctx, HttpServerRequest rawRequest) {
-        this(ctx, rawRequest, ctx.vertx());
-    }
-
-    public CloudGatewayCompletion(ExContext ctx, HttpServerRequest rawRequest, Vertx vertx) {
         this.ctx = ctx;
         this.rawRequest = rawRequest;
-        this.vertx = vertx;
-    }
-
-    /**
-     * 设置整体完成兜底超时（秒）；超时后强制结束请求，防“响应永不完成”悬挂
-     */
-    public void scheduleTimeout(int timeoutSeconds) {
-        if (timeoutSeconds <= 0) {
-            return;
-        }
-
-        timerId = vertx.setTimer(timeoutSeconds * 1000L, id -> {
-            if (completed.get()) {
-                return;
-            }
-
-            try {
-                //响应头已发出（SSE/流式下载中）：不强制结束，避免截断长流（悬挂由上游 idleTimeout 兜底）
-                if (rawRequest.response().headWritten()) {
-                    log.warn("Gateway streaming exceeds {}s (not interrupted): {}", timeoutSeconds, ctx.rawURI());
-                    return;
-                }
-            } catch (Throwable ignored) {
-                //ignore
-            }
-
-            log.warn("Gateway request timeout after {}s: {}", timeoutSeconds, ctx.rawURI());
-            ctx.newResponse().status(504);
-            postComplete();
-        });
     }
 
 
@@ -133,17 +96,13 @@ public class CloudGatewayCompletion implements Subscriber<Void> {
             return;
         }
 
-        if (timerId != -1) {
-            vertx.cancelTimer(timerId);
-        }
-
         try {
             HttpServerResponse rawResponse = rawRequest.response();
 
             if (rawResponse.headWritten() == false) {
                 rawResponse.setStatusCode(ctx.newResponse().getStatus());
 
-                if(Utils.isNotEmpty(ctx.newResponse().getReason())){
+                if (Utils.isNotEmpty(ctx.newResponse().getReason())) {
                     rawResponse.setStatusMessage(ctx.newResponse().getReason());
                 }
 
@@ -156,9 +115,14 @@ public class CloudGatewayCompletion implements Subscriber<Void> {
                 if (ctx.newResponse().getBody() != null) {
                     ExBody exBody = ctx.newResponse().getBody();
                     if (exBody instanceof ExBodyOfStream) {
+                        //也说明没改过
                         rawResponse.send(((ExBodyOfStream) exBody).getStream());
+                    } else if (exBody instanceof ExBodyOfBuffer) {
+                        Buffer buffer = ((ExBodyOfBuffer) exBody).getBuffer();
+                        rawResponse.putHeader(ExConstants.Content_Length, String.valueOf(buffer.length()));
+                        rawResponse.send(buffer);
                     } else {
-                        rawResponse.send(((ExBodyOfBuffer) exBody).getBuffer());
+                        rawResponse.end();
                     }
                 } else {
                     rawResponse.end();

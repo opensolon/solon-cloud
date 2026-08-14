@@ -24,6 +24,7 @@ import org.noear.solon.Utils;
 import org.noear.solon.cloud.gateway.exchange.ExConstants;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
 import org.noear.solon.cloud.gateway.exchange.ExContextImpl;
+import org.noear.solon.cloud.gateway.exchange.ExHeaderUtils;
 import org.noear.solon.cloud.gateway.exchange.XForwardedHeaders;
 import org.noear.solon.cloud.gateway.properties.HttpClientProperties;
 import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
@@ -37,7 +38,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -56,23 +59,34 @@ public class WebSocketRouteHandler implements RouteHandler {
      * 其余客户端头（Authorization、Cookie、自定义追踪/租户头等）原样透传；
      * 子协议经 subProtocols 单独协商，不走 header。</p>
      */
-    private static final Set<String> SKIP_HANDSHAKE_HEADERS = new HashSet<>(Arrays.asList(
-            "connection",
-            "keep-alive",
-            "proxy-authenticate",
-            "proxy-authorization",
-            "te",
-            "trailer",
-            "transfer-encoding",
-            "upgrade",
-            "proxy-connection",
-            "host",
-            "content-length",
-            "sec-websocket-key",
-            "sec-websocket-version",
-            "sec-websocket-extensions",
-            "sec-websocket-protocol",
-            "sec-websocket-accept"));
+    private static final Set<String> SKIP_HANDSHAKE_HEADERS = buildHandshakeSkipHeaders();
+
+    /**
+     * 握手响应回传客户端时剥离的头
+     *
+     * <p>逐跳头 + 由 Vert.x 本地按客户端 key 重新生成的 Sec-WebSocket-Accept + Content-Length；
+     * 注意不含 Sec-WebSocket-Protocol：后端协商选中的子协议需回传客户端，保证两端协议一致。</p>
+     */
+    private static final Set<String> SKIP_HANDSHAKE_RESPONSE_HEADERS = buildHandshakeResponseSkipHeaders();
+
+    private static Set<String> buildHandshakeSkipHeaders() {
+        Set<String> set = new HashSet<>(ExHeaderUtils.HOP_BY_HOP_HEADERS);
+        set.add("host");
+        set.add("content-length");
+        set.add("sec-websocket-key");
+        set.add("sec-websocket-version");
+        set.add("sec-websocket-extensions");
+        set.add("sec-websocket-protocol");
+        set.add("sec-websocket-accept");
+        return Collections.unmodifiableSet(set);
+    }
+
+    private static Set<String> buildHandshakeResponseSkipHeaders() {
+        Set<String> set = new HashSet<>(ExHeaderUtils.HOP_BY_HOP_HEADERS);
+        set.add("content-length");
+        set.add("sec-websocket-accept");
+        return Collections.unmodifiableSet(set);
+    }
 
     private final Vertx vertx;
     private final HttpClientProperties httpClientProps;
@@ -157,11 +171,16 @@ public class WebSocketRouteHandler implements RouteHandler {
             timeout = httpClientProps;
         }
 
-        //透传客户端头（剥离逐跳头与由客户端重新生成的握手头），
+        //透传客户端头（剥离逐跳头与由客户端重新生成的握手头；含 Connection 头显式声明的 token），
         //使 Authorization/Cookie/自定义头以及 filter 对 newRequest 的头改写在 WS 路径同样生效
+        Set<String> skipHeaders = ExHeaderUtils.buildSkipHeaders(ctx.rawHeader(ExConstants.Connection), SKIP_HANDSHAKE_HEADERS);
         HeadersMultiMap headers = new HeadersMultiMap();
         for (KeyValues<String> kv : ctx.newRequest().getHeaders()) {
-            if (SKIP_HANDSHAKE_HEADERS.contains(kv.getKey().toLowerCase())) {
+            if (skipHeaders.contains(kv.getKey().toLowerCase())) {
+                continue;
+            }
+
+            if (ExConstants.Host.equals(kv.getKey())) {
                 continue;
             }
 
@@ -186,6 +205,9 @@ public class WebSocketRouteHandler implements RouteHandler {
         //X-Forwarded-* 出站头统一生成（For/Host/Port/Proto）
         XForwardedHeaders.apply(xForwardedProps, ctx, options.getHeaders());
 
+        //X-Real-IP 与 HTTP 路径对齐（取值优先采信客户端 X-Real-IP / X-Forwarded-For，可伪造，仅链路透传）
+        options.getHeaders().set(ExConstants.X_Real_IP, ctx.realIp());
+
         return webSocketClient.connect(options);
     }
 
@@ -198,7 +220,19 @@ public class WebSocketRouteHandler implements RouteHandler {
             ExContextImpl ctxImpl = (ExContextImpl) ctx;
             HttpServerRequest rawRequest = ctxImpl.rawRequest();
 
-            // 升级当前请求为 WebSocket（会自动转发 header）
+            // 回传下游握手响应头（子协议协商结果、Set-Cookie、自定义头等），
+            // 使客户端感知到的握手状态（尤其 Sec-WebSocket-Protocol）与后端协商一致；
+            // 剥离逐跳头与由 Vert.x 本地生成的 Sec-WebSocket-Accept；
+            // 用追加语义（headers().add）保留多值头——putHeader 为覆盖语义，多值 Set-Cookie 会被后值吞掉
+            for (Map.Entry<String, String> kv : targetWebSocket.headers()) {
+                if (SKIP_HANDSHAKE_RESPONSE_HEADERS.contains(kv.getKey().toLowerCase())) {
+                    continue;
+                }
+
+                rawRequest.response().headers().add(kv.getKey(), kv.getValue());
+            }
+
+            // 升级当前请求为 WebSocket（本地生成握手响应）
             Future<ServerWebSocket> sourceWebSocketFuture = rawRequest.toWebSocket();
 
             sourceWebSocketFuture.onComplete(sourceAr -> {

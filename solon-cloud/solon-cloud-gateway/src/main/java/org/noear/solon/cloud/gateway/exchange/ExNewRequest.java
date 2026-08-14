@@ -37,7 +37,6 @@ public class ExNewRequest {
     private String path;
     private MultiMap<String> headers = new MultiMap<>();
     private ExBody body;
-    private boolean bodyModified; // body 是否被用户（filter）修改过
 
     /**
      * 配置方法
@@ -98,23 +97,12 @@ public class ExNewRequest {
     }
 
     /**
-     * 初始化主体（由 ExContextImpl 注入原始请求流，不算用户修改）
-     *
-     * @param body 原始请求主体流
-     */
-    void bodyInit(ReadStream<Buffer> body) {
-        this.body = new ExBodyOfStream(body);
-        this.bodyModified = false;
-    }
-
-    /**
      * 配置主体（方便用户修改）
      *
      * @param body 主体数据
      */
     public ExNewRequest body(Buffer body) {
         this.body = new ExBodyOfBuffer(body);
-        this.bodyModified = true;
         return this;
     }
 
@@ -125,7 +113,6 @@ public class ExNewRequest {
      */
     public ExNewRequest body(ReadStream<Buffer> body) {
         this.body = new ExBodyOfStream(body);
-        this.bodyModified = true;
         return this;
     }
 
@@ -175,14 +162,5 @@ public class ExNewRequest {
      */
     public ExBody getBody() {
         return body;
-    }
-
-    /**
-     * 主体是否被用户（filter）修改过
-     *
-     * <p>未修改时，Content-Length 可原样透传（固定长度转发）；修改后原长度可能失效，需剥离重建。</p>
-     */
-    public boolean isBodyModified() {
-        return bodyModified;
     }
 }

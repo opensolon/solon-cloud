@@ -20,6 +20,7 @@ import org.noear.solon.cloud.gateway.exchange.ExContextImpl;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
 import org.noear.solon.cloud.gateway.exchange.ExFilterChainImpl;
 import org.noear.solon.cloud.gateway.exchange.ExHandler;
+import org.noear.solon.cloud.gateway.properties.GatewayProperties;
 import org.noear.solon.cloud.gateway.properties.TimeoutProperties;
 import org.noear.solon.cloud.gateway.route.RouteFactoryManager;
 import org.noear.solon.core.handle.Handler;
@@ -74,8 +75,7 @@ public class CloudGatewayHandler implements VxHandler {
             webHandler.handle(request);
         } else {
             //有路由，采服网关响应式接口处理（不使用二级线程池）
-            CloudGatewayCompletion completion = new CloudGatewayCompletion(ctx, request, routeManager.getVertx());
-
+            CloudGatewayCompletion completion = new CloudGatewayCompletion(ctx, request);
 
             //开始执行
             try {

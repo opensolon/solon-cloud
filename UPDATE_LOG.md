@@ -1,4 +1,8 @@
 
+### 4.0.6
+
+* 修复 solon-cloud-gateway 转发 content-length 丢失的问题
+
 ### 4.0.5
 
 * 添加 solon-cloud-gateway `solon.cloud.gateway.predicate.*: bool` 配置支持

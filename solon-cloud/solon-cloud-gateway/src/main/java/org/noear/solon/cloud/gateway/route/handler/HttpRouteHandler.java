@@ -18,11 +18,13 @@ package org.noear.solon.cloud.gateway.route.handler;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.*;
 import org.noear.solon.Utils;
 import org.noear.solon.cloud.gateway.exchange.ExBody;
 import org.noear.solon.cloud.gateway.exchange.ExConstants;
 import org.noear.solon.cloud.gateway.exchange.ExContext;
+import org.noear.solon.cloud.gateway.exchange.ExHeaderUtils;
 import org.noear.solon.cloud.gateway.exchange.XForwardedHeaders;
 import org.noear.solon.cloud.gateway.exchange.impl.ExBodyOfBuffer;
 import org.noear.solon.cloud.gateway.exchange.impl.ExBodyOfStream;
@@ -39,8 +41,6 @@ import org.noear.solon.core.util.KeyValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -54,20 +54,6 @@ import java.util.regex.Pattern;
  */
 public class HttpRouteHandler implements RouteHandler {
     static final Logger log = LoggerFactory.getLogger(HttpRouteHandler.class);
-
-    /**
-     * 逐跳头（不应转发给上游，防 HTTP 请求走私）
-     */
-    private static final Set<String> HOP_BY_HOP_HEADERS = new HashSet<>(Arrays.asList(
-            "connection",
-            "keep-alive",
-            "proxy-authenticate",
-            "proxy-authorization",
-            "te",
-            "trailer",
-            "transfer-encoding",
-            "upgrade",
-            "proxy-connection"));
 
     private final Vertx vertx;
     private final HttpClientProperties httpClientProps;
@@ -150,7 +136,7 @@ public class HttpRouteHandler implements RouteHandler {
     public void handleDo(ExContext ctx, HttpClientRequest req1, CompletableEmitter emitter) {
         try {
             //逐跳头剥离集合（含 Connection 头显式声明的 token）
-            Set<String> skipHeaders = buildSkipHeaders(ctx.rawHeader(ExConstants.Connection));
+            Set<String> skipHeaders = ExHeaderUtils.buildSkipHeaders(ctx.rawHeader(ExConstants.Connection));
 
             //同步 header（剥离逐跳头；Host 不显式转发，由 Vert.x 按目标 URI 自动生成，原始值经 X-Forwarded-Host 传递）
             for (KeyValues<String> kv : ctx.newRequest().getHeaders()) {
@@ -162,16 +148,6 @@ public class HttpRouteHandler implements RouteHandler {
 
                 if (ExConstants.Host.equals(key)) {
                     continue;
-                }
-
-                //Content-Length：仅当 body 被 filter 修改（原长度可能失效）时剥离，由发送端按实际 body 重新生成
-                //（buffer 场景自动设置、stream 场景走 chunked），避免旧长度失配导致连接损坏；
-                //未修改的请求（如文件上传流式转发）保留原始 Content-Length，使 send(stream) 按固定长度发送，
-                //兼容不支持 chunked 请求体的后端 http-server（4.0.5 回归修复）
-                if (ExConstants.Content_Length.equals(key)) {
-                    if (ctx.newRequest().isBodyModified()) {
-                        continue;
-                    }
                 }
 
                 req1.putHeader(key, kv.getValues());
@@ -189,11 +165,15 @@ public class HttpRouteHandler implements RouteHandler {
 
             //同步 body（流复制；未知 ExBody 实现按无体处理，防 ClassCastException 悬挂）
             if (exBody instanceof ExBodyOfBuffer) {
-                req1.send(((ExBodyOfBuffer) exBody).getBuffer(), ar1 -> {
+                Buffer buffer = ((ExBodyOfBuffer) exBody).getBuffer();
+
+                //重置内容长度
+                req1.putHeader(ExConstants.Content_Length, String.valueOf(buffer.length()));
+                req1.send(buffer, ar1 -> {
                     callbackHandle(ctx, ar1, emitter);
                 });
             } else if (exBody instanceof ExBodyOfStream) {
-                //使用 chunked
+                //使用 chunked (也说明没有改过)
                 req1.send(((ExBodyOfStream) exBody).getStream(), ar1 -> {
                     callbackHandle(ctx, ar1, emitter);
                 });
@@ -305,24 +285,6 @@ public class HttpRouteHandler implements RouteHandler {
     }
 
     /**
-     * 构建逐跳头剥离集合（静态逐跳头 + Connection 头显式声明的 token）
-     */
-    private static Set<String> buildSkipHeaders(String connectionHeader) {
-        Set<String> skipHeaders = new HashSet<>(HOP_BY_HOP_HEADERS);
-
-        if (Utils.isNotEmpty(connectionHeader)) {
-            for (String token : connectionHeader.split(",")) {
-                String t = token.trim().toLowerCase();
-                if (Utils.isNotEmpty(t)) {
-                    skipHeaders.add(t);
-                }
-            }
-        }
-
-        return skipHeaders;
-    }
-
-    /**
      * 构建 http 客户端选项（连接池 + 压缩 + 代理 + SSL）
      */
     private HttpClientOptions buildClientOptions(boolean useProxy) {
@@ -392,7 +354,7 @@ public class HttpRouteHandler implements RouteHandler {
 
                 //header（与请求侧对称剥离逐跳头，含上游 Connection 声明的 token）：
                 //防响应拆分/走私，并避免上游 Transfer-Encoding 与下游写出方式冲突
-                Set<String> skipHeaders = buildSkipHeaders(resp1.getHeader(ExConstants.Connection));
+                Set<String> skipHeaders = ExHeaderUtils.buildSkipHeaders(resp1.getHeader(ExConstants.Connection));
 
                 for (Map.Entry<String, String> kv : resp1.headers()) {
                     if (skipHeaders.contains(kv.getKey().toLowerCase())) {

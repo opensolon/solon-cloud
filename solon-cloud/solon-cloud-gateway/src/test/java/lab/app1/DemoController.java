@@ -18,7 +18,10 @@ package lab.app1;
 import org.noear.solon.annotation.Body;
 import org.noear.solon.annotation.Controller;
 import org.noear.solon.annotation.Mapping;
+import org.noear.solon.annotation.Param;
 import org.noear.solon.core.handle.UploadedFile;
+
+import java.util.List;
 
 @Controller
 public class DemoController {
@@ -33,7 +36,8 @@ public class DemoController {
     }
 
     @Mapping("upload")
-    public String upload(UploadedFile file) {
+    public String upload(@Param(required = false) List<Integer> ids, UploadedFile file) {
+        System.out.println(ids);
         return file.getName();
     }
 }
